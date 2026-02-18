@@ -9,8 +9,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSettingsStore } from '../../stores/settings';
-import { useThemeStore } from '../../stores/theme';
+import { useSettingsStore } from '../../../stores/settings';
+import { useThemeStore } from '../../../stores/theme';
 import { AlertTriangle, Heart, Code } from 'lucide-react';
 
 interface NoticeDialogProps {

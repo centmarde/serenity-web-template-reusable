@@ -2,12 +2,11 @@
 import { useState, useEffect } from 'react';
 import Landing from './pages/LandingView';
 import LoadingView from './pages/LoadingView';
-import NoticeDialog from './pages/components/NoticeDialog';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'loading' | 'notice' | 'landing'>('loading');
+  const [currentView, setCurrentView] = useState<'loading' | 'landing'>('loading');
   
   const { loadSettings } = useSettingsStore();
   const { initializeTheme } = useThemeStore();
@@ -28,10 +27,6 @@ function App() {
   }, [loadSettings, initializeTheme]);
 
   const handleLoadingComplete = () => {
-    setCurrentView('notice');
-  };
-
-  const handleNoticeClose = () => {
     setCurrentView('landing');
   };
 
@@ -39,17 +34,6 @@ function App() {
     <div style={{ minHeight: '100vh' }}>
       {currentView === 'loading' && (
         <LoadingView onLoadingComplete={handleLoadingComplete} />
-      )}
-      
-      {currentView === 'notice' && (
-        <NoticeDialog 
-          open={true} 
-          onOpenChange={(open) => {
-            if (!open) {
-              handleNoticeClose();
-            }
-          }} 
-        />
       )}
       
       {currentView === 'landing' && <Landing />}
