@@ -14,6 +14,7 @@ import {
 } from "../utils/helpers";
 import NoticeDialog from "./landing/dialogs/NoticeDialog";
 import CounterDialog from "./landing/dialogs/CounterDialog";
+import OpsDialog from "./landing/dialogs/OpsDialog";
 
 interface ComponentData {
   themeColor: string;
@@ -46,6 +47,8 @@ const LandingView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showNoticeDialog, setShowNoticeDialog] = useState(true);
   const [showCounterDialog, setShowCounterDialog] = useState(false);
+  const [showOpsDialog, setShowOpsDialog] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string>("");
 
   useEffect(() => {
     const initialize = async () => {
@@ -110,6 +113,11 @@ const LandingView: React.FC = () => {
     getTraits,
     getRandomTrait,
   ]);
+
+  const handleFeatureClick = (featureName: string) => {
+    setSelectedFeature(featureName);
+    setShowOpsDialog(true);
+  };
 
   if (isLoading || !data) {
     return (
@@ -231,6 +239,7 @@ const LandingView: React.FC = () => {
               boxShadow: createThemedShadow(data.themeColor),
               border: `2px solid ${data.themeColor}30`,
             }}
+            onClick={() => handleFeatureClick("Schedule a Date")}
           >
             <CardContent className="p-6 text-center">
               <Button
@@ -265,6 +274,7 @@ const LandingView: React.FC = () => {
               boxShadow: createThemedShadow(data.themeColor),
               border: `2px solid ${data.themeColor}30`,
             }}
+            onClick={() => handleFeatureClick("Our Memories")}
           >
             <CardContent className="p-6 text-center">
               <Button
@@ -299,6 +309,7 @@ const LandingView: React.FC = () => {
               boxShadow: createThemedShadow(data.themeColor),
               border: `2px solid ${data.themeColor}30`,
             }}
+            onClick={() => handleFeatureClick("Our Music Playlist")}
           >
             <CardContent className="p-6 text-center">
               <Button
@@ -333,6 +344,7 @@ const LandingView: React.FC = () => {
               boxShadow: createThemedShadow(data.themeColor),
               border: `2px solid ${data.themeColor}30`,
             }}
+            onClick={() => handleFeatureClick("Made for You")}
           >
             <CardContent className="p-6 text-center">
               <Button
@@ -371,6 +383,13 @@ const LandingView: React.FC = () => {
       <CounterDialog 
         open={showCounterDialog} 
         onOpenChange={setShowCounterDialog} 
+      />
+      
+      {/* Ops Dialog */}
+      <OpsDialog 
+        open={showOpsDialog} 
+        onOpenChange={setShowOpsDialog} 
+        featureName={selectedFeature}
       />
     </div>
   );
