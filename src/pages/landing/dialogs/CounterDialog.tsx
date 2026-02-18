@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useSettingsStore } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { calculateRelationshipStats, type RelationshipStats } from '../../../utils/helpers';
 import { Heart, Calendar, Clock} from 'lucide-react';
 
@@ -24,6 +25,7 @@ interface DetailedStats extends RelationshipStats {
 }
 
 const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => {
+  const isMobile = useIsMobile();
   const { getCallsign, getCouplename, getCoupleOfficialDate, isLoading: settingsLoading } = useSettingsStore();
   const { isThemeInitialized, getCurrentThemeColor } = useThemeStore();
   const [displayData, setDisplayData] = useState<{
@@ -110,7 +112,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-3xl w-full max-w-[95vw]"
+        className={`w-full ${isMobile ? 'max-w-[95vw] max-h-[90vh] overflow-y-auto' : 'sm:max-w-3xl max-w-[95vw]'}`}
         style={{
           borderColor: themeColor,
           borderWidth: '2px'
@@ -119,11 +121,11 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div 
-              className="p-3 rounded-full"
+              className={`p-3 rounded-full ${isMobile ? 'p-2' : 'p-3'}`}
               style={{ backgroundColor: `${themeColor}20` }}
             >
               <Heart 
-                className="w-8 h-8"
+                className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`}
                 style={{ color: themeColor }}
                 fill={`${themeColor}40`}
               />
@@ -131,21 +133,21 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           </div>
 
           <DialogTitle 
-            className="text-2xl font-bold"
+            className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}
             style={{ color: themeColor }}
           >
             Our Love Journey, {callsign} 💕
           </DialogTitle>
           
-          <DialogDescription className="text-base">
+          <DialogDescription className={`${isMobile ? 'text-sm' : 'text-base'}`}>
             Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
           {/* Main Counter Display */}
           <Card 
-            className="p-6 text-center"
+            className={`text-center ${isMobile ? 'p-4' : 'p-6'}`}
             style={{
               backgroundColor: `${themeColor}10`,
               border: `2px solid ${themeColor}30`
@@ -153,25 +155,25 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           >
             <CardContent className="p-0">
               <p 
-                className="text-3xl font-bold mb-2"
+                className={`font-bold mb-2 ${isMobile ? 'text-2xl' : 'text-3xl'}`}
                 style={{ color: themeColor }}
               >
                 {stats.totalDays.toLocaleString()}
               </p>
-              <p className="text-lg text-gray-600">
+              <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>
                 Days Together
               </p>
             </CardContent>
           </Card>
 
           {/* Detailed Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'}`}>
             {statCards.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
                 <Card 
                   key={index}
-                  className="p-4 text-center hover:shadow-lg transition-shadow"
+                  className={`text-center hover:shadow-lg transition-shadow ${isMobile ? 'p-3' : 'p-4'}`}
                   style={{
                     backgroundColor: "rgba(255, 255, 255, 0.9)",
                     border: `1px solid ${themeColor}20`
@@ -180,17 +182,17 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
                   <CardContent className="p-0 space-y-2">
                     <div className="flex justify-center">
                       <IconComponent 
-                        size={24} 
+                        size={isMobile ? 20 : 24} 
                         style={{ color: themeColor }}
                       />
                     </div>
                     <p 
-                      className="text-xl font-semibold"
+                      className={`font-semibold ${isMobile ? 'text-lg' : 'text-xl'}`}
                       style={{ color: themeColor }}
                     >
                       {stat.value}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className={`text-gray-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                       {stat.subtitle}
                     </p>
                   </CardContent>
@@ -223,10 +225,10 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           </div>
         </div>
 
-        <div className="flex justify-center pt-4">
+        <div className={`flex justify-center ${isMobile ? 'pt-3' : 'pt-4'}`}>
           <Button 
             onClick={handleClose}
-            className="min-w-32"
+            className={`${isMobile ? 'min-w-28 text-sm' : 'min-w-32'}`}
             style={{
               backgroundColor: themeColor,
               borderColor: themeColor,
