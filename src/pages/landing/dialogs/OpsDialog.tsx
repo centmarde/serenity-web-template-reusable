@@ -9,10 +9,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSettingsStore } from '../../../stores/settings';
+import { useSettingsStore, type DialogMessages } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
-import { AlertTriangle, Code,  } from 'lucide-react';
+import { AlertTriangle, Code } from 'lucide-react';
 
 interface OpsDialogProps {
   open: boolean;
@@ -22,42 +22,93 @@ interface OpsDialogProps {
 
 const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName = "This Feature" }) => {
   const isMobile = useIsMobile();
-  const { getCallsign, getAppName, isLoading: settingsLoading } = useSettingsStore();
-  const { isThemeInitialized, getCurrentThemeColor } = useThemeStore();
+  const {
+    getCallsign,
+    getAppName,
+    getDialogMessages,
+    loadSettings,
+    waitForCallsign,
+    waitForAppName
+  } = useSettingsStore();
+  const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
   const [displayData, setDisplayData] = useState<{
     callsign: string;
     appName: string;
     themeColor: string;
+    dialogMessages: DialogMessages;
   } | null>(null);
 
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Wait for both settings and theme to be ready
-        if (!settingsLoading && isThemeInitialized()) {
-          const callsign = getCallsign();
-          const appName = getAppName();
-          const themeColor = getCurrentThemeColor();
+        // Initialize theme first
+        await initializeTheme();
+        await waitForInitialization();
 
-          setDisplayData({
-            callsign,
-            appName,
-            themeColor
-          });
-        }
+        // Load settings
+        await loadSettings();
+
+        // Wait for all required data
+        const callsign = await waitForCallsign();
+        const appName = await waitForAppName();
+        const themeColor = getCurrentThemeColor();
+        const dialogMessages = getDialogMessages();
+
+        setDisplayData({
+          callsign,
+          appName,
+          themeColor,
+          dialogMessages
+        });
       } catch (error) {
         console.error('Failed to initialize ops dialog data:', error);
-        // Provide fallback data
-        setDisplayData({
-          callsign: 'User',
-          appName: 'Love Space',
-          themeColor: '#F2A6A6'
-        });
+        // Provide fallback data from settings or defaults
+        try {
+          const fallbackCallsign = getCallsign() || 'User';
+          const fallbackAppName = getAppName() || 'Love Space';
+          const fallbackThemeColor = getCurrentThemeColor() || '#F2A6A6';
+          const fallbackDialogMessages = getDialogMessages();
+
+          setDisplayData({
+            callsign: fallbackCallsign,
+            appName: fallbackAppName,
+            themeColor: fallbackThemeColor,
+            dialogMessages: fallbackDialogMessages
+          });
+        } catch {
+          // Last resort fallback
+          const lastResortDialogMessages = {
+            welcomeMessage: "Welcome to your personal love space",
+            workInProgressNotice: "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+            featureComingSoon: "This feature is currently being built with love and attention to detail. Thank you for your patience",
+            counterDialogDescription: "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+            betaBadge: "Beta Version",
+            madeWithLove: "Made with 💝",
+            inDevelopment: "In Development",
+            comingSoon: "Coming Soon 🚀"
+          };
+          setDisplayData({
+            callsign: 'User',
+            appName: 'Love Space',
+            themeColor: '#F2A6A6',
+            dialogMessages: lastResortDialogMessages
+          });
+        }
       }
     };
 
     initializeData();
-  }, [settingsLoading, isThemeInitialized, getCallsign, getAppName, getCurrentThemeColor]);
+  }, [
+    initializeTheme,
+    waitForInitialization,
+    loadSettings,
+    waitForCallsign,
+    waitForAppName,
+    getCurrentThemeColor,
+    getCallsign,
+    getAppName,
+    getDialogMessages
+  ]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -67,7 +118,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
     return null; // Don't render until data is ready
   }
 
-  const { callsign,  themeColor } = displayData;
+  const { callsign, themeColor, dialogMessages } = displayData;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,7 +181,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                 <AlertDescription className="text-xs">
                   <strong>Feature Under Development</strong>
                   <br />
-                  This feature is currently being built with love and attention to detail. Thank you for your patience, {callsign}! 💝
+                  {dialogMessages.featureComingSoon}, {callsign}! 💝
                 </AlertDescription>
               </Alert>
 
@@ -145,7 +196,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                   }}
                 >
                   <Code className="w-3 h-3" />
-                  In Development
+                  {dialogMessages.inDevelopment}
                 </Badge>
                 <Badge 
                   variant="outline"
@@ -154,7 +205,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                     color: themeColor
                   }}
                 >
-                  Coming Soon 🚀
+                  {dialogMessages.comingSoon}
                 </Badge>
               </div>
 
@@ -234,7 +285,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                 <AlertDescription className="text-sm">
                   <strong>Feature Under Development</strong>
                   <br />
-                  This feature is currently being built with love and attention to detail. Thank you for your patience, {callsign}! 💝
+                  {dialogMessages.featureComingSoon}, {callsign}! 💝
                 </AlertDescription>
               </Alert>
 
@@ -249,7 +300,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                   }}
                 >
                   <Code className="w-3 h-3" />
-                  In Development
+                  {dialogMessages.inDevelopment}
                 </Badge>
                 <Badge 
                   variant="outline"
@@ -258,7 +309,7 @@ const OpsDialog: React.FC<OpsDialogProps> = ({ open, onOpenChange, featureName =
                     color: themeColor
                   }}
                 >
-                  Coming Soon 🚀
+                  {dialogMessages.comingSoon}
                 </Badge>
               </div>
 

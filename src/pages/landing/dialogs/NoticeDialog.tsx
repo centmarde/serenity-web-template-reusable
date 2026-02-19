@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSettingsStore } from '../../../stores/settings';
+import { useSettingsStore, type DialogMessages } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { AlertTriangle, Heart, Code } from 'lucide-react';
@@ -21,42 +21,93 @@ interface NoticeDialogProps {
 
 const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
   const isMobile = useIsMobile();
-  const { getCallsign, getAppName, isLoading: settingsLoading } = useSettingsStore();
-  const { isThemeInitialized, getCurrentThemeColor } = useThemeStore();
+  const {
+    getCallsign,
+    getAppName,
+    getDialogMessages,
+    loadSettings,
+    waitForCallsign,
+    waitForAppName
+  } = useSettingsStore();
+  const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
   const [displayData, setDisplayData] = useState<{
     callsign: string;
     appName: string;
     themeColor: string;
+    dialogMessages: DialogMessages;
   } | null>(null);
 
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Wait for both settings and theme to be ready
-        if (!settingsLoading && isThemeInitialized()) {
-          const callsign = getCallsign();
-          const appName = getAppName();
-          const themeColor = getCurrentThemeColor();
+        // Initialize theme first
+        await initializeTheme();
+        await waitForInitialization();
 
-          setDisplayData({
-            callsign,
-            appName,
-            themeColor
-          });
-        }
+        // Load settings
+        await loadSettings();
+
+        // Wait for all required data
+        const callsign = await waitForCallsign();
+        const appName = await waitForAppName();
+        const themeColor = getCurrentThemeColor();
+        const dialogMessages = getDialogMessages();
+
+        setDisplayData({
+          callsign,
+          appName,
+          themeColor,
+          dialogMessages
+        });
       } catch (error) {
         console.error('Failed to initialize notice dialog data:', error);
-        // Provide fallback data
-        setDisplayData({
-          callsign: 'User',
-          appName: 'Love Space',
-          themeColor: '#F2A6A6'
-        });
+        // Provide fallback data from settings or defaults
+        try {
+          const fallbackCallsign = getCallsign() || 'User';
+          const fallbackAppName = getAppName() || 'Love Space';
+          const fallbackThemeColor = getCurrentThemeColor() || '#F2A6A6';
+          const fallbackDialogMessages = getDialogMessages();
+
+          setDisplayData({
+            callsign: fallbackCallsign,
+            appName: fallbackAppName,
+            themeColor: fallbackThemeColor,
+            dialogMessages: fallbackDialogMessages
+          });
+        } catch {
+          // Last resort fallback
+          const lastResortDialogMessages = {
+            welcomeMessage: "Welcome to your personal love space",
+            workInProgressNotice: "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+            featureComingSoon: "This feature is currently being built with love and attention to detail. Thank you for your patience",
+            counterDialogDescription: "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+            betaBadge: "Beta Version",
+            madeWithLove: "Made with 💝",
+            inDevelopment: "In Development",
+            comingSoon: "Coming Soon 🚀"
+          };
+          setDisplayData({
+            callsign: 'User',
+            appName: 'Love Space',
+            themeColor: '#F2A6A6',
+            dialogMessages: lastResortDialogMessages
+          });
+        }
       }
     };
 
     initializeData();
-  }, [settingsLoading, isThemeInitialized, getCallsign, getAppName, getCurrentThemeColor]);
+  }, [
+    initializeTheme,
+    waitForInitialization,
+    loadSettings,
+    waitForCallsign,
+    waitForAppName,
+    getCurrentThemeColor,
+    getCallsign,
+    getAppName,
+    getDialogMessages
+  ]);
 
   const handleContinue = () => {
     onOpenChange(false);
@@ -66,7 +117,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
     return null; // Don't render until data is ready
   }
 
-  const { callsign, appName, themeColor } = displayData;
+  const { callsign, appName, themeColor, dialogMessages } = displayData;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -146,7 +197,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                 <AlertDescription className="text-xs">
                   <strong>Work in Progress Notice</strong>
                   <br />
-                  This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience {callsign}. 🥹
+                  {dialogMessages.workInProgressNotice} {callsign}. 🥹
                 </AlertDescription>
               </Alert>
 
@@ -161,7 +212,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                   }}
                 >
                   <Code className="w-3 h-3" />
-                  Beta Version
+                  {dialogMessages.betaBadge}
                 </Badge>
                 <Badge 
                   variant="outline"
@@ -170,7 +221,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                     color: themeColor
                   }}
                 >
-                  Made with 💝
+                  {dialogMessages.madeWithLove}
                 </Badge>
               </div>
 
@@ -264,7 +315,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                 <AlertDescription className="text-sm">
                   <strong>Work in Progress Notice</strong>
                   <br />
-                  This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience {callsign}. 🥹
+                  {dialogMessages.workInProgressNotice} {callsign}. 🥹
                 </AlertDescription>
               </Alert>
 
@@ -279,7 +330,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                   }}
                 >
                   <Code className="w-3 h-3" />
-                  Beta Version
+                  {dialogMessages.betaBadge}
                 </Badge>
                 <Badge 
                   variant="outline"
@@ -288,7 +339,7 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                     color: themeColor
                   }}
                 >
-                  Made with 💝
+                  {dialogMessages.madeWithLove}
                 </Badge>
               </div>
 

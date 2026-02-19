@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
+export interface DialogMessages {
+  welcomeMessage: string;
+  workInProgressNotice: string;
+  featureComingSoon: string;
+  counterDialogDescription: string;
+  betaBadge: string;
+  madeWithLove: string;
+  inDevelopment: string;
+  comingSoon: string;
+}
+
 export interface Settings {
   themeColor: string;
   callsign: string;
@@ -9,6 +20,7 @@ export interface Settings {
   coupleOfficialDate: string;
   startingGreetings: string;
   traits: string[];
+  dialogMessages: DialogMessages;
 }
 
 interface SettingsStore {
@@ -27,6 +39,7 @@ interface SettingsStore {
   getStartingGreetings: () => string;
   getTraits: () => string[];
   getRandomTrait: () => string;
+  getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForCallsign: () => Promise<string>;
   waitForCouplename: () => Promise<string>;
@@ -103,6 +116,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       if (!fetchedSettings.traits || !Array.isArray(fetchedSettings.traits) || fetchedSettings.traits.length === 0) {
         throw new Error('Traits array not found or empty in settings.json');
       }
+      
+      // DialogMessages is optional - if not present, fallbacks will be used
       
       set({ 
         settings: fetchedSettings, 
@@ -186,6 +201,24 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     }
     const randomIndex = Math.floor(Math.random() * traits.length);
     return traits[randomIndex];
+  },
+
+  getDialogMessages: () => {
+    const { settings } = get();
+    if (!settings || !settings.dialogMessages) {
+      // Provide fallback dialog messages
+      return {
+        welcomeMessage: "Welcome to your personal love space",
+        workInProgressNotice: "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+        featureComingSoon: "This feature is currently being built with love and attention to detail. Thank you for your patience",
+        counterDialogDescription: "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+        betaBadge: "Beta Version",
+        madeWithLove: "Made with 💝",
+        inDevelopment: "In Development",
+        comingSoon: "Coming Soon 🚀"
+      };
+    }
+    return settings.dialogMessages;
   },
 
   waitForThemeColor: async () => {

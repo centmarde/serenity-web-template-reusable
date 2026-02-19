@@ -233,11 +233,18 @@ const LandingView: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {/* Schedule a Date Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Schedule a Date")}
           >
@@ -268,11 +275,18 @@ const LandingView: React.FC = () => {
 
           {/* Our Memories Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Our Memories")}
           >
@@ -303,11 +317,18 @@ const LandingView: React.FC = () => {
 
           {/* Our Music Playlist Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Our Music Playlist")}
           >
@@ -338,11 +359,18 @@ const LandingView: React.FC = () => {
 
           {/* Made for You Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Made for You")}
           >
