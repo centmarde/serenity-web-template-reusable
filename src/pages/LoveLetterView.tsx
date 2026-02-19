@@ -1,31 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../stores/settings";
 import { useThemeStore } from "../stores/theme";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { 
   Heart, 
   Mail, 
-  Send, 
-  Plus, 
-  Calendar,
-  User,
-  MessageSquare 
+  Frown,
+  HeartHandshake,
+  PartyPopper
 } from "lucide-react";
-
-interface LoveLetter {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  from: string;
-  to: string;
-  isRead: boolean;
-}
+import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
 
 interface ComponentData {
   themeColor: string;
@@ -51,42 +36,6 @@ const LoveLetterView: React.FC = () => {
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [letters, setLetters] = useState<LoveLetter[]>([]);
-  const [showNewLetter, setShowNewLetter] = useState(false);
-  const [selectedLetter, setSelectedLetter] = useState<LoveLetter | null>(null);
-  const [newLetterTitle, setNewLetterTitle] = useState("");
-  const [newLetterContent, setNewLetterContent] = useState("");
-
-  // Sample love letters for demo
-  const getSampleLetters = (): LoveLetter[] => [
-    {
-      id: "1",
-      title: "My Dearest Love",
-      content: "Every morning I wake up grateful that you're in my life. Your smile brightens even my darkest days, and your laugh is my favorite sound in the world. I want you to know that my love for you grows stronger with each passing moment. You are my heart, my soul, and my everything. 💕",
-      date: "2026-02-14",
-      from: "Your Forever Love",
-      to: "My Beautiful Girlfriend",
-      isRead: false,
-    },
-    {
-      id: "2", 
-      title: "Thinking of You",
-      content: "I was just thinking about the way you scrunch your nose when you're concentrating, and it made me smile so big. You have no idea how many little things you do that make me fall in love with you all over again. I can't wait to hold you in my arms tonight. ✨",
-      date: "2026-02-10",
-      from: "Your Devoted Boyfriend",
-      to: "My Sweet Angel",
-      isRead: true,
-    },
-    {
-      id: "3",
-      title: "Our Future Together",
-      content: "I dream about our future together - lazy Sunday mornings, adventures around the world, building a home filled with love and laughter. With you by my side, I know every dream is possible. You make me want to be the best version of myself. I love you more than words can express. 🌟",
-      date: "2026-02-05",
-      from: "Your Life Partner",
-      to: "My Soulmate",
-      isRead: true,
-    }
-  ];
 
   useEffect(() => {
     const initialize = async () => {
@@ -105,22 +54,9 @@ const LoveLetterView: React.FC = () => {
         };
 
         setData(loadedData);
-        setLetters(getSampleLetters());
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to initialize Love Letter View:", error);
-        const fallbackThemeColor = getCurrentThemeColor() || "#F2A6A6";
-
-        setData({
-          themeColor: fallbackThemeColor,
-          callsign: "darling",
-          bfName: "Love",
-          gfName: "Beautiful",
-          appName: "Love Space",
-          startingGreetings: "baby",
-        });
-
-        setLetters(getSampleLetters());
         setIsLoading(false);
       }
     };
@@ -136,33 +72,6 @@ const LoveLetterView: React.FC = () => {
     getAppName,
     getStartingGreetings,
   ]);
-
-  const handleCreateLetter = () => {
-    if (!newLetterTitle.trim() || !newLetterContent.trim() || !data) return;
-
-    const newLetter: LoveLetter = {
-      id: Date.now().toString(),
-      title: newLetterTitle.trim(),
-      content: newLetterContent.trim(),
-      date: new Date().toISOString().split('T')[0],
-      from: data.gfName,
-      to: data.bfName,
-      isRead: false,
-    };
-
-    setLetters([newLetter, ...letters]);
-    setNewLetterTitle("");
-    setNewLetterContent("");
-    setShowNewLetter(false);
-  };
-
-  const handleLetterClick = (letter: LoveLetter) => {
-    setSelectedLetter(letter);
-    // Mark as read
-    setLetters(letters.map(l => 
-      l.id === letter.id ? { ...l, isRead: true } : l
-    ));
-  };
 
   if (isLoading || !data) {
     return (
@@ -187,266 +96,258 @@ const LoveLetterView: React.FC = () => {
         background: `linear-gradient(135deg, ${data.themeColor}15, ${data.themeColor}30, #ffffff)`,
       }}
     >
-      <div className="container mx-auto max-w-7xl space-y-6">
-        {/* Header Section */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center mb-4">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: `${data.themeColor}20`,
-                border: `3px solid ${data.themeColor}`,
-              }}
-            >
-              <Mail size={36} color={data.themeColor} />
-            </div>
-          </div>
-          
-          <h1
-            className="text-3xl font-bold flex items-center justify-center gap-3"
-            style={{ color: data.themeColor }}
-          >
-            <Heart size={28} fill={data.themeColor} />
-            Love Letters
-            <Heart size={28} fill={data.themeColor} />
-          </h1>
-          
-          <p className="text-gray-600 text-lg">
-            Messages of love between {data.gfName} & {data.bfName} 💕
-          </p>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Letters List */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* New Letter Button */}
-            <Button
-              onClick={() => setShowNewLetter(true)}
-              className="w-full flex items-center gap-2"
-              style={{
-                backgroundColor: data.themeColor,
-                borderColor: data.themeColor,
-              }}
-            >
-              <Plus size={16} />
-              Write New Letter
-            </Button>
-
-            {/* Letters List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <MessageSquare size={20} />
-                  Your Letters ({letters.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-96">
-                  <div className="space-y-2 p-4">
-                    {letters.map((letter) => (
-                      <Card
-                        key={letter.id}
-                        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          selectedLetter?.id === letter.id
-                            ? 'ring-2'
-                            : 'hover:scale-[1.02]'
-                        }`}
-                        style={{
-                          borderColor: selectedLetter?.id === letter.id ? data.themeColor : undefined,
-                        }}
-                        onClick={() => handleLetterClick(letter)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-semibold text-sm truncate flex-1">
-                              {letter.title}
-                            </h4>
-                            {!letter.isRead && (
-                              <Badge
-                                variant="default"
-                                className="text-xs ml-2"
-                                style={{ backgroundColor: data.themeColor }}
-                              >
-                                New
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-500 line-clamp-2">
-                            {letter.content}
-                          </p>
-                          <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <User size={10} />
-                              {letter.from}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar size={10} />
-                              {new Date(letter.date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Letter Display/Editor */}
-          <div className="lg:col-span-2">
-            {showNewLetter ? (
-              /* New Letter Editor */
-              <Card>
-                <CardHeader>
-                  <CardTitle
-                    className="flex items-center gap-2"
-                    style={{ color: data.themeColor }}
-                  >
-                    <Send size={20} />
-                    Write a New Love Letter
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Letter Title
-                    </label>
-                    <Input
-                      placeholder="Give your letter a sweet title..."
-                      value={newLetterTitle}
-                      onChange={(e) => setNewLetterTitle(e.target.value)}
-                      style={{ borderColor: `${data.themeColor}30` }}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Your Message
-                    </label>
-                    <Textarea
-                      placeholder={`Dear ${data.bfName},\n\nWrite your heart out here... 💕`}
-                      value={newLetterContent}
-                      onChange={(e) => setNewLetterContent(e.target.value)}
-                      rows={12}
-                      className="resize-none"
-                      style={{ borderColor: `${data.themeColor}30` }}
-                    />
-                  </div>
-                  
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={handleCreateLetter}
-                      disabled={!newLetterTitle.trim() || !newLetterContent.trim()}
-                      style={{
-                        backgroundColor: data.themeColor,
-                        borderColor: data.themeColor,
-                      }}
-                    >
-                      <Send size={16} className="mr-2" />
-                      Send Letter
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowNewLetter(false);
-                        setNewLetterTitle("");
-                        setNewLetterContent("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : selectedLetter ? (
-              /* Selected Letter Display */
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle
-                        className="text-xl mb-2"
-                        style={{ color: data.themeColor }}
-                      >
-                        {selectedLetter.title}
-                      </CardTitle>
-                      <div className="text-sm text-gray-500 space-y-1">
-                        <p className="flex items-center gap-2">
-                          <User size={14} />
-                          From: {selectedLetter.from}
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <Heart size={14} />
-                          To: {selectedLetter.to}
-                        </p>
-                        <p className="flex items-center gap-2">
-                          <Calendar size={14} />
-                          {new Date(selectedLetter.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={selectedLetter.isRead ? "secondary" : "default"}
-                      style={{
-                        backgroundColor: selectedLetter.isRead ? "#f3f4f6" : data.themeColor,
-                      }}
-                    >
-                      {selectedLetter.isRead ? "Read" : "New"}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div 
-                    className="prose max-w-none p-6 rounded-lg"
-                    style={{
-                      backgroundColor: `${data.themeColor}05`,
-                      border: `1px solid ${data.themeColor}20`,
-                    }}
-                  >
-                    <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                      {selectedLetter.content}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              /* Welcome Screen */
-              <Card className="h-full flex items-center justify-center">
-                <CardContent className="text-center space-y-4 py-16">
-                  <div
-                    className="w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-6"
-                    style={{
-                      backgroundColor: `${data.themeColor}15`,
-                      border: `2px solid ${data.themeColor}30`,
-                    }}
-                  >
-                    <Mail size={48} style={{ color: `${data.themeColor}80` }} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-700">
-                    Welcome to Your Love Letters
-                  </h3>
-                  <p className="text-gray-500 max-w-md">
-                    Select a letter from the left to read it, or write a new one to express your feelings! 💕
-                  </p>
-                  <Button
-                    onClick={() => setShowNewLetter(true)}
-                    className="mt-4"
-                    style={{
-                      backgroundColor: data.themeColor,
-                      borderColor: data.themeColor,
-                    }}
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Write Your First Letter
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h1
+          className="flex items-center justify-center gap-3 text-gray-800 font-bold mb-4"
+          style={{
+            fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+            color: "#333333",
+          }}
+        >
+          <Mail
+            size={32}
+            fill={data.themeColor}
+            color={data.themeColor}
+            className="animate-pulse"
+          />
+          Love Letters
+          <Heart
+            size={32}
+            fill={data.themeColor}
+            color={data.themeColor}
+            className="animate-pulse"
+          />
+        </h1>
+        <p
+          className="text-lg text-gray-600 max-w-2xl mx-auto"
+          style={{
+            fontSize: "clamp(1rem, 3vw, 1.25rem)",
+            color: "#666666",
+          }}
+        >
+          Special letters for different moments in our love story. Choose when you're ready to open them ✨
+        </p>
       </div>
+
+      {/* 3D Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 max-w-7xl mx-auto px-4">
+        {/* Card 1: Open when you're sad */}
+        <CardContainer className="inter-var h-[450px]">
+          <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+            <CardItem
+              translateZ="50"
+              className="text-xl font-bold text-neutral-600 dark:text-white"
+            >
+              <div
+                className="flex items-center gap-3 mb-4"
+                style={{ color: data.themeColor }}
+              >
+                <Frown size={28} />
+                <span style={{ fontSize: "clamp(1.25rem, 3vw, 1.5rem)" }}>
+                  Open when you're sad
+                </span>
+              </div>
+            </CardItem>
+
+            <CardItem
+              as="p"
+              translateZ="60"
+              className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300"
+              style={{ fontSize: "clamp(0.875rem, 2.5vw, 1rem)" }}
+            >
+              A gentle reminder of how much you mean to me when the world feels heavy 💙
+            </CardItem>
+
+            <CardItem
+              translateZ="100"
+              rotateX={20}
+              rotateZ={-10}
+              className="w-full mt-4 flex-1"
+            >
+              <div
+                className="h-48 w-full rounded-xl flex items-center justify-center text-white font-bold text-lg relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${data.themeColor}60, ${data.themeColor}80)`,
+                  minHeight: '200px',
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-400/20"></div>
+                <div className="relative z-10 text-center">
+                  <img
+                    src="/assets/sad.gif"
+                    alt="Comfort hug"
+                    className="w-24 h-24 mx-auto mb-4 opacity-90"
+                  />
+                  <p style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}>
+                    "You're stronger than you know"
+                  </p>
+                </div>
+              </div>
+            </CardItem>
+
+            <div className="flex justify-center items-center mt-auto">
+              <CardItem
+                translateZ={20}
+                translateX={-20}
+                as={Button}
+                className="px-6 py-3 rounded-xl text-white font-bold"
+                style={{
+                  backgroundColor: data.themeColor,
+                  fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
+                }}
+              >
+                Open Letter
+              </CardItem>
+            </div>
+          </CardBody>
+        </CardContainer>
+
+        {/* Card 2: Open when you miss me */}
+        <CardContainer className="inter-var h-[450px]">
+          <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+            <CardItem
+              translateZ="50"
+              className="text-xl font-bold text-neutral-600 dark:text-white"
+            >
+              <div
+                className="flex items-center gap-3 mb-4"
+                style={{ color: data.themeColor }}
+              >
+                <HeartHandshake size={28} />
+                <span style={{ fontSize: "clamp(1.25rem, 3vw, 1.5rem)" }}>
+                  Open when you miss me
+                </span>
+              </div>
+            </CardItem>
+
+            <CardItem
+              as="p"
+              translateZ="60"
+              className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300"
+              style={{ fontSize: "clamp(0.875rem, 2.5vw, 1rem)" }}
+            >
+              For moments when distance feels too far and you need to feel close 💕
+            </CardItem>
+
+            <CardItem
+              translateZ="100"
+              rotateX={20}
+              rotateZ={10}
+              className="w-full mt-4 flex-1"
+            >
+              <div
+                className="h-48 w-full rounded-xl flex items-center justify-center text-white font-bold text-lg relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${data.themeColor}60, ${data.themeColor}80)`,
+                  minHeight: '200px',
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 to-red-400/20"></div>
+                <div className="relative z-10 text-center">
+                  <img
+                    src="/assets/peach-goma.gif"
+                    alt="Missing you"
+                    className="w-24 h-24 mx-auto mb-4 opacity-90"
+                  />
+                  <p style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}>
+                    "I'm always with you in spirit"
+                  </p>
+                </div>
+              </div>
+            </CardItem>
+
+            <div className="flex justify-center items-center mt-auto">
+              <CardItem
+                translateZ={20}
+                translateX={20}
+                as={Button}
+                className="px-6 py-3 rounded-xl text-white font-bold"
+                style={{
+                  backgroundColor: data.themeColor,
+                  fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
+                }}
+              >
+                Open Letter
+              </CardItem>
+            </div>
+          </CardBody>
+        </CardContainer>
+
+        {/* Card 3: Open on our 1st anniversary */}
+        <CardContainer className="inter-var h-[450px]">
+          <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+            <CardItem
+              translateZ="50"
+              className="text-xl font-bold text-neutral-600 dark:text-white"
+            >
+              <div
+                className="flex items-center gap-3 mb-4"
+                style={{ color: data.themeColor }}
+              >
+                <PartyPopper size={28} />
+                <span style={{ fontSize: "clamp(1.1rem, 2.8vw, 1.3rem)" }}>
+                  Open on our 1st anniversary
+                </span>
+              </div>
+            </CardItem>
+
+            <CardItem
+              as="p"
+              translateZ="60"
+              className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300"
+              style={{ fontSize: "clamp(0.875rem, 2.5vw, 1rem)" }}
+            >
+              A celebration of our first year and all the beautiful memories 🎉
+            </CardItem>
+
+            <CardItem
+              translateZ="100"
+              rotateX={20}
+              rotateZ={-5}
+              className="w-full mt-4 flex-1"
+            >
+              <div
+                className="h-48 w-full rounded-xl flex items-center justify-center text-white font-bold text-lg relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${data.themeColor}60, ${data.themeColor}80)`,
+                  minHeight: '200px',
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-400/20"></div>
+                <div className="relative z-10 text-center">
+                  <img
+                    src="/assets/dudu-cute.gif"
+                    alt="Anniversary celebration"
+                    className="w-24 h-24 mx-auto mb-4 opacity-90"
+                  />
+                  <p style={{ fontSize: "clamp(0.875rem, 2vw, 1rem)" }}>
+                    "Here's to our first year of forever"
+                  </p>
+                </div>
+              </div>
+            </CardItem>
+
+            <div className="flex justify-center items-center mt-auto">
+              <CardItem
+                translateZ={20}
+                translateX={-10}
+                as={Button}
+                className="px-6 py-3 rounded-xl text-white font-bold"
+                style={{
+                  backgroundColor: data.themeColor,
+                  fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
+                }}
+              >
+                Open Letter
+              </CardItem>
+            </div>
+          </CardBody>
+        </CardContainer>
+      </div>
+
+      {/* Bottom Spacing */}
+      <div className="h-16"></div>
     </div>
   );
 };
