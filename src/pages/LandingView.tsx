@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Heart, Calendar, Camera, Music, Gift } from "lucide-react";
 import {
   calculateRelationshipStats,
+  calculateAnniversaryCountdown,
   createThemedShadow,
   type RelationshipStats,
+  type AnniversaryCountdown,
 } from "../utils/helpers";
 import NoticeDialog from "./landing/dialogs/NoticeDialog";
 import CounterDialog from "./landing/dialogs/CounterDialog";
@@ -25,6 +27,7 @@ interface ComponentData {
   coupleOfficialDate: string;
   traits: string[];
   relationshipStats: RelationshipStats;
+  anniversaryCountdown: AnniversaryCountdown;
 }
 
 const LandingView: React.FC = () => {
@@ -63,6 +66,8 @@ const LandingView: React.FC = () => {
         const coupleOfficialDate = getCoupleOfficialDate();
         const relationshipStats =
           calculateRelationshipStats(coupleOfficialDate);
+        const anniversaryCountdown = 
+          calculateAnniversaryCountdown(coupleOfficialDate);
 
         const loadedData: ComponentData = {
           themeColor: getCurrentThemeColor(),
@@ -73,6 +78,7 @@ const LandingView: React.FC = () => {
           coupleOfficialDate,
           traits: getTraits(),
           relationshipStats,
+          anniversaryCountdown,
         };
 
         setData(loadedData);
@@ -83,6 +89,7 @@ const LandingView: React.FC = () => {
         // Provide fallback values with calculated stats
         const fallbackDate = "2025-01-01";
         const fallbackStats = calculateRelationshipStats(fallbackDate);
+        const fallbackCountdown = calculateAnniversaryCountdown(fallbackDate);
         const fallbackThemeColor = getCurrentThemeColor() || "#F2A6A6";
 
         setData({
@@ -94,6 +101,7 @@ const LandingView: React.FC = () => {
           coupleOfficialDate: fallbackDate,
           traits: ["You are amazing"],
           relationshipStats: fallbackStats,
+          anniversaryCountdown: fallbackCountdown,
         });
 
         setIsLoading(false);
@@ -215,7 +223,10 @@ const LandingView: React.FC = () => {
                   fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
                 }}
               >
-                💕 {data.relationshipStats.totalDays} days together
+                {data.anniversaryCountdown.isToday 
+                  ? `🎉 Happy ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} Anniversary!` 
+                  : `💕 ${data.anniversaryCountdown.daysUntilAnniversary} days until our ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} anniversary`
+                }
               </p>
               <p 
                 className="text-xs text-gray-500 mt-1"

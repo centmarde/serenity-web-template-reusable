@@ -223,7 +223,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
                 {stats.totalDays.toLocaleString()}
               </p>
               <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                Days Together
+                you survived {stats.totalDays.toLocaleString()} days with me 😆
               </p>
             </CardContent>
           </Card>
