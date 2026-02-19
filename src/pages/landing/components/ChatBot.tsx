@@ -41,7 +41,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       const timer = setTimeout(() => {
         const initialMessage: Message = {
           id: "initial",
-          text: `Hey ${greeting}! � It's your mini ${bfName} here! ${bfName} trained me to keep you company when he's not around. I know all his sweet thoughts about you! What's on your mind, beautiful? 💕`,
+          text: `Hey ${greeting}! It's your mini ${bfName} here! ${bfName} trained me to keep you company when he's not around. I know all his sweet thoughts about you! What's on your mind, beautiful? 💕`,
           isUser: false,
           timestamp: new Date(),
         };
@@ -142,11 +142,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
           onClick={handleToggleMinimize}
         >
           <div className="flex items-center gap-2">
-            <img
-              src="/assets/dudu-cute.gif"
-              alt="Chat Bot"
-              className="w-8 h-8 rounded-full border-2 border-white"
-            />
+            <div 
+              className="w-8 h-8 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden"
+              style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+            >
+              <img
+                src="/assets/dudu-cute.gif"
+                alt="Mini assistant"
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            </div>
             <div>
               <h3 className="text-white font-semibold text-sm">
                 Mini {bfName} 💕

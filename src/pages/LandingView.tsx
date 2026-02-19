@@ -31,7 +31,11 @@ interface ComponentData {
   anniversaryCountdown: AnniversaryCountdown;
 }
 
-const LandingView: React.FC = () => {
+interface LandingViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   const {
     getCallsign,
     getGfName,
@@ -125,8 +129,12 @@ const LandingView: React.FC = () => {
   ]);
 
   const handleFeatureClick = (featureName: string) => {
-    setSelectedFeature(featureName);
-    setShowOpsDialog(true);
+    if (featureName === "Love Letters" && onNavigate) {
+      onNavigate('/love-letters');
+    } else {
+      setSelectedFeature(featureName);
+      setShowOpsDialog(true);
+    }
   };
 
   if (isLoading || !data) {
