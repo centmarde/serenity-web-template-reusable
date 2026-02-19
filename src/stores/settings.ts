@@ -15,7 +15,8 @@ export interface DialogMessages {
 export interface Settings {
   themeColor: string;
   callsign: string;
-  couplename: string;
+  gf_name: string;
+  bf_name: string;
   appName: string;
   coupleOfficialDate: string;
   startingGreetings: string;
@@ -33,7 +34,8 @@ interface SettingsStore {
   loadSettings: () => Promise<void>;
   getThemeColor: () => string;
   getCallsign: () => string;
-  getCouplename: () => string;
+  getGfName: () => string;
+  getBfName: () => string;
   getAppName: () => string;
   getCoupleOfficialDate: () => string;
   getStartingGreetings: () => string;
@@ -42,7 +44,8 @@ interface SettingsStore {
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForCallsign: () => Promise<string>;
-  waitForCouplename: () => Promise<string>;
+  waitForGfName: () => Promise<string>;
+  waitForBfName: () => Promise<string>;
   waitForAppName: () => Promise<string>;
   waitForCoupleOfficialDate: () => Promise<string>;
   waitForStartingGreetings: () => Promise<string>;
@@ -97,8 +100,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         throw new Error('Callsign not found in settings.json');
       }
       
-      if (fetchedSettings.couplename === undefined) {
-        throw new Error('Couplename not found in settings.json');
+      if (fetchedSettings.gf_name === undefined) {
+        throw new Error('gf_name not found in settings.json');
+      }
+      
+      if (fetchedSettings.bf_name === undefined) {
+        throw new Error('bf_name not found in settings.json');
       }
       
       if (fetchedSettings.appName === undefined) {
@@ -154,12 +161,20 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.callsign;
   },
 
-  getCouplename: () => {
+  getGfName: () => {
     const { settings } = get();
-    if (!settings || settings.couplename === undefined) {
+    if (!settings || settings.gf_name === undefined) {
       throw new Error('Settings not loaded. Call loadSettings() first.');
     }
-    return settings.couplename;
+    return settings.gf_name;
+  },
+
+  getBfName: () => {
+    const { settings } = get();
+    if (!settings || settings.bf_name === undefined) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.bf_name;
   },
 
   getAppName: () => {
@@ -231,9 +246,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return get().getCallsign();
   },
 
-  waitForCouplename: async () => {
+  waitForGfName: async () => {
     await get().loadSettings();
-    return get().getCouplename();
+    return get().getGfName();
+  },
+
+  waitForBfName: async () => {
+    await get().loadSettings();
+    return get().getBfName();
   },
 
   waitForAppName: async () => {

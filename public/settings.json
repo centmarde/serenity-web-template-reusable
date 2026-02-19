@@ -1,7 +1,8 @@
 {
   "themeColor": "#F2A6A6",
   "callsign": "call sign",
-  "couplename": "couple name",
+  "gf_name": "girlfriend name",
+  "bf_name": "boyfriend name",
   "appName": "your app name",
   "coupleOfficialDate": "2018-02-19",
   "startingGreetings": "baby girl",

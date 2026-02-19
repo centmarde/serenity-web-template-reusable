@@ -29,18 +29,18 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
   const isMobile = useIsMobile();
   const {
     getCallsign,
-    getCouplename,
+    getGfName,
     getCoupleOfficialDate,
     getDialogMessages,
     loadSettings,
     waitForCallsign,
-    waitForCouplename,
+    waitForGfName,
     waitForCoupleOfficialDate
   } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
   const [displayData, setDisplayData] = useState<{
     callsign: string;
-    couplename: string;
+    gfName: string;
     themeColor: string;
     stats: DetailedStats;
     dialogMessages: DialogMessages;
@@ -58,7 +58,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
 
         // Wait for all required data
         const callsign = await waitForCallsign();
-        const couplename = await waitForCouplename();
+        const gfName = await waitForGfName();
         const coupleOfficialDate = await waitForCoupleOfficialDate();
         const themeColor = getCurrentThemeColor();
         const dialogMessages = getDialogMessages();
@@ -71,7 +71,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
 
         setDisplayData({
           callsign,
-          couplename,
+          gfName,
           themeColor,
           stats: detailedStats,
           dialogMessages
@@ -81,7 +81,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
         // Provide fallback data from settings or defaults
         try {
           const fallbackCallsign = getCallsign() || 'darling';
-          const fallbackCouplename = getCouplename() || 'Love';
+          const fallbackGfName = getGfName() || 'Love';
           const fallbackDate = getCoupleOfficialDate() || '2025-01-01';
           const fallbackThemeColor = getCurrentThemeColor() || '#F2A6A6';
           const fallbackDialogMessages = getDialogMessages();
@@ -89,7 +89,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           const fallbackStats = calculateRelationshipStats(fallbackDate);
           setDisplayData({
             callsign: fallbackCallsign,
-            couplename: fallbackCouplename,
+            gfName: fallbackGfName,
             themeColor: fallbackThemeColor,
             stats: {
               ...fallbackStats,
@@ -112,7 +112,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           };
           setDisplayData({
             callsign: 'darling',
-            couplename: 'Love',
+            gfName: 'Love',
             themeColor: '#F2A6A6',
             stats: {
               ...lastResortStats,
@@ -130,11 +130,11 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
     waitForInitialization,
     loadSettings,
     waitForCallsign,
-    waitForCouplename,
+    waitForGfName,
     waitForCoupleOfficialDate,
     getCurrentThemeColor,
     getCallsign,
-    getCouplename,
+    getGfName,
     getCoupleOfficialDate,
     getDialogMessages
   ]);
@@ -216,12 +216,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
             }}
           >
             <CardContent className="p-0">
-              <p 
-                className={`font-bold mb-2 ${isMobile ? 'text-2xl' : 'text-3xl'}`}
-                style={{ color: themeColor }}
-              >
-                {stats.totalDays.toLocaleString()}
-              </p>
+             
               <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>
                 you survived {stats.totalDays.toLocaleString()} days with me 😆
               </p>
