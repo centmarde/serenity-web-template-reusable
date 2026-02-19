@@ -1,0 +1,83 @@
+export interface Route {
+  path: string;
+  name: string;
+  component: string;
+  icon?: string;
+  isPublic?: boolean;
+  showInNav?: boolean;
+}
+
+export const routes: Route[] = [
+  {
+    path: '/',
+    name: 'Home',
+    component: 'LandingView',
+    icon: 'Heart',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/love-letters',
+    name: 'Love Letters',
+    component: 'LoveLetterView',
+    icon: 'Mail',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/memories',
+    name: 'Our Memories',
+    component: 'ComingSoon',
+    icon: 'Camera',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/music',
+    name: 'Our Music Playlist',
+    component: 'ComingSoon',
+    icon: 'Music',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/gifts',
+    name: 'Made for You',
+    component: 'ComingSoon',
+    icon: 'Gift',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/games',
+    name: 'Play with Me',
+    component: 'ComingSoon',
+    icon: 'Gamepad2',
+    isPublic: true,
+    showInNav: true,
+  },
+  {
+    path: '/goals',
+    name: 'Future Goals',
+    component: 'ComingSoon',
+    icon: 'Target',
+    isPublic: true,
+    showInNav: true,
+  },
+];
+
+export const getRouteByPath = (path: string): Route | undefined => {
+  return routes.find(route => route.path === path);
+};
+
+export const getRouteByName = (name: string): Route | undefined => {
+  return routes.find(route => route.name === name);
+};
+
+export const getNavRoutes = (): Route[] => {
+  return routes.filter(route => route.showInNav);
+};
+
+export const isValidRoute = (path: string): boolean => {
+  return routes.some(route => route.path === path);
+};

@@ -1,9 +1,10 @@
 {
   "themeColor": "#F2A6A6",
-  "callsign": "babi",
-  "couplename": "Martha",
-  "appName": "Babi Personal Love Space",
-  "coupleOfficialDate": "2026-02-16",
+  "callsign": "call sign",
+  "gf_name": "girlfriend name",
+  "bf_name": "boyfriend name",
+  "appName": "your app name",
+  "coupleOfficialDate": "2018-02-19",
   "startingGreetings": "baby girl",
   "traits": [
     "you like pink color and it's so cute on you",
@@ -16,5 +17,15 @@
     "you get nonchalant about things and it's adorable",
     "you have the sweetest way of saying good night",
     "you dreamed to be a sailor and I can't wait to see you in action"
-  ]
+  ],
+  "dialogMessages": {
+    "welcomeMessage": "Welcome to your personal love space",
+    "workInProgressNotice": "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+    "featureComingSoon": "This feature is currently being built with love and attention to detail. Thank you for your patience",
+    "counterDialogDescription": "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+    "betaBadge": "Beta Version",
+    "madeWithLove": "Made with 💝",
+    "inDevelopment": "In Development",
+    "comingSoon": "Coming Soon 🚀"
+  }
 }

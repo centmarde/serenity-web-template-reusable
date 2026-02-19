@@ -13,7 +13,8 @@ import { useSettingsStore } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { calculateRelationshipStats, type RelationshipStats } from '../../../utils/helpers';
-import { Heart, Calendar, Clock} from 'lucide-react';
+import { Heart, Calendar, Clock } from 'lucide-react';
+import { type DialogMessages } from '../../../stores/settings';
 
 interface CounterDialogProps {
   open: boolean;
@@ -26,56 +27,117 @@ interface DetailedStats extends RelationshipStats {
 
 const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => {
   const isMobile = useIsMobile();
-  const { getCallsign, getCouplename, getCoupleOfficialDate, isLoading: settingsLoading } = useSettingsStore();
-  const { isThemeInitialized, getCurrentThemeColor } = useThemeStore();
+  const {
+    getCallsign,
+    getGfName,
+    getCoupleOfficialDate,
+    getDialogMessages,
+    loadSettings,
+    waitForCallsign,
+    waitForGfName,
+    waitForCoupleOfficialDate
+  } = useSettingsStore();
+  const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
   const [displayData, setDisplayData] = useState<{
     callsign: string;
-    couplename: string;
+    gfName: string;
     themeColor: string;
     stats: DetailedStats;
+    dialogMessages: DialogMessages;
   } | null>(null);
 
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // Wait for both settings and theme to be ready
-        if (!settingsLoading && isThemeInitialized()) {
-          const callsign = getCallsign();
-          const couplename = getCouplename();
-          const themeColor = getCurrentThemeColor();
-          const coupleOfficialDate = getCoupleOfficialDate();
-          
-          const basicStats = calculateRelationshipStats(coupleOfficialDate);
-          const detailedStats: DetailedStats = {
-            ...basicStats,
-            totalHours: basicStats.totalDays * 24
-          };
+        // Initialize theme first
+        await initializeTheme();
+        await waitForInitialization();
 
-          setDisplayData({
-            callsign,
-            couplename,
-            themeColor,
-            stats: detailedStats
-          });
-        }
+        // Load settings
+        await loadSettings();
+
+        // Wait for all required data
+        const callsign = await waitForCallsign();
+        const gfName = await waitForGfName();
+        const coupleOfficialDate = await waitForCoupleOfficialDate();
+        const themeColor = getCurrentThemeColor();
+        const dialogMessages = getDialogMessages();
+        
+        const basicStats = calculateRelationshipStats(coupleOfficialDate);
+        const detailedStats: DetailedStats = {
+          ...basicStats,
+          totalHours: basicStats.totalDays * 24
+        };
+
+        setDisplayData({
+          callsign,
+          gfName,
+          themeColor,
+          stats: detailedStats,
+          dialogMessages
+        });
       } catch (error) {
         console.error('Failed to initialize counter dialog data:', error);
-        // Provide fallback data
-        const fallbackStats = calculateRelationshipStats('2025-01-01');
-        setDisplayData({
-          callsign: 'darling',
-          couplename: 'Love',
-          themeColor: '#F2A6A6',
-          stats: {
-            ...fallbackStats,
-            totalHours: fallbackStats.totalDays * 24
-          }
-        });
+        // Provide fallback data from settings or defaults
+        try {
+          const fallbackCallsign = getCallsign() || 'darling';
+          const fallbackGfName = getGfName() || 'Love';
+          const fallbackDate = getCoupleOfficialDate() || '2025-01-01';
+          const fallbackThemeColor = getCurrentThemeColor() || '#F2A6A6';
+          const fallbackDialogMessages = getDialogMessages();
+          
+          const fallbackStats = calculateRelationshipStats(fallbackDate);
+          setDisplayData({
+            callsign: fallbackCallsign,
+            gfName: fallbackGfName,
+            themeColor: fallbackThemeColor,
+            stats: {
+              ...fallbackStats,
+              totalHours: fallbackStats.totalDays * 24
+            },
+            dialogMessages: fallbackDialogMessages
+          });
+        } catch {
+          // Last resort fallback
+          const lastResortStats = calculateRelationshipStats('2025-01-01');
+          const lastResortDialogMessages = {
+            welcomeMessage: "Welcome to your personal love space",
+            workInProgressNotice: "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+            featureComingSoon: "This feature is currently being built with love and attention to detail. Thank you for your patience",
+            counterDialogDescription: "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+            betaBadge: "Beta Version",
+            madeWithLove: "Made with 💝",
+            inDevelopment: "In Development",
+            comingSoon: "Coming Soon 🚀"
+          };
+          setDisplayData({
+            callsign: 'darling',
+            gfName: 'Love',
+            themeColor: '#F2A6A6',
+            stats: {
+              ...lastResortStats,
+              totalHours: lastResortStats.totalDays * 24
+            },
+            dialogMessages: lastResortDialogMessages
+          });
+        }
       }
     };
 
     initializeData();
-  }, [settingsLoading, isThemeInitialized, getCallsign, getCouplename, getCurrentThemeColor, getCoupleOfficialDate]);
+  }, [
+    initializeTheme,
+    waitForInitialization,
+    loadSettings,
+    waitForCallsign,
+    waitForGfName,
+    waitForCoupleOfficialDate,
+    getCurrentThemeColor,
+    getCallsign,
+    getGfName,
+    getCoupleOfficialDate,
+    getDialogMessages
+  ]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -85,7 +147,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
     return null; // Don't render until data is ready
   }
 
-  const { callsign, themeColor, stats } = displayData;
+  const { callsign, themeColor, stats, dialogMessages } = displayData;
 
   const statCards = [
     {
@@ -140,7 +202,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
           </DialogTitle>
           
           <DialogDescription className={`${isMobile ? 'text-sm' : 'text-base'}`}>
-            Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.
+            {dialogMessages.counterDialogDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -154,14 +216,9 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
             }}
           >
             <CardContent className="p-0">
-              <p 
-                className={`font-bold mb-2 ${isMobile ? 'text-2xl' : 'text-3xl'}`}
-                style={{ color: themeColor }}
-              >
-                {stats.totalDays.toLocaleString()}
-              </p>
+             
               <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                Days Together
+                you survived {stats.totalDays.toLocaleString()} days with me 😆
               </p>
             </CardContent>
           </Card>
@@ -211,7 +268,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
                 borderColor: `${themeColor}30`
               }}
             >
-              💝 Still Counting
+              💝 {dialogMessages.madeWithLove}
             </Badge>
             <Badge 
               variant="outline"

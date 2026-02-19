@@ -6,31 +6,39 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Calendar, Camera, Music, Gift } from "lucide-react";
+import { Heart, Camera, Music, Gift, Mail, Gamepad2, Target } from "lucide-react";
 import {
   calculateRelationshipStats,
+  calculateAnniversaryCountdown,
   createThemedShadow,
   type RelationshipStats,
+  type AnniversaryCountdown,
 } from "../utils/helpers";
 import NoticeDialog from "./landing/dialogs/NoticeDialog";
 import CounterDialog from "./landing/dialogs/CounterDialog";
 import OpsDialog from "./landing/dialogs/OpsDialog";
+import ChatBot from "./landing/components/ChatBot";
 
 interface ComponentData {
   themeColor: string;
   callsign: string;
-  couplename: string;
+  gfName: string;
   appName: string;
   startingGreetings: string;
   coupleOfficialDate: string;
   traits: string[];
   relationshipStats: RelationshipStats;
+  anniversaryCountdown: AnniversaryCountdown;
 }
 
-const LandingView: React.FC = () => {
+interface LandingViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   const {
     getCallsign,
-    getCouplename,
+    getGfName,
     getAppName,
     getStartingGreetings,
     getCoupleOfficialDate,
@@ -48,6 +56,7 @@ const LandingView: React.FC = () => {
   const [showNoticeDialog, setShowNoticeDialog] = useState(true);
   const [showCounterDialog, setShowCounterDialog] = useState(false);
   const [showOpsDialog, setShowOpsDialog] = useState(false);
+  const [showChatBot, setShowChatBot] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<string>("");
 
   useEffect(() => {
@@ -63,16 +72,19 @@ const LandingView: React.FC = () => {
         const coupleOfficialDate = getCoupleOfficialDate();
         const relationshipStats =
           calculateRelationshipStats(coupleOfficialDate);
+        const anniversaryCountdown = 
+          calculateAnniversaryCountdown(coupleOfficialDate);
 
         const loadedData: ComponentData = {
           themeColor: getCurrentThemeColor(),
           callsign: getCallsign(),
-          couplename: getCouplename(),
+          gfName: getGfName(),
           appName: getAppName(),
           startingGreetings: getStartingGreetings(),
           coupleOfficialDate,
           traits: getTraits(),
           relationshipStats,
+          anniversaryCountdown,
         };
 
         setData(loadedData);
@@ -83,17 +95,19 @@ const LandingView: React.FC = () => {
         // Provide fallback values with calculated stats
         const fallbackDate = "2025-01-01";
         const fallbackStats = calculateRelationshipStats(fallbackDate);
+        const fallbackCountdown = calculateAnniversaryCountdown(fallbackDate);
         const fallbackThemeColor = getCurrentThemeColor() || "#F2A6A6";
 
         setData({
           themeColor: fallbackThemeColor,
           callsign: "darling",
-          couplename: "Love",
+          gfName: "Love",
           appName: "Love Space",
           startingGreetings: "baby",
           coupleOfficialDate: fallbackDate,
           traits: ["You are amazing"],
           relationshipStats: fallbackStats,
+          anniversaryCountdown: fallbackCountdown,
         });
 
         setIsLoading(false);
@@ -106,7 +120,7 @@ const LandingView: React.FC = () => {
     loadSettings,
     getCurrentThemeColor,
     getCallsign,
-    getCouplename,
+    getGfName,
     getAppName,
     getStartingGreetings,
     getCoupleOfficialDate,
@@ -115,8 +129,12 @@ const LandingView: React.FC = () => {
   ]);
 
   const handleFeatureClick = (featureName: string) => {
-    setSelectedFeature(featureName);
-    setShowOpsDialog(true);
+    if (featureName === "Love Letters" && onNavigate) {
+      onNavigate('/love-letters');
+    } else {
+      setSelectedFeature(featureName);
+      setShowOpsDialog(true);
+    }
   };
 
   if (isLoading || !data) {
@@ -184,7 +202,7 @@ const LandingView: React.FC = () => {
               color: "#333333",
             }}
           >
-            Welcome to your personal love space, {data.couplename} 💕
+            Welcome to your personal love space, {data.gfName} 💕
           </p>
           
           {/* Guidance Subtitle */}
@@ -215,7 +233,10 @@ const LandingView: React.FC = () => {
                   fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
                 }}
               >
-                💕 {data.relationshipStats.totalDays} days together
+                {data.anniversaryCountdown.isToday 
+                  ? `🎉 Happy ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} Anniversary!` 
+                  : `💕 ${data.anniversaryCountdown.daysUntilAnniversary} days until our ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} anniversary`
+                }
               </p>
               <p 
                 className="text-xs text-gray-500 mt-1"
@@ -229,17 +250,24 @@ const LandingView: React.FC = () => {
           </div>
         </div>
 
-        {/* 4 Button Cards Grid - 1 Row, 4 Columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {/* Schedule a Date Button Card */}
+        {/* 6 Button Cards Grid - 1 Row, 6 Columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+          {/* Love Letters Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
             }}
-            onClick={() => handleFeatureClick("Schedule a Date")}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
+            }}
+            onClick={() => handleFeatureClick("Love Letters")}
           >
             <CardContent className="p-6 text-center">
               <Button
@@ -250,7 +278,7 @@ const LandingView: React.FC = () => {
                   backgroundColor: `${data.themeColor}10`,
                 }}
               >
-                <Calendar 
+                <Mail 
                   size={32} 
                   color={data.themeColor}
                 />
@@ -260,7 +288,7 @@ const LandingView: React.FC = () => {
                     fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
                   }}
                 >
-                  Schedule a Date
+                  Love Letters
                 </span>
               </Button>
             </CardContent>
@@ -268,11 +296,18 @@ const LandingView: React.FC = () => {
 
           {/* Our Memories Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Our Memories")}
           >
@@ -303,11 +338,18 @@ const LandingView: React.FC = () => {
 
           {/* Our Music Playlist Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Our Music Playlist")}
           >
@@ -338,11 +380,18 @@ const LandingView: React.FC = () => {
 
           {/* Made for You Button Card */}
           <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.85)",
               boxShadow: createThemedShadow(data.themeColor),
-              border: `2px solid ${data.themeColor}30`,
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
             }}
             onClick={() => handleFeatureClick("Made for You")}
           >
@@ -370,7 +419,109 @@ const LandingView: React.FC = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Play with Me Button Card */}
+          <Card
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.85)",
+              boxShadow: createThemedShadow(data.themeColor),
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
+            }}
+            onClick={() => handleFeatureClick("Play with Me")}
+          >
+            <CardContent className="p-6 text-center">
+              <Button
+                variant="ghost"
+                className="w-full h-auto flex flex-col gap-3 p-4"
+                style={{
+                  color: data.themeColor,
+                  backgroundColor: `${data.themeColor}10`,
+                }}
+              >
+                <Gamepad2 
+                  size={32} 
+                  color={data.themeColor}
+                />
+                <span
+                  className="font-semibold"
+                  style={{
+                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
+                  }}
+                >
+                  Play with Me
+                </span>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Future Goals Button Card */}
+          <Card
+            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.85)",
+              boxShadow: createThemedShadow(data.themeColor),
+              border: `4px solid ${data.themeColor}`,
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
+            }}
+            onClick={() => handleFeatureClick("Future Goals")}
+          >
+            <CardContent className="p-6 text-center">
+              <Button
+                variant="ghost"
+                className="w-full h-auto flex flex-col gap-3 p-4"
+                style={{
+                  color: data.themeColor,
+                  backgroundColor: `${data.themeColor}10`,
+                }}
+              >
+                <Target 
+                  size={32} 
+                  color={data.themeColor}
+                />
+                <span
+                  className="font-semibold"
+                  style={{
+                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
+                  }}
+                >
+                  Future Goals
+                </span>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
+      </div>
+
+      {/* Floating Chat Bot Icon */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={() => setShowChatBot(true)}
+          className="w-16 h-16 rounded-full p-0 shadow-2xl hover:scale-110 transition-all duration-300 group"
+          style={{
+            backgroundColor: data.themeColor,
+            borderColor: data.themeColor,
+          }}
+        >
+          <img
+            src="/assets/dudu-cute.gif"
+            alt="Chat with love assistant"
+            className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform duration-300"
+          />
+        </Button>
       </div>
       
       {/* Notice Dialog */}
@@ -390,6 +541,12 @@ const LandingView: React.FC = () => {
         open={showOpsDialog} 
         onOpenChange={setShowOpsDialog} 
         featureName={selectedFeature}
+      />
+      
+      {/* Chat Bot */}
+      <ChatBot 
+        isOpen={showChatBot} 
+        onClose={() => setShowChatBot(false)} 
       />
     </div>
   );

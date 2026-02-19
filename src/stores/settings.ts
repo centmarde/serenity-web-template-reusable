@@ -1,14 +1,27 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
+export interface DialogMessages {
+  welcomeMessage: string;
+  workInProgressNotice: string;
+  featureComingSoon: string;
+  counterDialogDescription: string;
+  betaBadge: string;
+  madeWithLove: string;
+  inDevelopment: string;
+  comingSoon: string;
+}
+
 export interface Settings {
   themeColor: string;
   callsign: string;
-  couplename: string;
+  gf_name: string;
+  bf_name: string;
   appName: string;
   coupleOfficialDate: string;
   startingGreetings: string;
   traits: string[];
+  dialogMessages: DialogMessages;
 }
 
 interface SettingsStore {
@@ -21,15 +34,18 @@ interface SettingsStore {
   loadSettings: () => Promise<void>;
   getThemeColor: () => string;
   getCallsign: () => string;
-  getCouplename: () => string;
+  getGfName: () => string;
+  getBfName: () => string;
   getAppName: () => string;
   getCoupleOfficialDate: () => string;
   getStartingGreetings: () => string;
   getTraits: () => string[];
   getRandomTrait: () => string;
+  getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForCallsign: () => Promise<string>;
-  waitForCouplename: () => Promise<string>;
+  waitForGfName: () => Promise<string>;
+  waitForBfName: () => Promise<string>;
   waitForAppName: () => Promise<string>;
   waitForCoupleOfficialDate: () => Promise<string>;
   waitForStartingGreetings: () => Promise<string>;
@@ -84,8 +100,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         throw new Error('Callsign not found in settings.json');
       }
       
-      if (fetchedSettings.couplename === undefined) {
-        throw new Error('Couplename not found in settings.json');
+      if (fetchedSettings.gf_name === undefined) {
+        throw new Error('gf_name not found in settings.json');
+      }
+      
+      if (fetchedSettings.bf_name === undefined) {
+        throw new Error('bf_name not found in settings.json');
       }
       
       if (fetchedSettings.appName === undefined) {
@@ -103,6 +123,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       if (!fetchedSettings.traits || !Array.isArray(fetchedSettings.traits) || fetchedSettings.traits.length === 0) {
         throw new Error('Traits array not found or empty in settings.json');
       }
+      
+      // DialogMessages is optional - if not present, fallbacks will be used
       
       set({ 
         settings: fetchedSettings, 
@@ -139,12 +161,20 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.callsign;
   },
 
-  getCouplename: () => {
+  getGfName: () => {
     const { settings } = get();
-    if (!settings || settings.couplename === undefined) {
+    if (!settings || settings.gf_name === undefined) {
       throw new Error('Settings not loaded. Call loadSettings() first.');
     }
-    return settings.couplename;
+    return settings.gf_name;
+  },
+
+  getBfName: () => {
+    const { settings } = get();
+    if (!settings || settings.bf_name === undefined) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.bf_name;
   },
 
   getAppName: () => {
@@ -188,6 +218,24 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return traits[randomIndex];
   },
 
+  getDialogMessages: () => {
+    const { settings } = get();
+    if (!settings || !settings.dialogMessages) {
+      // Provide fallback dialog messages
+      return {
+        welcomeMessage: "Welcome to your personal love space",
+        workInProgressNotice: "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
+        featureComingSoon: "This feature is currently being built with love and attention to detail. Thank you for your patience",
+        counterDialogDescription: "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
+        betaBadge: "Beta Version",
+        madeWithLove: "Made with 💝",
+        inDevelopment: "In Development",
+        comingSoon: "Coming Soon 🚀"
+      };
+    }
+    return settings.dialogMessages;
+  },
+
   waitForThemeColor: async () => {
     await get().loadSettings();
     return get().getThemeColor();
@@ -198,9 +246,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return get().getCallsign();
   },
 
-  waitForCouplename: async () => {
+  waitForGfName: async () => {
     await get().loadSettings();
-    return get().getCouplename();
+    return get().getGfName();
+  },
+
+  waitForBfName: async () => {
+    await get().loadSettings();
+    return get().getBfName();
   },
 
   waitForAppName: async () => {
