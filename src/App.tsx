@@ -62,7 +62,9 @@ function App() {
       )}
       
       {currentView === 'main' && renderMainContent()}
+      
     </div>
+    
   );
 }
 

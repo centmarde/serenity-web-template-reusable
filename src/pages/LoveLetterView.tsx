@@ -11,6 +11,7 @@ import {
   PartyPopper
 } from "lucide-react";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
+import SentMeLoveLetterSection from "./loveLetter/components/SentMeLoveLetterSection";
 
 interface ComponentData {
   themeColor: string;
@@ -91,47 +92,49 @@ const LoveLetterView: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen p-4"
+      className="min-h-screen"
       style={{
         background: `linear-gradient(135deg, ${data.themeColor}15, ${data.themeColor}30, #ffffff)`,
       }}
     >
-      {/* Header Section */}
-      <div className="text-center mb-8">
-        <h1
-          className="flex items-center justify-center gap-3 text-gray-800 font-bold mb-4"
-          style={{
-            fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
-            color: "#333333",
-          }}
-        >
-          <Mail
-            size={32}
-            fill={data.themeColor}
-            color={data.themeColor}
-            className="animate-pulse"
-          />
-          Love Letters
-          <Heart
-            size={32}
-            fill={data.themeColor}
-            color={data.themeColor}
-            className="animate-pulse"
-          />
-        </h1>
-        <p
-          className="text-lg text-gray-600 max-w-2xl mx-auto"
-          style={{
-            fontSize: "clamp(1rem, 3vw, 1.25rem)",
-            color: "#666666",
-          }}
-        >
-          Special letters for different moments in our love story. Choose when you're ready to open them ✨
-        </p>
-      </div>
+      {/* Main Content with Padding */}
+      <div className="p-4">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1
+            className="flex items-center justify-center gap-3 text-gray-800 font-bold mb-4"
+            style={{
+              fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+              color: "#333333",
+            }}
+          >
+            <Mail
+              size={32}
+              fill={data.themeColor}
+              color={data.themeColor}
+              className="animate-pulse"
+            />
+            Love Letters
+            <Heart
+              size={32}
+              fill={data.themeColor}
+              color={data.themeColor}
+              className="animate-pulse"
+            />
+          </h1>
+          <p
+            className="text-lg text-gray-600 max-w-2xl mx-auto"
+            style={{
+              fontSize: "clamp(1rem, 3vw, 1.25rem)",
+              color: "#666666",
+            }}
+          >
+            Special letters for different moments in our love story. Choose when you're ready to open them ✨
+          </p>
+        </div>
 
-      {/* 3D Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 max-w-7xl mx-auto px-4">
+        {/* 3D Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 max-w-7xl mx-auto px-4 relative">
         {/* Card 1: Open when you're sad */}
         <CardContainer className="inter-var h-[450px]">
           <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
@@ -344,11 +347,27 @@ const LoveLetterView: React.FC = () => {
             </div>
           </CardBody>
         </CardContainer>
+
+        </div>
+
+        {/* Send Me Love Letter Section */}
+        <div className="mt-12 mb-8">
+          <SentMeLoveLetterSection />
+        </div>
       </div>
 
-      {/* Bottom Spacing */}
-      <div className="h-16"></div>
+      {/* Full-width SVG Wave at bottom */}
+      <div className="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full">
+          <path 
+            fill={data.themeColor} 
+            fillOpacity="0.8" 
+            d="M0,32L17.1,69.3C34.3,107,69,181,103,202.7C137.1,224,171,192,206,186.7C240,181,274,203,309,197.3C342.9,192,377,160,411,133.3C445.7,107,480,85,514,80C548.6,75,583,85,617,101.3C651.4,117,686,139,720,165.3C754.3,192,789,224,823,218.7C857.1,213,891,171,926,176C960,181,994,235,1029,229.3C1062.9,224,1097,160,1131,144C1165.7,128,1200,160,1234,165.3C1268.6,171,1303,149,1337,128C1371.4,107,1406,85,1423,74.7L1440,64L1440,320L1422.9,320C1405.7,320,1371,320,1337,320C1302.9,320,1269,320,1234,320C1200,320,1166,320,1131,320C1097.1,320,1063,320,1029,320C994.3,320,960,320,926,320C891.4,320,857,320,823,320C788.6,320,754,320,720,320C685.7,320,651,320,617,320C582.9,320,549,320,514,320C480,320,446,320,411,320C377.1,320,343,320,309,320C274.3,320,240,320,206,320C171.4,320,137,320,103,320C68.6,320,34,320,17,320L0,320Z"
+          />
+        </svg>
+      </div>
     </div>
+    
   );
 };
 
