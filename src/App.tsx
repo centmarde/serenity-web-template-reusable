@@ -5,11 +5,15 @@ import DefaultLayout from './layout/Default';
 import LandingView from './pages/LandingView';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
-import { getRouteByPath } from './utils/routes';
+import { getRouteByPath, isValidRoute } from './utils/routes';
 
 function App() {
   const [currentView, setCurrentView] = useState<'loading' | 'main'>('loading');
-  const [currentPath, setCurrentPath] = useState<string>('/');
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    // Initialize with current browser location
+    const path = window.location.pathname;
+    return isValidRoute(path) ? path : '/';
+  });
   
   const { loadSettings } = useSettingsStore();
   const { initializeTheme } = useThemeStore();
@@ -29,6 +33,17 @@ function App() {
     initialize();
   }, [loadSettings, initializeTheme]);
 
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      setCurrentPath(isValidRoute(path) ? path : '/');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleLoadingComplete = () => {
     setCurrentView('main');
   };
@@ -36,6 +51,8 @@ function App() {
   const handleNavigate = (path: string) => {
     const route = getRouteByPath(path);
     if (route) {
+      // Update browser URL without page refresh
+      window.history.pushState({}, '', path);
       setCurrentPath(path);
     }
   };
