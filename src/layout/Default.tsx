@@ -4,7 +4,7 @@ import OpsDialog from "../pages/landing/dialogs/OpsDialog";
 import ChatBot from "../pages/landing/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { getRouteByPath } from "../utils/routes";
-import LoveLetterView from "../pages/LoveLetterView";
+import LoveLetterView from "../pages/loveLetter/LoveLetterView";
 import { useThemeStore } from "../stores/theme";
 
 // Coming soon component

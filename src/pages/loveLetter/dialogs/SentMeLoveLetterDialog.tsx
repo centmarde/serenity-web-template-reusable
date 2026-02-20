@@ -240,7 +240,7 @@ const SentMeLoveLetterDialog: React.FC<SentMeLoveLetterDialogProps> = ({
               />
             ) : (
               <textarea
-                placeholder={`My Dearest ${data.bfName || 'Love'},\n\nWrite your love letter here... 💕\n\nTell me about your day, your dreams, or just how much you love me.`}
+                placeholder={`My Dearest ${data.bfName || 'Love'},\n\nWrite your love letter here... 💕\n\nTell me about your day, your dreams, or just how much you love me 😝.`}
                 value={letterContent}
                 onChange={(e) => setLetterContent(e.target.value)}
                 rows={10}

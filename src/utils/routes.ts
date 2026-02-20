@@ -17,6 +17,22 @@ export const routes: Route[] = [
     showInNav: true,
   },
   {
+    path: '/auth',
+    name: 'Boyfriend Access',
+    component: 'AuthView',
+    icon: 'Lock',
+    isPublic: true,
+    showInNav: false,
+  },
+  {
+    path: '/boyfriend-dashboard',
+    name: 'Boyfriend Dashboard',
+    component: 'BoyFriendDashboardView',
+    icon: 'Heart',
+    isPublic: false,
+    showInNav: false,
+  },
+  {
     path: '/love-letters',
     name: 'Love Letters',
     component: 'LoveLetterView',

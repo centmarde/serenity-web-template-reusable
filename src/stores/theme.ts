@@ -49,11 +49,9 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      // Detect system theme
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      // Load theme color from settings
+      // Load theme preferences from settings
       const themeColor = await useSettingsStore.getState().waitForThemeColor();
+      const isDark = await useSettingsStore.getState().waitForIsDarkMode();
       
       set({ 
         currentThemeColor: themeColor, 

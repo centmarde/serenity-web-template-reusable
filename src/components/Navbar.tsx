@@ -11,7 +11,9 @@ import {
   Gift, 
   Gamepad2, 
   Target,
-  Heart 
+  Heart,
+  Sun,
+  Moon
 } from "lucide-react";
 
 interface NavbarProps {
@@ -21,7 +23,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
   const { getAppName, loadSettings } = useSettingsStore();
-  const { getCurrentThemeColor, initializeTheme, waitForInitialization } = useThemeStore();
+  const { getCurrentThemeColor, initializeTheme, waitForInitialization, toggleDarkMode, isDark } = useThemeStore();
   
   const [appName, setAppName] = useState<string>("");
   const [themeColor, setThemeColor] = useState<string>("#F2A6A6");
@@ -93,6 +95,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             >
               {appName}
             </h1>
+            
+            {/* Theme Toggle Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleDarkMode}
+              className="ml-2 p-1.5 rounded-full hover:scale-105 transition-all duration-200"
+              style={{
+                color: themeColor,
+                border: `1px solid ${themeColor}20`,
+                backgroundColor: "transparent"
+              }}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </Button>
           </div>
 
           {/* Navigation Tabs - Desktop */}

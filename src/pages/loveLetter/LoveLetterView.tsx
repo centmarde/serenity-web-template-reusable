@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useSettingsStore } from "../stores/settings";
-import { useThemeStore } from "../stores/theme";
+import { useSettingsStore } from "../../stores/settings";
+import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import Waves from "@/components/Waves";
 
@@ -12,7 +12,7 @@ import {
   PartyPopper
 } from "lucide-react";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
-import SentMeLoveLetterSection from "./loveLetter/components/SentMeLoveLetterSection";
+import SentMeLoveLetterSection from "./components/SentMeLoveLetterSection";
 
 interface ComponentData {
   themeColor: string;

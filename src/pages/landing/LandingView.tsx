@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useSettingsStore } from "../stores/settings";
-import { useThemeStore } from "../stores/theme";
+import { useSettingsStore } from "../../stores/settings";
+import { useThemeStore } from "../../stores/theme";
 import {
   Card,
   CardContent,
@@ -13,11 +13,11 @@ import {
   createThemedShadow,
   type RelationshipStats,
   type AnniversaryCountdown,
-} from "../utils/helpers";
-import NoticeDialog from "./landing/dialogs/NoticeDialog";
-import CounterDialog from "./landing/dialogs/CounterDialog";
-import OpsDialog from "./landing/dialogs/OpsDialog";
-import ChatBot from "./landing/components/ChatBot";
+} from "../../utils/helpers";
+import NoticeDialog from "./dialogs/NoticeDialog";
+import CounterDialog from "./dialogs/CounterDialog";
+import OpsDialog from "./dialogs/OpsDialog";
+import ChatBot from "./components/ChatBot";
 
 interface ComponentData {
   themeColor: string;
@@ -528,6 +528,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       <NoticeDialog 
         open={showNoticeDialog} 
         onOpenChange={setShowNoticeDialog} 
+        onNavigate={onNavigate}
       />
       
       {/* Counter Dialog */}

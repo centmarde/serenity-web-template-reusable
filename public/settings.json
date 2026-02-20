@@ -1,9 +1,10 @@
 {
   "themeColor": "#F2A6A6",
-  "callsign": "call sign",
-  "gf_name": "girlfriend name",
-  "bf_name": "boyfriend name",
-  "appName": "your app name",
+  "isDarkMode": false,
+  "callsign": "babi",
+  "gf_name": "martha",
+  "bf_name": "marde",
+  "appName": "our love space",
   "coupleOfficialDate": "2026-02-16",
   "startingGreetings": "baby girl",
   "traits": [

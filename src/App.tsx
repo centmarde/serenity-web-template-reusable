@@ -2,9 +2,12 @@
 import { useState, useEffect } from 'react';
 import LoadingView from './pages/LoadingView';
 import DefaultLayout from './layout/Default';
-import LandingView from './pages/LandingView';
+import LandingView from './pages/landing/LandingView';
+import AuthView from './pages/auth/AuthView';
+import BoyFriendDashboardView from './pages/boyfriendDashboard/BoyFriendDashboardView';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
+import { useInitializeAuth } from './stores/authData';
 import { getRouteByPath, isValidRoute } from './utils/routes';
 
 function App() {
@@ -17,13 +20,15 @@ function App() {
   
   const { loadSettings } = useSettingsStore();
   const { initializeTheme } = useThemeStore();
+  const initializeAuth = useInitializeAuth();
 
-  // Initialize settings and theme when app starts
+  // Initialize settings, theme, and auth when app starts  
   useEffect(() => {
     const initialize = async () => {
       try {
         await loadSettings();
         await initializeTheme();
+        await initializeAuth(); // Initialize authentication state (has built-in safeguard)
       } catch (error) {
         console.error('Failed to initialize app:', error);
         // Continue anyway with fallback values
@@ -31,7 +36,7 @@ function App() {
     };
     
     initialize();
-  }, [loadSettings, initializeTheme]);
+  }, [loadSettings, initializeTheme, initializeAuth]);
 
   // Handle browser back/forward navigation
   useEffect(() => {
@@ -61,6 +66,16 @@ function App() {
     // Render LandingView without layout for home route
     if (currentPath === '/') {
       return <LandingView onNavigate={handleNavigate} />;
+    }
+    
+    // Render AuthView without layout for auth route
+    if (currentPath === '/auth') {
+      return <AuthView onNavigate={handleNavigate} />;
+    }
+    
+    // Render BoyFriendDashboardView without layout for boyfriend dashboard route
+    if (currentPath === '/boyfriend-dashboard') {
+      return <BoyFriendDashboardView onNavigate={handleNavigate} />;
     }
     
     // All other routes use DefaultLayout
