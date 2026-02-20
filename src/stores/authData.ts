@@ -28,7 +28,7 @@ interface AuthStore extends AuthState, AuthActions {}
 // Create the authentication store using Zustand with persistence
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       user: null,
       isLoading: false,
@@ -39,8 +39,7 @@ export const useAuthStore = create<AuthStore>()(
       // Initialize authentication state
       initialize: async () => {
         // Prevent multiple initializations
-        const currentState = useAuthStore.getState();
-        if (currentState.isInitialized) {
+        if (get().isInitialized) {
           return;
         }
 
@@ -208,24 +207,27 @@ export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
 export const useIsAuthInitialized = () => useAuthStore((state) => state.isInitialized);
 
-// Individual action hooks for better performance
-export const useLogin = () => useAuthStore((state) => state.login);
-export const useLogout = () => useAuthStore((state) => state.logout);
-export const useSetUser = () => useAuthStore((state) => state.setUser);
-export const useSetLoading = () => useAuthStore((state) => state.setLoading);
-export const useSetError = () => useAuthStore((state) => state.setError);
-export const useClearError = () => useAuthStore((state) => state.clearError);
-export const useInitializeAuth = () => useAuthStore((state) => state.initialize);
+// Stable action getters - these get the function reference directly from store  
+export const useLogin = () => useAuthStore.getState().login;
+export const useLogout = () => useAuthStore.getState().logout;
+export const useSetUser = () => useAuthStore.getState().setUser;
+export const useSetLoading = () => useAuthStore.getState().setLoading;
+export const useSetError = () => useAuthStore.getState().setError;
+export const useClearError = () => useAuthStore.getState().clearError;
+export const useInitializeAuth = () => useAuthStore.getState().initialize;
 
-// Combined action hooks (creates new object on every render - use sparingly)
-export const useAuthActions = () => useAuthStore((state) => ({
-  login: state.login,
-  logout: state.logout,
-  setUser: state.setUser,
-  setLoading: state.setLoading,
-  setError: state.setError,
-  clearError: state.clearError,
-  initialize: state.initialize,
-}));
+// Combined action hooks - stable reference to avoid infinite loops
+export const useAuthActions = () => {
+  const actions = useAuthStore.getState();
+  return {
+    login: actions.login,
+    logout: actions.logout,
+    setUser: actions.setUser,
+    setLoading: actions.setLoading,
+    setError: actions.setError,
+    clearError: actions.clearError,
+    initialize: actions.initialize,
+  };
+};
 
 export default useAuthStore;
