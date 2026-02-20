@@ -75,4 +75,7 @@ export const adminDb = supabaseAdmin ? {
 // Utility function to check if admin operations are available
 export const isAdminAvailable = () => supabaseAdmin !== null
 
+// Storage constants for general use
+export const STORAGE_BASE_URL = 'https://rhuxiyqliygmogxcwltv.supabase.co/storage/v1/object/public/';
+
 export default supabase
