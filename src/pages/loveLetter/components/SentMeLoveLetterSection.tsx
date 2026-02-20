@@ -75,14 +75,20 @@ const SentMeLoveLetterSection: React.FC = () => {
             {/* Header with badge */}
             <div className="text-center lg:text-left space-y-4">
               <div className="flex items-center justify-center lg:justify-start gap-3 mb-2">
-                <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium text-primary">
+                <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium"
+                 style={{
+                  backgroundColor: data.isInitialized ? useThemeStore.getState().getCurrentThemeColor() : '#F2A6A6',
+                }}>
                   💌 Love Letters
                 </Badge>
               </div>
               
               <h3 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-800 leading-tight">
                 Share Your{' '}
-                <span className="text-primary">
+                <span className="text-primary"
+                 style={{
+                  color: data.isInitialized ? useThemeStore.getState().getCurrentThemeColor() : '#F2A6A6',
+                }}>
                   Heart
                 </span>
               </h3>
@@ -95,9 +101,16 @@ const SentMeLoveLetterSection: React.FC = () => {
               </p>
               
               <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-primary">
-                <Heart className="w-4 h-4 fill-current" />
+                <Heart className="w-4 h-4 fill-current" 
+                 style={{
+                  color: data.isInitialized ? useThemeStore.getState().getCurrentThemeColor() : '#F2A6A6',
+                }}
+                />
                 <span className="italic text-gray-500">"Every word becomes a treasure I'll keep forever"</span>
-                <Heart className="w-4 h-4 fill-current" />
+                <Heart className="w-4 h-4 fill-current"
+                 style={{
+                  color: data.isInitialized ? useThemeStore.getState().getCurrentThemeColor() : '#F2A6A6',
+                }} />
               </div>
             </div>
             
@@ -106,7 +119,10 @@ const SentMeLoveLetterSection: React.FC = () => {
               <Button
                 onClick={() => setIsSendLetterDialogOpen(true)}
                 size="lg"
-                className="group px-8 py-4 text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="group px-8 py-4 text-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 text-white"
+                style={{
+                  backgroundColor: data.isInitialized ? useThemeStore.getState().getCurrentThemeColor() : '#F2A6A6',
+                }}
               >
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
