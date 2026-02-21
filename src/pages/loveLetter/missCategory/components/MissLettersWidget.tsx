@@ -3,7 +3,7 @@ import { useSettingsStore } from "../../../../stores/settings";
 import { useThemeStore } from "../../../../stores/theme";
 import useMessagesStore from "../../../../stores/messagesData";
 import type { LoveLetter } from "../../../../stores/messagesData";
-import type { Question } from "../composables/aiSadForms";
+import type { Question } from "../composables/aiMissForms";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,11 @@ interface ComponentData {
   gfName: string;
 }
 
-interface SadLettersWidgetProps {
+interface MissLettersWidgetProps {
   aiEnhancedData?: {
     questions: Question[],
     baseLetter: LoveLetter | null,
-    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive',
+    tone: 'romantic' | 'affectionate' | 'playful' | 'reassuring',
     enhancedMessage?: {
       title: string,
       content: string,
@@ -30,7 +30,7 @@ interface SadLettersWidgetProps {
   isGeneratingResponse?: boolean;
 }
 
-const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({ 
+const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({ 
   aiEnhancedData, 
   isGeneratingResponse = false 
 }) => {
@@ -77,7 +77,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
         // Fetch letters from database
         await fetchLetters();
       } catch (error) {
-        console.error("Failed to initialize Sad Letters Widget:", error);
+        console.error("Failed to initialize Miss Letters Widget:", error);
       }
     };
     initialize();
@@ -92,11 +92,11 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
     fetchLetters,
   ]);
 
-  // Use useMemo to efficiently filter letters by "sad" category
-  const sadLetters = useMemo(() => {
-    const filtered = getLettersByCategory("sad");
+  // Use useMemo to efficiently filter letters by "miss" category
+  const missLetters = useMemo(() => {
+    const filtered = getLettersByCategory("miss");
     console.log("All letters:", letters);
-    console.log("Filtered sad letters:", filtered);
+    console.log("Filtered miss letters:", filtered);
     console.log("Letter categories:", letters.map(l => ({ id: l.id, category: l.category, title: l.title })));
     return filtered;
   }, [getLettersByCategory, letters]);
@@ -117,15 +117,15 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
 
   const handleCreateTestLetter = async () => {
     const testLetter = {
-      title: "A Gentle Reminder",
-      message: "Hey beautiful, I know today might feel heavy, but I want you to know that you're incredibly strong. Every storm passes, and you've weathered so many before. I believe in you, and I'm here for you always. You're loved more than you know. 💙",
-      category: "sad",
+      title: "Missing You So Much",
+      message: "Every moment apart makes me appreciate you more. I can't wait to hold you in my arms again and tell you how much you mean to me. Distance means nothing when someone means everything. 💕",
+      category: "miss",
       is_girlfriend: false
     };
 
     try {
       await createLetter(testLetter);
-      console.log("Test sad letter created successfully");
+      console.log("Test miss letter created successfully");
     } catch (error) {
       console.error("Failed to create test letter:", error);
     }
@@ -176,7 +176,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
     );
   }
 
-  if (sadLetters.length === 0) {
+  if (missLetters.length === 0) {
     return (
       <Card className="w-full max-w-4xl mx-auto">
         <CardContent className="p-8">
@@ -187,16 +187,16 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
               fill="currentColor"
             />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              No Sad Letters Found
+              No Miss Letters Found
             </h3>
             <p className="text-gray-500 mb-4">
-              No letters with category "sad" were found in the database.
+              No letters with category "miss" were found in the database.
             </p>
             <div className="text-xs text-gray-400 text-left bg-gray-50 p-3 rounded mb-4">
               <strong>Debug Info:</strong><br/>
               Total letters in database: {letters.length}<br/>
               Categories found: {letters.map(l => l.category).filter(Boolean).join(", ") || "None"}<br/>
-              Looking for category: "sad"
+              Looking for category: "miss"
             </div>
             <Button
               onClick={handleCreateTestLetter}
@@ -204,7 +204,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
               className="text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Creating..." : "Create Test Sad Letter"}
+              {isLoading ? "Creating..." : "Create Test Miss Letter"}
             </Button>
           </div>
         </CardContent>
@@ -233,7 +233,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
                 🤖 Creating Your Personalized Message...
               </h3>
               <p className="text-gray-600 text-sm mb-2">
-                Analyzing your responses and generating a tailored comfort message just for you
+                Analyzing your responses and generating a tailored missing you message just for you
               </p>
               <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
                 <span className="animate-pulse">●</span>
@@ -263,7 +263,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
                     className="text-xl font-bold mb-2"
                     style={{ color: data.themeColor }}
                   >
-                    {aiEnhancedData.baseLetter?.title || "Untitled Letter"}
+                   {aiEnhancedData.baseLetter?.title || "Untitled Letter"}
                   </h2>
                 </div>
 
@@ -315,7 +315,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
         </div>
       )}
 
-    
+      
 
       {/* Letter Detail Modal */}
       {selectedLetter && (
@@ -377,4 +377,4 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
   );
 };
 
-export default SadLettersWidget;
+export default MissLettersWidget;

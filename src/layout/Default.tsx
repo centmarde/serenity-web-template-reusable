@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getRouteByPath } from "../utils/routes";
 import LoveLetterView from "../pages/loveLetter/LoveLetterView";
 import SadCategoryView from "../pages/loveLetter/sadCategory/SadCategoryView";
+import MissCategoryView from "../pages/loveLetter/missCategory/MissCategoryView";
 import { useThemeStore } from "../stores/theme";
 
 // Coming soon component
@@ -58,6 +59,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ currentPath, onNavigate }
         return <LoveLetterView onNavigate={onNavigate} />;
       case 'SadCategoryView':
         return <SadCategoryView />;
+      case 'MissCategoryView':
+        return <MissCategoryView onNavigate={onNavigate} />;
       case 'ComingSoon':
         return <ComingSoonView routeName={route.name} />;
       default:

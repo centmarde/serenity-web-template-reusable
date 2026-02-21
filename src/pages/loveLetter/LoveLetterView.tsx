@@ -276,6 +276,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
                   backgroundColor: data.themeColor,
                   fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
                 }}
+                onClick={() => onNavigate && onNavigate('/girlfriend-miss')}
               >
                 Open Letter
               </CardItem>

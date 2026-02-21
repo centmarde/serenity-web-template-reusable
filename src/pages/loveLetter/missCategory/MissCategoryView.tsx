@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../../../stores/settings";
 import { useThemeStore } from "../../../stores/theme";
 import type { LoveLetter } from "../../../stores/messagesData";
-import SadLettersWidget from "./components/SadLettersWidget";
-import SadFormsWidget from "../dialogs/SadFormsDialog";
-import { useAISadForms, type Question } from "./composables/aiSadForms";
+import MissLettersWidget from "./components/MissLettersWidget";
+import MissFormsWidget from "../dialogs/MissFormsDialog";
+import { useAIMissForms, type Question } from "./composables/aiMissForms";
 
 interface ComponentData {
   themeColor: string;
@@ -14,7 +14,7 @@ interface ComponentData {
   bfName: string;
 }
 
-const SadCategoryView: React.FC = () => {
+const MissCategoryView: React.FC = () => {
   const {
     getCallsign,
     getAppName,
@@ -27,7 +27,7 @@ const SadCategoryView: React.FC = () => {
     useThemeStore();
 
   // Removed createLetter - AI messages are shown in UI only, not saved to database
-  const { enhanceMessageWithAI } = useAISadForms();
+  const { enhanceMessageWithAI } = useAIMissForms();
   
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +37,7 @@ const SadCategoryView: React.FC = () => {
   const [aiResponseData, setAiResponseData] = useState<{
     questions: Question[],
     baseLetter: LoveLetter | null,
-    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive',
+    tone: 'romantic' | 'affectionate' | 'playful' | 'reassuring',
     enhancedMessage?: {
       title: string,
       content: string,
@@ -63,7 +63,7 @@ const SadCategoryView: React.FC = () => {
         setData(loadedData);
         setIsLoading(false);
       } catch (error) {
-        console.error("Failed to initialize Sad Category View:", error);
+        console.error("Failed to initialize Miss Category View:", error);
         setIsLoading(false);
       }
     };
@@ -82,14 +82,14 @@ const SadCategoryView: React.FC = () => {
   const generateAIResponse = async (responseData: {
     questions: Question[],
     baseLetter: LoveLetter | null,
-    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive'
+    tone: 'romantic' | 'affectionate' | 'playful' | 'reassuring'
   }) => {
     if (!data || !responseData) return;
 
     try {
       console.log('Generating AI response with data:', responseData);
       
-      // Use the AI enhancement function from aiSadForms.ts
+      // Use the AI enhancement function from aiMissForms.ts
       const result = await enhanceMessageWithAI(
         responseData.questions,
         responseData.baseLetter,
@@ -109,8 +109,8 @@ const SadCategoryView: React.FC = () => {
         setAiResponseData({
           ...responseData,
           enhancedMessage: {
-            title: "You Are Loved",
-            content: "Even when words are hard to find, know that you are cherished and supported. 💙",
+            title: "Missing You So Much",
+            content: "Distance means nothing when someone means everything. You're always in my heart. 💕",
             tone: responseData.tone
           }
         });
@@ -121,8 +121,8 @@ const SadCategoryView: React.FC = () => {
       setAiResponseData({
         ...responseData,
         enhancedMessage: {
-          title: "A Message of Care",
-          content: "You are stronger than you realize, and you are not alone. 💙",
+          title: "Always Thinking of You",
+          content: "Every moment apart makes me appreciate you more. Can't wait to be together again. 💕",
           tone: responseData.tone
         }
       });
@@ -132,9 +132,9 @@ const SadCategoryView: React.FC = () => {
   const handleFormsComplete = async (responseData: {
     questions: Question[],
     baseLetter: LoveLetter | null,
-    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive'
+    tone: 'romantic' | 'affectionate' | 'playful' | 'reassuring'
   }) => {
-    console.log('Forms completed with data:', responseData);
+    console.log('Miss forms completed with data:', responseData);
     
     setAiResponseData(responseData);
     setIsGeneratingAIResponse(true);
@@ -172,7 +172,7 @@ const SadCategoryView: React.FC = () => {
   return (
     <>
       {/* AI Forms Dialog - Shows first */}
-      <SadFormsWidget
+      <MissFormsWidget
         isOpen={showFormsDialog}
         onComplete={handleFormsComplete}
         onClose={handleFormsClose}
@@ -200,7 +200,7 @@ const SadCategoryView: React.FC = () => {
                   🤖 Analyzing your responses...
                 </p>
                 <p className="text-sm text-gray-500">
-                  Creating a personalized message with {aiResponseData?.tone || 'loving'} tone
+                  Creating a personalized message with {aiResponseData?.tone || 'affectionate'} tone
                 </p>
               </div>
             )}
@@ -208,7 +208,7 @@ const SadCategoryView: React.FC = () => {
             {/* Show letters widget only after completing forms or if forms dialog is closed */}
             {(!showFormsDialog || hasCompletedForms) && !isGeneratingAIResponse && (
               <div className="w-full">
-                <SadLettersWidget 
+                <MissLettersWidget 
                   aiEnhancedData={aiResponseData}
                   isGeneratingResponse={isGeneratingAIResponse}
                 />
@@ -237,4 +237,4 @@ const SadCategoryView: React.FC = () => {
   );
 };
 
-export default SadCategoryView;
+export default MissCategoryView;
