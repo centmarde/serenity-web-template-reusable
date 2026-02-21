@@ -49,6 +49,14 @@ export const routes: Route[] = [
     showInNav: false,
   },
   {
+    path: '/girlfriend-miss',
+    name: 'When You Miss Me',
+    component: 'MissCategoryView',
+    icon: 'HeartHandshake',
+    isPublic: true,
+    showInNav: false,
+  },
+  {
     path: '/memories',
     name: 'Our Memories',
     component: 'ComingSoon',
