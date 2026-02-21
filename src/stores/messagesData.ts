@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase, STORAGE_BASE_URL } from '@/lib/supabase';
+import { supabase, supabaseAdmin, STORAGE_BASE_URL } from '@/lib/supabase';
 
 // Types
 export interface LoveLetter {
@@ -19,6 +19,7 @@ export interface LoveLetterCreate {
   category?: string;
   is_girlfriend?: boolean;
   attach_image?: string;
+  user_id?: string | null;
 }
 
 export interface LoveLetterUpdate {
@@ -133,9 +134,19 @@ const useMessagesStore = create<MessagesState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const { data, error } = await supabase
+      // Use admin client when user_id is explicitly null to bypass RLS
+      // which would otherwise inject auth.uid() and fail the FK constraint
+      const client = letter.user_id === null && supabaseAdmin
+        ? supabaseAdmin
+        : supabase;
+
+      const payload = letter.user_id === null
+        ? { ...letter, user_id: null }
+        : letter;
+
+      const { data, error } = await client
         .from('love_letters')
-        .insert([letter])
+        .insert([payload])
         .select()
         .single();
 

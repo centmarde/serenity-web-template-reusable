@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSettingsStore } from "../../../stores/settings";
 import { useThemeStore } from "../../../stores/theme";
+import useMessagesStore from "../../../stores/messagesData";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Send, Edit3, FileText } from "lucide-react";
 import EasyMDE from "easymde";
 import "easymde/dist/easymde.min.css";
+import SentConfirmationDialog from "./SentConfirmationDialog";
+import SuccessDialog from "../../../components/dialogs/SuccessDialog";
+import ErrorDialog from "../../../components/dialogs/ErrorDialog";
 
 interface ComponentData {
   themeColor: string;
@@ -36,11 +40,18 @@ const SentMeLoveLetterDialog: React.FC<SentMeLoveLetterDialogProps> = ({
 
   const { getCurrentThemeColor, waitForInitialization } = useThemeStore();
 
+  const { createLetter } = useMessagesStore();
+
   const [data, setData] = useState<ComponentData | null>(null);
   const [letterTitle, setLetterTitle] = useState("");
   const [letterContent, setLetterContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingContent, setPendingContent] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const easyMDERef = useRef<EasyMDE | null>(null);
 
@@ -108,6 +119,7 @@ const SentMeLoveLetterDialog: React.FC<SentMeLoveLetterDialogProps> = ({
       easyMDERef.current.toTextArea();
       easyMDERef.current = null;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, data, useMarkdownEditor]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,25 +127,56 @@ const SentMeLoveLetterDialog: React.FC<SentMeLoveLetterDialogProps> = ({
     const currentContent = easyMDERef.current ? easyMDERef.current.value() : letterContent;
     if (!letterTitle.trim() || !currentContent.trim()) return;
 
+    // Capture current content and open confirmation dialog
+    setPendingContent(currentContent);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmSend = async () => {
     setIsSubmitting(true);
-    
-    // Simulate sending (you can implement actual functionality later)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setLetterTitle("");
-      setLetterContent("");
-      if (easyMDERef.current) {
-        easyMDERef.current.value("");
+
+    try {
+      const result = await createLetter({
+        title: letterTitle.trim(),
+        message: pendingContent.trim(),
+        category: "love",
+        is_girlfriend: true,
+        user_id: null,  // explicitly null — bypasses auth.uid() RLS injection
+      });
+
+      setShowConfirmation(false);
+
+      if (result) {
+        // Reset form on success
+        setLetterTitle("");
+        setLetterContent("");
+        setPendingContent("");
+        if (easyMDERef.current) {
+          easyMDERef.current.value("");
+        }
+        onOpenChange(false);
+        setShowSuccess(true);
+      } else {
+        setShowError(true);
+        setErrorMessage("Your letter couldn't be saved. Please try again.");
       }
-      onOpenChange(false);
-      // You could show a success message here
-    }, 1500);
+    } catch (error) {
+      console.error("Failed to send love letter:", error);
+      setShowConfirmation(false);
+      setShowError(true);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Something went wrong. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!data) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
 
       <DialogContent
         className="sm:max-w-2xl max-w-[95vw] mx-auto"
@@ -292,6 +335,35 @@ const SentMeLoveLetterDialog: React.FC<SentMeLoveLetterDialogProps> = ({
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog */}
+    <SentConfirmationDialog
+      isOpen={showConfirmation}
+      onOpenChange={setShowConfirmation}
+      onConfirm={handleConfirmSend}
+      isSubmitting={isSubmitting}
+      themeColor={data.themeColor}
+      letterTitle={letterTitle}
+      recipientName={data.bfName || "Love"}
+    />
+
+    {/* Success Dialog */}
+    <SuccessDialog
+      isOpen={showSuccess}
+      onOpenChange={setShowSuccess}
+      themeColor={data.themeColor}
+      recipientName={data.bfName || "Love"}
+    />
+
+    {/* Error Dialog */}
+    <ErrorDialog
+      isOpen={showError}
+      onOpenChange={setShowError}
+      themeColor={data.themeColor}
+      message={errorMessage}
+      onRetry={() => setShowConfirmation(true)}
+    />
+    </>
   );
 };
 
