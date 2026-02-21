@@ -17,9 +17,10 @@ import { AlertTriangle, Heart, Code } from 'lucide-react';
 interface NoticeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onNavigate?: (path: string) => void;
 }
 
-const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
+const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange, onNavigate }) => {
   const isMobile = useIsMobile();
   const {
     getCallsign,
@@ -111,6 +112,13 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
 
   const handleContinue = () => {
     onOpenChange(false);
+  };
+
+  const handleBoyfriendAccess = () => {
+    onOpenChange(false);
+    if (onNavigate) {
+      onNavigate('/auth');
+    }
   };
 
   if (!displayData) {
@@ -213,6 +221,25 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                 >
                   <Code className="w-3 h-3" />
                   {dialogMessages.betaBadge}
+                </Badge>
+                <Badge 
+                  variant="outline"
+                  className="flex items-center gap-1 cursor-pointer hover:bg-opacity-10 transition-colors"
+                  style={{ 
+                    borderColor: themeColor,
+                    color: themeColor,
+                    backgroundColor: 'transparent'
+                  }}
+                  onClick={handleBoyfriendAccess}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${themeColor}10`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  Boyfriend Access
                 </Badge>
                 <Badge 
                   variant="outline"
@@ -331,6 +358,25 @@ const NoticeDialog: React.FC<NoticeDialogProps> = ({ open, onOpenChange }) => {
                 >
                   <Code className="w-3 h-3" />
                   {dialogMessages.betaBadge}
+                </Badge>
+                <Badge 
+                  variant="outline"
+                  className="flex items-center gap-1 cursor-pointer hover:bg-opacity-10 transition-colors"
+                  style={{ 
+                    borderColor: themeColor,
+                    color: themeColor,
+                    backgroundColor: 'transparent'
+                  }}
+                  onClick={handleBoyfriendAccess}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${themeColor}10`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  Boyfriend Access
                 </Badge>
                 <Badge 
                   variant="outline"

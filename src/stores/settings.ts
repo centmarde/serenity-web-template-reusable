@@ -14,6 +14,7 @@ export interface DialogMessages {
 
 export interface Settings {
   themeColor: string;
+  isDarkMode: boolean;
   callsign: string;
   gf_name: string;
   bf_name: string;
@@ -33,6 +34,7 @@ interface SettingsStore {
   // Actions
   loadSettings: () => Promise<void>;
   getThemeColor: () => string;
+  getIsDarkMode: () => boolean;
   getCallsign: () => string;
   getGfName: () => string;
   getBfName: () => string;
@@ -43,6 +45,7 @@ interface SettingsStore {
   getRandomTrait: () => string;
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
+  waitForIsDarkMode: () => Promise<boolean>;
   waitForCallsign: () => Promise<string>;
   waitForGfName: () => Promise<string>;
   waitForBfName: () => Promise<string>;
@@ -153,6 +156,15 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.themeColor;
   },
 
+  getIsDarkMode: () => {
+    const { settings } = get();
+    if (!settings || settings.isDarkMode === undefined) {
+      // Default to false (light mode) if not specified
+      return false;
+    }
+    return settings.isDarkMode;
+  },
+
   getCallsign: () => {
     const { settings } = get();
     if (!settings || settings.callsign === undefined) {
@@ -239,6 +251,11 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForThemeColor: async () => {
     await get().loadSettings();
     return get().getThemeColor();
+  },
+
+  waitForIsDarkMode: async () => {
+    await get().loadSettings();
+    return get().getIsDarkMode();
   },
 
   waitForCallsign: async () => {
