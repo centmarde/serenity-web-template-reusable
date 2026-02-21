@@ -5,6 +5,8 @@ import type { LoveLetter } from "../../../stores/messagesData";
 import MissLettersWidget from "./components/MissLettersWidget";
 import MissFormsWidget from "../dialogs/MissFormsDialog";
 import { useAIMissForms, type Question } from "./composables/aiMissForms";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 interface ComponentData {
   themeColor: string;
@@ -44,6 +46,11 @@ const MissCategoryView: React.FC = () => {
       tone: string
     }
   } | null>(null);
+
+  const handleGoBack = () => {
+    // Use browser's back button functionality
+    window.history.back();
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -187,6 +194,18 @@ const MissCategoryView: React.FC = () => {
       >
         {/* Main Content with Full Width */}
         <div className="w-full px-2 py-4 sm:px-4 lg:px-8">
+          {/* Back Button */}
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={handleGoBack}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span>Back</span>
+            </Button>
+          </div>
+
           {/* Content Area - Letters Widget */}
           <div className="w-full">
             {/* Show loading indicator when generating AI response */}
