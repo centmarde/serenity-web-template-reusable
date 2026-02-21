@@ -118,71 +118,102 @@ export interface AnniversaryCountdown {
  * Get anniversary countdown details
  */
 export const calculateAnniversaryCountdown = (startDate: string): AnniversaryCountdown => {
-  const start = new Date(startDate);
-  const current = new Date();
-  
-  // Calculate how many complete years have passed
-  let yearsCompleted = current.getFullYear() - start.getFullYear();
-  
-  // Check if we've passed this year's anniversary date
-  const thisYearAnniversary = new Date(
-    current.getFullYear(),
-    start.getMonth(),
-    start.getDate()
-  );
-  
-  // If we haven't reached this year's anniversary yet, subtract 1 from years completed
-  if (current < thisYearAnniversary) {
-    yearsCompleted--;
-  }
-  
-  // Next anniversary number is years completed + 1
-  const nextAnniversaryNumber = yearsCompleted + 1;
-  
-  // Calculate the next anniversary date
-  let nextAnniversary: Date;
-  
-  if (current < thisYearAnniversary) {
-    // This year's anniversary hasn't happened yet
-    nextAnniversary = thisYearAnniversary;
-  } else if (current.getTime() === thisYearAnniversary.getTime()) {
-    // Today is the anniversary!
-    nextAnniversary = thisYearAnniversary;
-  } else {
-    // This year's anniversary has passed, use next year's
-    nextAnniversary = new Date(
-      current.getFullYear() + 1,
-      start.getMonth(),
-      start.getDate()
-    );
-  }
-  
-  // Calculate days until anniversary
-  const diffTime = nextAnniversary.getTime() - current.getTime();
-  const daysUntilAnniversary = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Check if today is the anniversary
-  const isToday = daysUntilAnniversary === 0;
-  
-  // Get ordinal suffix (1st, 2nd, 3rd, etc.)
-  const getOrdinalSuffix = (n: number): string => {
-    if (n >= 11 && n <= 13) return 'th';
-    switch (n % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+  try {
+    const start = new Date(startDate);
+    const current = new Date();
+    
+    // Validate dates
+    if (isNaN(start.getTime())) {
+      console.error('Invalid start date:', startDate);
+      return {
+        nextAnniversaryNumber: 1,
+        daysUntilAnniversary: 0,
+        isToday: false,
+        ordinalSuffix: 'st'
+      };
     }
-  };
-  
-  const ordinalSuffix = getOrdinalSuffix(nextAnniversaryNumber);
-  
-  return {
-    nextAnniversaryNumber,
-    daysUntilAnniversary,
-    isToday,
-    ordinalSuffix
-  };
+    
+    // Debug logging
+    console.log('Anniversary calculation debug:', {
+      startDate,
+      startDateParsed: start.toISOString(),
+      currentDate: current.toISOString(),
+      startYear: start.getFullYear(),
+      currentYear: current.getFullYear()
+    });
+    
+    // Calculate how many complete years have passed
+    let yearsCompleted = current.getFullYear() - start.getFullYear();
+    
+    // Set time to start of day for accurate comparison
+    const currentDateOnly = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+    const thisYearAnnivDateOnly = new Date(current.getFullYear(), start.getMonth(), start.getDate());
+    
+    // If we haven't reached this year's anniversary yet, subtract 1 from years completed
+    if (currentDateOnly < thisYearAnnivDateOnly) {
+      yearsCompleted--;
+    }
+    
+    // Next anniversary number is years completed + 1
+    const nextAnniversaryNumber = yearsCompleted + 1;
+    
+    // Calculate the next anniversary date
+    let nextAnniversary: Date;
+    
+    if (currentDateOnly < thisYearAnnivDateOnly) {
+      // This year's anniversary hasn't happened yet
+      nextAnniversary = thisYearAnnivDateOnly;
+    } else if (currentDateOnly.getTime() === thisYearAnnivDateOnly.getTime()) {
+      // Today is the anniversary!
+      nextAnniversary = thisYearAnnivDateOnly;
+    } else {
+      // This year's anniversary has passed, use next year's
+      nextAnniversary = new Date(
+        current.getFullYear() + 1,
+        start.getMonth(),
+        start.getDate()
+      );
+    }
+    
+    // Calculate days until anniversary
+    const diffTime = nextAnniversary.getTime() - currentDateOnly.getTime();
+    const daysUntilAnniversary = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Check if today is the anniversary
+    const isToday = daysUntilAnniversary === 0;
+    
+    // Get ordinal suffix (1st, 2nd, 3rd, etc.)
+    const getOrdinalSuffix = (n: number): string => {
+      if (n >= 11 && n <= 13) return 'th';
+      switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+    
+    const ordinalSuffix = getOrdinalSuffix(nextAnniversaryNumber);
+    
+    const result = {
+      nextAnniversaryNumber,
+      daysUntilAnniversary,
+      isToday,
+      ordinalSuffix
+    };
+    
+    console.log('Anniversary calculation result:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error calculating anniversary countdown:', error);
+    return {
+      nextAnniversaryNumber: 1,
+      daysUntilAnniversary: 0,
+      isToday: false,
+      ordinalSuffix: 'st'
+    };
+  }
 };
 
 /**

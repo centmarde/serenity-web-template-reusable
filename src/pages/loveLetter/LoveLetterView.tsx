@@ -3,6 +3,7 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import Waves from "@/components/Waves";
+import AnnivGuardDialog from "./annivCategory/dialogs/AnnivGuardDialog";
 
 import { 
   Heart, 
@@ -21,6 +22,7 @@ interface ComponentData {
   gfName: string;
   appName: string;
   startingGreetings: string;
+  coupleOfficialDate: string;
 }
 
 interface LoveLetterViewProps {
@@ -34,6 +36,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
     getGfName,
     getAppName,
     getStartingGreetings,
+    getCoupleOfficialDate,
     loadSettings,
   } = useSettingsStore();
 
@@ -42,6 +45,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAnnivGuard, setShowAnnivGuard] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -57,6 +61,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
           gfName: getGfName(),
           appName: getAppName(),
           startingGreetings: getStartingGreetings(),
+          coupleOfficialDate: getCoupleOfficialDate(),
         };
 
         setData(loadedData);
@@ -77,6 +82,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
     getGfName,
     getAppName,
     getStartingGreetings,
+    getCoupleOfficialDate,
   ]);
 
   if (isLoading || !data) {
@@ -348,6 +354,7 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
                   backgroundColor: data.themeColor,
                   fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
                 }}
+                onClick={() => setShowAnnivGuard(true)}
               >
                 Open Letter
               </CardItem>
@@ -362,6 +369,17 @@ const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
           <SentMeLoveLetterSection />
         </div>
       </div>
+
+      {/* Anniversary Guard Dialog */}
+      {data && (
+        <AnnivGuardDialog
+          open={showAnnivGuard}
+          onOpenChange={setShowAnnivGuard}
+          coupleOfficialDate={data.coupleOfficialDate}
+          themeColor={data.themeColor}
+          onNavigateToAnniversary={() => onNavigate && onNavigate('/girlfriend-anniversary')}
+        />
+      )}
 
       {/* Full-width SVG Wave at bottom */}
       <Waves 
