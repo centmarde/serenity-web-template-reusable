@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
+    "@fontsource/dancing-script": "^5.2.8",
+    "@fontsource/great-vibes": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.97.0",
     "@tailwindcss/vite": "^4.1.18",

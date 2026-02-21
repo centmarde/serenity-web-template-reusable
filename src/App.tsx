@@ -9,6 +9,7 @@ import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
 import { useInitializeAuth } from './stores/authData';
 import { getRouteByPath, isValidRoute } from './utils/routes';
+import './styles/romantic-fonts.css';
 
 function App() {
   const [currentView, setCurrentView] = useState<'loading' | 'main'>('loading');

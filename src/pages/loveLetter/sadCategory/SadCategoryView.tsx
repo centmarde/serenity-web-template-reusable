@@ -203,40 +203,13 @@ const SadCategoryView: React.FC = () => {
           background: `linear-gradient(135deg, ${data.themeColor}15, ${data.themeColor}30, #ffffff)`,
         }}
       >
-        {/* Main Content with Padding */}
-        <div className="p-4">
-          {/* Header Section */}
-          <div className="text-center mb-8">
-            <h1
-              className="text-gray-800 font-bold mb-4"
-              style={{
-                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
-                color: "#333333",
-              }}
-            >
-              When You're Sad
-            </h1>
-            <p
-              className="text-lg text-gray-600 max-w-2xl mx-auto"
-              style={{
-                fontSize: "clamp(1rem, 3vw, 1.25rem)",
-                color: "#666666",
-              }}
-            >
-              {isGeneratingAIResponse 
-                ? "✨ Creating your personalized response based on your needs..."
-                : hasCompletedForms 
-                ? "Based on your responses, here are some personalized comfort letters for you 💙"
-                : "A gentle space for when you need comfort and love 💙"
-              }
-            </p>
-          </div>
-
+        {/* Main Content with Full Width */}
+        <div className="w-full px-2 py-4 sm:px-4 lg:px-8">
           {/* Content Area - Letters Widget */}
-          <div className="max-w-6xl mx-auto">
+          <div className="w-full">
             {/* Show loading indicator when generating AI response */}
             {isGeneratingAIResponse && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 px-4 max-w-4xl mx-auto">
                 <div
                   className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
                   style={{ borderColor: data.themeColor }}
@@ -252,15 +225,17 @@ const SadCategoryView: React.FC = () => {
             
             {/* Show letters widget only after completing forms or if forms dialog is closed */}
             {(!showFormsDialog || hasCompletedForms) && !isGeneratingAIResponse && (
-              <SadLettersWidget 
-                aiEnhancedData={aiResponseData}
-                isGeneratingResponse={isGeneratingAIResponse}
-              />
+              <div className="w-full">
+                <SadLettersWidget 
+                  aiEnhancedData={aiResponseData}
+                  isGeneratingResponse={isGeneratingAIResponse}
+                />
+              </div>
             )}
             
             {/* Show a message if forms dialog was closed without completion */}
             {!showFormsDialog && !hasCompletedForms && !isGeneratingAIResponse && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 px-4 max-w-4xl mx-auto">
                 <p className="text-gray-600 mb-4">
                   You can restart the AI questionnaire anytime to get personalized recommendations.
                 </p>

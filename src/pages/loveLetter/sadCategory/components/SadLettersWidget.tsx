@@ -5,9 +5,9 @@ import useMessagesStore from "../../../../stores/messagesData";
 import type { LoveLetter } from "../../../../stores/messagesData";
 import type { Question } from "../composables/aiSadForms";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
-import { Heart, Calendar, User, Image as  Sparkles, Wand2 } from "lucide-react";
+import { Heart, Calendar, User, Image as Wand2 } from "lucide-react";
 
 interface ComponentData {
   themeColor: string;
@@ -144,7 +144,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
 
   if (error) {
     return (
-      <Card className="max-w-2xl mx-auto">
+      <Card className="w-full max-w-4xl mx-auto">
         <CardContent className="p-6">
           <div className="text-center">
             <p className="text-red-600 mb-4">Error loading letters: {error}</p>
@@ -178,7 +178,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
 
   if (sadLetters.length === 0) {
     return (
-      <Card className="max-w-2xl mx-auto">
+      <Card className="w-full max-w-4xl mx-auto">
         <CardContent className="p-8">
           <div className="text-center">
             <Heart 
@@ -213,10 +213,10 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full max-w-none mx-auto px-2 sm:px-4 lg:px-8">
       {/* AI Generation Loading State */}
       {isGeneratingResponse && (
-        <Card className="mb-6" style={{ borderColor: `${data.themeColor}40` }}>
+        <Card className="mb-6 max-w-4xl mx-auto" style={{ borderColor: `${data.themeColor}40` }}>
           <CardContent className="p-6">
             <div className="text-center">
               <div 
@@ -247,92 +247,62 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
 
       {/* AI Enhanced Message Section */}
       {aiEnhancedData && !isGeneratingResponse && (
-        <Card className="mb-6" style={{ borderColor: `${data.themeColor}40` }}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div 
-                className="rounded-full p-2"
-                style={{ backgroundColor: `${data.themeColor}20` }}
-              >
-                <Wand2 
-                  size={20} 
-                  style={{ color: data.themeColor }}
-                />
-              </div>
-              <div>
-                <CardTitle 
-                  className="text-lg flex items-center gap-2"
-                  style={{ color: data.themeColor }}
-                >
-                  <Sparkles size={18} />
-                  Your Personalized Message
-                  <Sparkles size={18} />
-                </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  Enhanced with {aiEnhancedData.tone} tone • Based on your responses
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* Show user responses summary */}
-            <div className="flex gap-2 mb-4 flex-wrap">
-              {aiEnhancedData.questions.map((q, index) => (
-                <Badge 
-                  key={q.id}
-                  variant="outline"
-                  className="text-xs"
-                  style={{ 
-                    borderColor: q.answer ? data.themeColor : '#d1d5db',
-                    color: q.answer ? data.themeColor : '#6b7280',
-                    backgroundColor: q.answer ? `${data.themeColor}10` : 'transparent'
-                  }}
-                >
-                  Q{index + 1}: {q.answer ? 'Yes' : 'No'}
-                </Badge>
-              ))}
-              <Badge 
-                variant="secondary"
-                className="text-xs ml-2"
-                style={{ 
-                  backgroundColor: `${data.themeColor}20`,
-                  color: data.themeColor 
-                }}
-              >
-                {aiEnhancedData.tone} tone
-              </Badge>
-            </div>
-            
-            {/* Enhanced message display */}
-            <div 
-              className="p-4 rounded-lg"
-              style={{ 
-                backgroundColor: `${data.themeColor}08`, 
-                borderLeft: `4px solid ${data.themeColor}` 
-              }}
-            >
-              {aiEnhancedData.enhancedMessage ? (
-                <div>
-                  <h4 
-                    className="font-semibold mb-3 text-center"
-                    style={{ color: data.themeColor }}
-                  >
-                    {aiEnhancedData.enhancedMessage.title}
-                  </h4>
-                  <p className="text-gray-700 leading-relaxed text-center">
-                    {aiEnhancedData.enhancedMessage.content}
-                  </p>
+        <div className="w-full mb-6">
+          {/* Enhanced message display - Love Letter Format */}
+          <div 
+            className="love-letter-container"
+            style={{ 
+              borderColor: `${data.themeColor}40`,
+            }}
+          >
+            {aiEnhancedData.enhancedMessage ? (
+              <div className="romantic-letter">
+                {/* Love Letter Greeting */}
+                <div className="romantic-greeting" style={{ color: data.themeColor }}>
+                  My Dearest {data.gfName || "Love"},
                 </div>
-              ) : (
-                <p className="text-gray-700 leading-relaxed text-center italic">
+                
+                {/* Enhanced Message Content */}
+                <div className="romantic-content text-gray-800">
+                  {aiEnhancedData.enhancedMessage.content}
+                </div>
+                
+                {/* Bottom Section */}
+                <div className="flex flex-col">
+                  {/* Decorative Hearts */}
+                  <div className="flex justify-center items-center gap-2 mb-4 opacity-60">
+                    <Heart size={12} fill={data.themeColor} style={{ color: data.themeColor }} />
+                    <Heart size={16} fill={data.themeColor} style={{ color: data.themeColor }} />
+                    <Heart size={12} fill={data.themeColor} style={{ color: data.themeColor }} />
+                  </div>
+                  
+                  {/* Love Letter Closing */}
+                  <div className="romantic-signature" style={{ color: data.themeColor }}>
+                    <div className="mb-2">With all my love,</div>
+                    <div className="font-semibold">
+                      Your Babi {data.bfName || "❤️"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="romantic-letter">
+                <div className="romantic-greeting" style={{ color: data.themeColor }}>
+                  My Dearest {data.gfName || "Love"},
+                </div>
+                <p className="romantic-content text-gray-700 italic text-center">
                   "✨ Your personalized message has been added to the collection below! ✨"
                 </p>
-              )}
-            </div>
-            
-           
-          </CardContent>
-        </Card>
+                <div className="romantic-signature" style={{ color: data.themeColor }}>
+                  <div className="mb-2">With all my love,</div>
+                  <div className="font-semibold">
+                    Your Babi {data.bfName || "❤️"}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
     
@@ -340,7 +310,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
       {/* Letter Detail Modal */}
       {selectedLetter && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle 

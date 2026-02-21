@@ -1,0 +1,86 @@
+@import '@fontsource/dancing-script/400.css';
+@import '@fontsource/dancing-script/500.css';
+@import '@fontsource/dancing-script/600.css';
+@import '@fontsource/great-vibes/400.css';
+
+.romantic-letter {
+  font-family: 'Dancing Script', cursive;
+  line-height: 1.8;
+  text-align: left;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 300px;
+}
+
+.romantic-signature {
+  font-family: 'Great Vibes', cursive;
+  font-size: clamp(1.4em, 4vw, 1.8em);
+  text-align: right;
+  margin-top: auto;
+  padding: 2rem 1.5rem 0.5rem 0;
+  letter-spacing: 0.5px;
+}
+
+.romantic-greeting {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 500;
+  font-size: clamp(1.3em, 4vw, 1.6em);
+  margin-bottom: 2rem;
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.romantic-content {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.4em, 4vw, 1.8em);
+  line-height: 2.2;
+  text-align: left;
+  flex-grow: 1;
+  padding: 2.5rem 1.5rem;
+  margin: 1.5rem 0;
+  word-wrap: break-word;
+  hyphens: auto;
+  letter-spacing: 0.5px;
+}
+
+.love-letter-container {
+  background: linear-gradient(135deg, #fef7f0 0%, #fdf2f8 100%);
+  border: 2px solid #f3e8ff;
+  border-radius: 20px;
+  padding: clamp(2.5rem, 4vw, 3.5rem);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 500px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.love-letter-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #f472b6, transparent);
+}
+
+.love-letter-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #f472b6, transparent);
+}
