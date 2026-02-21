@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Sparkles, Brain } from "lucide-react";
 import { useAISadForms, type ComponentData, type Question } from "../sadCategory/composables/aiSadForms";
+import { useIsMobile } from "../../../hooks/use-mobile";
 
 interface SadFormsWidgetProps {
   isOpen: boolean;
@@ -37,10 +38,13 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
     getLettersByCategory
   } = useMessagesStore();
   
+  const isMobile = useIsMobile();
+  
   const [data, setData] = useState<ComponentData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(true);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // States for the form collection
   const [baseLetter, setBaseLetter] = useState<LoveLetter | null>(null);
@@ -71,6 +75,9 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
   useEffect(() => {
     const initialize = async () => {
       try {
+        setIsInitialized(false);
+        setIsGeneratingQuestions(true);
+        
         await initializeTheme();
         await waitForInitialization();
         await loadSettings();
@@ -89,20 +96,25 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
         await fetchRandomSadLetter();
         
         // Step 2: Generate AI questions after initializing data
-        setIsGeneratingQuestions(true);
-        
         const result = await generateAIQuestions(loadedData.callsign);
         if (result.questions) {
           setQuestions(result.questions);
         }
+        
         setIsGeneratingQuestions(false);
+        setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize Sad Forms Widget:", error);
         setIsGeneratingQuestions(false);
+        setIsInitialized(true); // Still mark as initialized to prevent loading loop
       }
     };
-    initialize();
+    
+    if (isOpen) {
+      initialize();
+    }
   }, [
+    isOpen,
     initializeTheme,
     waitForInitialization,
     loadSettings,
@@ -150,66 +162,110 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
     });
   };
 
-  if (!data) {
+  if (!data || !isInitialized) {
     return null;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const allAnswered = questions.every(q => q.answered);
+  const allAnswered = questions.every(q => q.answered) && questions.length > 0;
 
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="max-w-2xl [&>button]:hidden">
+      <DialogContent 
+        className={`${isMobile ? 'max-w-[95vw] h-[90vh] overflow-y-auto' : 'max-w-lg'} [&>button]:hidden`}
+        style={{
+          maxWidth: isMobile ? '95vw' : 'min(480px, 85vw)',
+          width: isMobile ? '95vw' : 'min(480px, 85vw)',
+          padding: isMobile ? 'min(20px, 4vw)' : '24px'
+        }}
+      >
         <DialogHeader>
           <DialogTitle 
             className="flex items-center gap-2 text-center justify-center"
-            style={{ color: data.themeColor }}
+            style={{ 
+              color: data.themeColor,
+              fontSize: isMobile ? 'clamp(1rem, 4vw, 1.125rem)' : '1.125rem'
+            }}
           >
-            <Sparkles size={24} />
+            <Sparkles size={isMobile ? 20 : 22} />
             Mini {data.bfName} Care Assistant
-            <Sparkles size={24} />
+            <Sparkles size={isMobile ? 20 : 22} />
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-6">
+        <div 
+          className={isMobile ? "p-3" : "p-4"}
+          style={{
+            padding: isMobile ? 'min(12px, 3vw)' : '16px'
+          }}
+        >
           {/* AI Assistant GIF */}
-          <div className="text-center mb-6 animate-fade-in">
+          <div 
+            className="text-center animate-fade-in"
+            style={{ marginBottom: isMobile ? 'min(20px, 4vw)' : '20px' }}
+          >
             <div 
-              className="mx-auto rounded-full p-4 mb-4 animate-pulse-subtle"
+              className="mx-auto rounded-full mb-4 animate-pulse-subtle"
               style={{ 
                 backgroundColor: `${data.themeColor}20`,
                 width: 'fit-content',
-                animation: 'pulse 2s infinite'
+                animation: 'pulse 2s infinite',
+                padding: isMobile ? 'min(12px, 3vw)' : '12px'
               }}
             >
               <img
                 src="/assets/listen.gif"
                 alt="AI Care Assistant"
-                className="w-24 h-24 mx-auto rounded-full border-2"
-                style={{ borderColor: `${data.themeColor}40` }}
+                className="mx-auto rounded-full border-2"
+                style={{ 
+                  borderColor: `${data.themeColor}40`,
+                  width: isMobile ? 'clamp(60px, 15vw, 80px)' : '72px',
+                  height: isMobile ? 'clamp(60px, 15vw, 80px)' : '72px'
+                }}
               />
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p 
+              className="text-gray-600 leading-relaxed"
+              style={{ 
+                fontSize: isMobile ? 'clamp(0.75rem, 3vw, 0.875rem)' : '0.875rem',
+                padding: isMobile ? '0 min(8px, 2vw)' : '0 8px'
+              }}
+            >
               Hi {data.callsign}! I'm your mini {data.bfName} care assistant. Let me ask a few questions to personalize your comfort experience 💙
             </p>
           </div>
 
           {/* Loading State for AI Question Generation */}
           {isGeneratingQuestions ? (
-            <div className="text-center mb-6">
-              <div className="flex items-center justify-center gap-2 mb-2">
+            <div 
+              className="text-center"
+              style={{ marginBottom: isMobile ? 'min(20px, 4vw)' : '20px' }}
+            >
+              <div 
+                className="flex items-center justify-center mb-2"
+                style={{ gap: isMobile ? 'min(6px, 1.5vw)' : '8px' }}
+              >
                 <Brain 
                   className="animate-pulse"
-                  size={20}
+                  size={isMobile ? 16 : 18}
                   style={{ color: data.themeColor }}
                 />
-                <span className="text-sm" style={{ color: data.themeColor }}>
+                <span 
+                  style={{ 
+                    color: data.themeColor,
+                    fontSize: isMobile ? 'clamp(0.75rem, 3vw, 0.875rem)' : '0.875rem'
+                  }}
+                >
                   Generating personalized questions...
                 </span>
               </div>
               <div 
-                className="w-32 h-1 mx-auto rounded-full overflow-hidden"
-                style={{ backgroundColor: `${data.themeColor}20` }}
+                className="mx-auto rounded-full overflow-hidden"
+                style={{ 
+                  backgroundColor: `${data.themeColor}20`,
+                  width: isMobile ? 'min(100px, 25vw)' : '120px',
+                  height: '4px'
+                }}
               >
                 <div 
                   className="h-full rounded-full animate-pulse"
@@ -223,11 +279,18 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
           ) : (
             <>
               {/* Progress Indicator */}
-              <div className="flex items-center justify-center mb-6">
+              <div 
+                className="flex items-center justify-center"
+                style={{ 
+                  marginBottom: isMobile ? 'min(20px, 4vw)' : '20px',
+                  flexWrap: isMobile ? 'wrap' : 'nowrap',
+                  gap: isMobile ? 'min(4px, 1vw)' : '6px'
+                }}
+              >
             {questions.map((q, index) => (
               <React.Fragment key={q.id}>
                 <div 
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ${
+                  className={`rounded-full flex items-center justify-center font-semibold transition-all duration-500 ${
                     q.answered 
                       ? 'text-white' 
                       : index === currentQuestionIndex 
@@ -237,20 +300,24 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
                   style={{ 
                     backgroundColor: q.answered || index === currentQuestionIndex
                       ? data.themeColor 
-                      : '#e5e7eb'
+                      : '#e5e7eb',
+                    width: isMobile ? 'clamp(24px, 6vw, 32px)' : '32px',
+                    height: isMobile ? 'clamp(24px, 6vw, 32px)' : '32px',
+                    fontSize: isMobile ? 'clamp(0.625rem, 2.5vw, 0.75rem)' : '0.75rem'
                   }}
                 >
                   {q.answered ? '✓' : index + 1}
                 </div>
-                {index < questions.length - 1 && (
+                {index < questions.length - 1 && !isMobile && (
                   <div 
-                    className={`w-12 h-0.5 transition-all duration-500 ${
+                    className={`h-0.5 transition-all duration-500 ${
                       questions[index + 1]?.answered || currentQuestionIndex > index
                         ? 'opacity-100' 
                         : 'opacity-30'
                     }`}
                     style={{ 
-                      backgroundColor: data.themeColor
+                      backgroundColor: data.themeColor,
+                      width: '24px'
                     }}
                   />
                 )}
@@ -261,38 +328,59 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
           )}
 
           {/* Question Card */}
-          {!allAnswered && (
-            <Card className="mb-6 animate-slide-up">
-              <CardContent className="p-6">
+          {!allAnswered && currentQuestion && questions.length > 0 && (
+            <Card 
+              className="animate-slide-up"
+              style={{ marginBottom: isMobile ? 'min(20px, 4vw)' : '20px' }}
+            >
+              <CardContent 
+                style={{ 
+                  padding: isMobile ? 'min(16px, 4vw)' : '20px' 
+                }}
+              >
                 <div className="text-center">
                   <Badge 
                     variant="secondary" 
                     className="mb-4"
                     style={{ 
                       backgroundColor: `${data.themeColor}20`,
-                      color: data.themeColor 
+                      color: data.themeColor,
+                      fontSize: isMobile ? 'clamp(0.625rem, 2.5vw, 0.75rem)' : '0.75rem',
+                      padding: isMobile ? 'min(4px, 1vw) min(8px, 2vw)' : '6px 12px'
                     }}
                   >
                     Question {currentQuestionIndex + 1} of {questions.length}
                   </Badge>
                   
                   <h3 
-                    className="text-lg font-semibold mb-6"
+                    className="font-semibold"
                     style={{ 
-                      fontSize: "clamp(1.125rem, 3vw, 1.25rem)",
-                      color: "#333"
+                      fontSize: isMobile ? "clamp(1rem, 4vw, 1.125rem)" : "1.125rem",
+                      color: "#333",
+                      marginBottom: isMobile ? 'min(20px, 4vw)' : '20px',
+                      lineHeight: '1.4'
                     }}
                   >
                     {currentQuestion.text}
                   </h3>
 
-                  <div className="flex gap-4 justify-center">
+                  <div 
+                    className="flex justify-center"
+                    style={{ 
+                      gap: isMobile ? 'min(12px, 3vw)' : '12px',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      alignItems: 'center'
+                    }}
+                  >
                     <Button
                       onClick={() => handleAnswer(true)}
-                      className="px-8 py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-all duration-300"
+                      className="text-white font-semibold rounded-lg hover:opacity-90 transition-all duration-300"
                       style={{ 
                         backgroundColor: data.themeColor,
-                        fontSize: "clamp(0.875rem, 2.5vw, 1rem)"
+                        fontSize: isMobile ? "clamp(0.875rem, 3vw, 1rem)" : "0.875rem",
+                        padding: isMobile ? 'min(12px, 3vw) min(24px, 6vw)' : '12px 32px',
+                        width: isMobile ? '100%' : 'auto',
+                        minHeight: '44px'
                       }}
                     >
                       Yes
@@ -300,11 +388,14 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
                     <Button
                       onClick={() => handleAnswer(false)}
                       variant="outline"
-                      className="px-8 py-3 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300"
+                      className="font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300"
                       style={{ 
                         borderColor: data.themeColor,
                         color: data.themeColor,
-                        fontSize: "clamp(0.875rem, 2.5vw, 1rem)"
+                        fontSize: isMobile ? "clamp(0.875rem, 3vw, 1rem)" : "0.875rem",
+                        padding: isMobile ? 'min(12px, 3vw) min(24px, 6vw)' : '12px 32px',
+                        width: isMobile ? '100%' : 'auto',
+                        minHeight: '44px'
                       }}
                     >
                       No
@@ -316,35 +407,62 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
           )}
 
           {/* Form Complete Message */}
-          {allAnswered && (
+          {allAnswered && questions.length > 0 && (
             <Card>
-              <CardContent className="p-6">
+              <CardContent 
+                style={{ 
+                  padding: isMobile ? 'min(16px, 4vw)' : '20px' 
+                }}
+              >
                 <div className="text-center">
                   <Heart 
-                    size={48} 
-                    className="mx-auto mb-4"
+                    size={isMobile ? 36 : 40} 
+                    className="mx-auto"
                     fill={data.themeColor}
                     color={data.themeColor}
+                    style={{ marginBottom: isMobile ? 'min(12px, 3vw)' : '12px' }}
                   />
                   <h3 
-                    className="text-xl font-semibold mb-3"
-                    style={{ color: data.themeColor }}
+                    className="font-semibold"
+                    style={{ 
+                      color: data.themeColor,
+                      fontSize: isMobile ? 'clamp(1.125rem, 4vw, 1.25rem)' : '1.125rem',
+                      marginBottom: isMobile ? 'min(8px, 2vw)' : '8px'
+                    }}
                   >
                     Thank you, {data.callsign}!
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Your responses have been recorded. I'll now create a personalized message based on your needs and emotional state.
+                  <p 
+                    className="text-gray-600"
+                    style={{
+                      fontSize: isMobile ? 'clamp(0.875rem, 3vw, 1rem)' : '0.875rem',
+                      marginBottom: isMobile ? 'min(20px, 4vw)' : '20px',
+                      lineHeight: '1.5',
+                      padding: isMobile ? '0 min(8px, 2vw)' : '0 8px'
+                    }}
+                  >
+                    I'm sorry you're feeling this way. Let me prepare something special to help brighten your day and remind you how much you're loved.
                   </p>
                   
                   <div className="flex justify-center">
                     <div 
-                      className="animate-spin rounded-full h-8 w-8 border-b-2"
-                      style={{ borderColor: data.themeColor }}
+                      className="animate-spin rounded-full border-b-2"
+                      style={{ 
+                        borderColor: data.themeColor,
+                        width: isMobile ? 'clamp(24px, 6vw, 32px)' : '28px',
+                        height: isMobile ? 'clamp(24px, 6vw, 32px)' : '28px'
+                      }}
                     ></div>
                   </div>
                   
-                  <p className="text-sm text-gray-500 mt-3">
-                    Creating your personalized response...
+                  <p 
+                    className="text-gray-500"
+                    style={{
+                      fontSize: isMobile ? 'clamp(0.75rem, 2.5vw, 0.875rem)' : '0.75rem',
+                      marginTop: isMobile ? 'min(8px, 2vw)' : '8px'
+                    }}
+                  >
+                    Preparing your special message...
                   </p>
                 </div>
               </CardContent>
@@ -352,18 +470,32 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
           )}
 
           {/* Summary of Answers (shown when complete) */}
-          {allAnswered && (
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500 mb-2">Your responses:</p>
-              <div className="flex gap-2 justify-center flex-wrap">
+          {allAnswered && questions.length > 0 && (
+            <div 
+              className="text-center"
+              style={{ marginTop: isMobile ? 'min(20px, 4vw)' : '16px' }}
+            >
+              <p 
+                className="text-gray-500 mb-2"
+                style={{ 
+                  fontSize: isMobile ? 'clamp(0.625rem, 2.5vw, 0.75rem)' : '0.75rem'
+                }}
+              >
+                Your responses:
+              </p>
+              <div 
+                className="flex justify-center flex-wrap"
+                style={{ gap: isMobile ? 'min(4px, 1vw)' : '6px' }}
+              >
                 {questions.map((q, index) => (
                   <Badge 
                     key={q.id}
                     variant="outline"
-                    className="text-xs"
                     style={{ 
                       borderColor: data.themeColor,
-                      color: q.answer ? data.themeColor : '#6b7280'
+                      color: q.answer ? data.themeColor : '#6b7280',
+                      fontSize: isMobile ? 'clamp(0.625rem, 2vw, 0.75rem)' : '0.75rem',
+                      padding: isMobile ? 'min(2px, 0.5vw) min(6px, 1.5vw)' : '3px 8px'
                     }}
                   >
                     Q{index + 1}: {q.answer ? 'Yes' : 'No'}
