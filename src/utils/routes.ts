@@ -41,6 +41,14 @@ export const routes: Route[] = [
     showInNav: true,
   },
   {
+    path: '/girlfriend-sad',
+    name: 'When You\'re Sad',
+    component: 'SadCategoryView',
+    icon: 'Frown',
+    isPublic: true,
+    showInNav: false,
+  },
+  {
     path: '/memories',
     name: 'Our Memories',
     component: 'ComingSoon',

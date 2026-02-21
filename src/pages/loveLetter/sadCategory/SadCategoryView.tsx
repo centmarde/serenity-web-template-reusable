@@ -1,0 +1,283 @@
+import React, { useState, useEffect } from "react";
+import { useSettingsStore } from "../../../stores/settings";
+import { useThemeStore } from "../../../stores/theme";
+import useMessagesStore from "../../../stores/messagesData";
+import type { LoveLetter } from "../../../stores/messagesData";
+import SadLettersWidget from "./components/SadLettersWidget";
+import SadFormsWidget from "../dialogs/SadFormsDialog";
+import { useAISadForms, type Question } from "./composables/aiSadForms";
+
+interface ComponentData {
+  themeColor: string;
+  callsign: string;
+  appName: string;
+  gfName: string;
+  bfName: string;
+}
+
+const SadCategoryView: React.FC = () => {
+  const {
+    getCallsign,
+    getAppName,
+    getGfName,
+    getBfName,
+    loadSettings,
+  } = useSettingsStore();
+
+  const { initializeTheme, getCurrentThemeColor, waitForInitialization } =
+    useThemeStore();
+
+  const { createLetter } = useMessagesStore();
+  const { enhanceMessageWithAI } = useAISadForms();
+  
+  const [data, setData] = useState<ComponentData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showFormsDialog, setShowFormsDialog] = useState(true);
+  const [hasCompletedForms, setHasCompletedForms] = useState(false);
+  const [isGeneratingAIResponse, setIsGeneratingAIResponse] = useState(false);
+  const [aiResponseData, setAiResponseData] = useState<{
+    questions: Question[],
+    baseLetter: LoveLetter | null,
+    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive',
+    enhancedMessage?: {
+      title: string,
+      content: string,
+      tone: string
+    }
+  } | null>(null);
+
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        await initializeTheme();
+        await waitForInitialization();
+        await loadSettings();
+
+        const loadedData: ComponentData = {
+          themeColor: getCurrentThemeColor(),
+          callsign: getCallsign(),
+          appName: getAppName(),
+          gfName: getGfName(),
+          bfName: getBfName(),
+        };
+
+        setData(loadedData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to initialize Sad Category View:", error);
+        setIsLoading(false);
+      }
+    };
+    initialize();
+  }, [
+    initializeTheme,
+    waitForInitialization,
+    loadSettings,
+    getCurrentThemeColor,
+    getCallsign,
+    getAppName,
+    getGfName,
+    getBfName,
+  ]);
+
+  const generateAIResponse = async (responseData: {
+    questions: Question[],
+    baseLetter: LoveLetter | null,
+    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive'
+  }) => {
+    if (!data || !responseData) return;
+
+    try {
+      console.log('Generating AI response with data:', responseData);
+      
+      // Use the AI enhancement function from aiSadForms.ts
+      const result = await enhanceMessageWithAI(
+        responseData.questions,
+        responseData.baseLetter,
+        data,
+        responseData.tone
+      );
+
+      if (result.success && result.enhancedMessage) {
+        // Try to save the enhanced letter to database
+        try {
+          const newLetter: LoveLetter = {
+            title: result.enhancedMessage.title,
+            message: result.enhancedMessage.content,
+            category: 'sad',
+            is_girlfriend: false
+          };
+
+          const savedLetter = await createLetter(newLetter);
+          if (savedLetter) {
+            console.log('AI-generated letter saved successfully:', savedLetter);
+          }
+        } catch (saveError) {
+          console.warn('Could not save letter to database, but continuing with UI update:', saveError);
+        }
+
+        // Update the response data with the enhanced message
+        setAiResponseData({
+          ...responseData,
+          enhancedMessage: result.enhancedMessage
+        });
+      } else {
+        console.error('Failed to enhance message:', result.error);
+        // Set fallback message
+        setAiResponseData({
+          ...responseData,
+          enhancedMessage: {
+            title: "You Are Loved",
+            content: "Even when words are hard to find, know that you are cherished and supported. 💙",
+            tone: responseData.tone
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error in generateAIResponse:', error);
+      // Set final fallback
+      setAiResponseData({
+        ...responseData,
+        enhancedMessage: {
+          title: "A Message of Care",
+          content: "You are stronger than you realize, and you are not alone. 💙",
+          tone: responseData.tone
+        }
+      });
+    }
+  };
+
+  const handleFormsComplete = async (responseData: {
+    questions: Question[],
+    baseLetter: LoveLetter | null,
+    tone: 'gentle' | 'encouraging' | 'loving' | 'supportive'
+  }) => {
+    console.log('Forms completed with data:', responseData);
+    
+    setAiResponseData(responseData);
+    setIsGeneratingAIResponse(true);
+    
+    // Always attempt to generate AI response, with fallbacks built in
+    await generateAIResponse(responseData);
+    
+    // Always complete successfully
+    setHasCompletedForms(true);
+    setShowFormsDialog(false);
+    setIsGeneratingAIResponse(false);
+  };
+
+  const handleFormsClose = () => {
+    setShowFormsDialog(false);
+    // Optionally, you can redirect back or show a different state
+  };
+
+  if (isLoading || !data) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background: `linear-gradient(135deg, ${data?.themeColor || '#F2A6A6'}20, ${data?.themeColor || '#F2A6A6'}40, #ffffff)`,
+        }}
+      >
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-b-2"
+          style={{ borderColor: data?.themeColor || getCurrentThemeColor() }}
+        ></div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* AI Forms Dialog - Shows first */}
+      <SadFormsWidget
+        isOpen={showFormsDialog}
+        onComplete={handleFormsComplete}
+        onClose={handleFormsClose}
+      />
+
+      {/* Main Content - Shows after completing forms or if forms are skipped */}
+      <div
+        className="min-h-screen"
+        style={{
+          background: `linear-gradient(135deg, ${data.themeColor}15, ${data.themeColor}30, #ffffff)`,
+        }}
+      >
+        {/* Main Content with Padding */}
+        <div className="p-4">
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            <h1
+              className="text-gray-800 font-bold mb-4"
+              style={{
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+                color: "#333333",
+              }}
+            >
+              When You're Sad
+            </h1>
+            <p
+              className="text-lg text-gray-600 max-w-2xl mx-auto"
+              style={{
+                fontSize: "clamp(1rem, 3vw, 1.25rem)",
+                color: "#666666",
+              }}
+            >
+              {isGeneratingAIResponse 
+                ? "✨ Creating your personalized response based on your needs..."
+                : hasCompletedForms 
+                ? "Based on your responses, here are some personalized comfort letters for you 💙"
+                : "A gentle space for when you need comfort and love 💙"
+              }
+            </p>
+          </div>
+
+          {/* Content Area - Letters Widget */}
+          <div className="max-w-6xl mx-auto">
+            {/* Show loading indicator when generating AI response */}
+            {isGeneratingAIResponse && (
+              <div className="text-center py-12">
+                <div
+                  className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+                  style={{ borderColor: data.themeColor }}
+                ></div>
+                <p className="text-gray-600 mb-2">
+                  🤖 Analyzing your responses...
+                </p>
+                <p className="text-sm text-gray-500">
+                  Creating a personalized message with {aiResponseData?.tone || 'loving'} tone
+                </p>
+              </div>
+            )}
+            
+            {/* Show letters widget only after completing forms or if forms dialog is closed */}
+            {(!showFormsDialog || hasCompletedForms) && !isGeneratingAIResponse && (
+              <SadLettersWidget 
+                aiEnhancedData={aiResponseData}
+                isGeneratingResponse={isGeneratingAIResponse}
+              />
+            )}
+            
+            {/* Show a message if forms dialog was closed without completion */}
+            {!showFormsDialog && !hasCompletedForms && !isGeneratingAIResponse && (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">
+                  You can restart the AI questionnaire anytime to get personalized recommendations.
+                </p>
+                <button
+                  onClick={() => setShowFormsDialog(true)}
+                  className="px-6 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-all duration-300"
+                  style={{ backgroundColor: data.themeColor }}
+                >
+                  Start AI Assessment
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default SadCategoryView;

@@ -23,7 +23,11 @@ interface ComponentData {
   startingGreetings: string;
 }
 
-const LoveLetterView: React.FC = () => {
+interface LoveLetterViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const LoveLetterView: React.FC<LoveLetterViewProps> = ({ onNavigate }) => {
   const {
     getCallsign,
     getBfName,
@@ -200,6 +204,7 @@ const LoveLetterView: React.FC = () => {
                   backgroundColor: data.themeColor,
                   fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
                 }}
+                onClick={() => onNavigate && onNavigate('/girlfriend-sad')}
               >
                 Open Letter
               </CardItem>
