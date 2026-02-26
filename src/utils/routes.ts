@@ -81,6 +81,22 @@ export const routes: Route[] = [
     showInNav: true,
   },
   {
+    path: '/girlfriend/madeforyou/lyrics-art',
+    name: 'Lyrics Art Fullscreen',
+    component: 'LyricsArtFullscreenView',
+    icon: 'Music',
+    isPublic: true,
+    showInNav: false,
+  },
+  {
+    path: '/girlfriend/madeforyou/ascii-art',
+    name: 'ASCII Art Fullscreen',
+    component: 'AsciiFullscreenView',
+    icon: 'Image',
+    isPublic: true,
+    showInNav: false,
+  },
+  {
     path: '/games',
     name: 'Play with Me',
     component: 'ComingSoon',

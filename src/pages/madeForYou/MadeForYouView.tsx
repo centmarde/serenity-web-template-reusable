@@ -3,9 +3,8 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Gift } from "lucide-react";
-import AsciiWidget from "./components/AsciiWidget";
-import LyricsArtWidget from "./components/LyricsArtWidget";
+import { Heart, ArrowLeft, Gift, Music2, Image } from "lucide-react";
+import FlowerCard from "./components/FlowerCard";
 
 interface MadeForYouViewProps {
   onNavigate?: (path: string) => void;
@@ -167,8 +166,8 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
               color: data.themeColor,
             }}
           >
-            Here are my efforts for you,{" "}
-            <span >{data.gfName}</span> 💗
+            A Bouquet of Love for you,{" "}
+            <span >{data.gfName}</span>
           </h2>
           <p
             className="opacity-80 leading-relaxed"
@@ -177,18 +176,12 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
               color: `${data.themeColor}cc`,
             }}
           >
-            I poured my heart into every little detail of this.
-            I hope it makes you smile, feel loved, and know just how much you
-            mean to me. 🌸
+            Like picking flowers from a garden, each creation below is a special gift.
+            Choose a bouquet and discover something beautiful I made just for you. 🌸
           </p>
         </div>
 
-        {/* Small gif row */}
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <img src="/assets/listen.gif" alt="listen" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
-          <img src="/assets/blee.gif" alt="blee" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
-          <img src="/assets/listen.gif" alt="listen" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{ transform: "scaleX(-1)" }} />
-        </div>
+       
 
         {/* Coming soon note */}
         <p
@@ -198,18 +191,48 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
             color: `${data.themeColor}99`,
           }}
         >
-          ✨ and more art & efforts are still on the way — stay tuned 🎨💕
+          ✨ More flowers blooming soon — new bouquets are on the way �💕
         </p>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 w-full ">
+      <div className="flex-1 w-full px-4 sm:px-6 lg:px-8">
+        {/* Bouquet Selection Header */}
+        <div className="text-center mb-8">
+          <h2
+            className="font-bold text-2xl mb-2"
+            style={{ color: data.themeColor }}
+          >
+            💐 Choose Your Bouquet
+          </h2>
+          <p
+            className="text-sm opacity-80"
+            style={{ color: `${data.themeColor}cc` }}
+          >
+            Each flower leads to a special creation made just for you
+          </p>
+        </div>
 
-        {/* ASCII Art Widget */}
-        <AsciiWidget />
+        {/* Flower Cards Grid */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+          {/* Lyrics Art Flower */}
+          <FlowerCard
+            title="Lyrics Art"
+            icon={<Music2 size={24} />}
+            flowerImage="/flowers/rose.png"
+            route="/girlfriend/madeforyou/lyrics-art"
+            onNavigate={onNavigate}
+          />
 
-        {/* Lyrics Poster Widget — full bleed, no px */}
-        <LyricsArtWidget />
+          {/* ASCII Art Flower */}
+          <FlowerCard
+            title="ASCII Art"
+            icon={<Image size={24} />}
+            flowerImage="/flowers/rose1.png"
+            route="/girlfriend/madeforyou/ascii-art"
+            onNavigate={onNavigate}
+          />
+        </div>
 
         {/* Footer note */}
         <div className="text-center px-6 pb-8">

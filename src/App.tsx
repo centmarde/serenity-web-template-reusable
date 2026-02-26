@@ -5,6 +5,8 @@ import DefaultLayout from './layout/Default';
 import LandingView from './pages/landing/LandingView';
 import AuthView from './pages/auth/AuthView';
 import BoyFriendDashboardView from './pages/boyfriendDashboard/BoyFriendDashboardView';
+import LyricsArtFullscreenView from './pages/madeForYou/LyricsArtFullscreenView';
+import AsciiFullscreenView from './pages/madeForYou/AsciiFullscreenView';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
 import { useInitializeAuth } from './stores/authData';
@@ -77,6 +79,15 @@ function App() {
     // Render BoyFriendDashboardView without layout for boyfriend dashboard route
     if (currentPath === '/boyfriend-dashboard') {
       return <BoyFriendDashboardView onNavigate={handleNavigate} />;
+    }
+
+    // Render fullscreen views without layout
+    if (currentPath === '/girlfriend/madeforyou/lyrics-art') {
+      return <LyricsArtFullscreenView onNavigate={handleNavigate} />;
+    }
+
+    if (currentPath === '/girlfriend/madeforyou/ascii-art') {
+      return <AsciiFullscreenView onNavigate={handleNavigate} />;
     }
     
     // All other routes use DefaultLayout

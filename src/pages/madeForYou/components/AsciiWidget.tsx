@@ -1,48 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { AsciiArt } from "@/components/ui/ascii-art";
+import { Card, CardContent } from "@/components/ui/card";
+import { Maximize2, Image } from "lucide-react";
+import { useSettingsStore } from "@/stores/settings";
 
 interface AsciiWidgetProps {
-  themeColor?: string;
-  title?: string;
+  onNavigate?: (path: string) => void;
 }
 
-const LARGE_SCREEN_BREAKPOINT = 1024;
-
-const AsciiWidget: React.FC<AsciiWidgetProps> = () => {
-  const [resolution, setResolution] = useState(
-    window.innerWidth >= LARGE_SCREEN_BREAKPOINT ? 200 : 120
-  );
+const AsciiWidget: React.FC<AsciiWidgetProps> = ({ onNavigate }) => {
+  const { waitForThemeColor } = useSettingsStore();
+  const [themeColor, setThemeColor] = useState("#F2A6A6");
 
   useEffect(() => {
-    const handleResize = () => {
-      setResolution(window.innerWidth >= LARGE_SCREEN_BREAKPOINT ? 200 : 120);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    waitForThemeColor()
+      .then(setThemeColor)
+      .catch(() => setThemeColor("#F2A6A6"));
+  }, [waitForThemeColor]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden"
+    <Card 
+      className="cursor-pointer hover:shadow-xl transition-all duration-300 group relative"
       style={{
-        height: "clamp(400px, 100vw, 200vh)",
-        background: "#0a0a0a",
+        borderColor: themeColor,
+        borderWidth: '2px',
       }}
+      onClick={() => onNavigate?.("/girlfriend/madeforyou/ascii-art")}
     >
-      <AsciiArt
-        src="/assets/ascii/set1.jpg"
-        resolution={resolution}
-        charset="dense"
-        colored={true}
-        backgroundColor="#0a0a0a"
-        animated={true}
-        animationStyle="matrix"
-        animateOnView={true}
-        objectFit="contain"
-        className="absolute inset-0 w-full h-full"
-      />
-    </div>
+      <CardContent 
+        className="p-4"
+        style={{
+          background: `linear-gradient(135deg, ${themeColor}10, ${themeColor}05)`,
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/assets/peach-goma.gif" 
+              alt="ASCII Art"
+              className="w-12 h-12 object-cover rounded"
+            />
+            <div className="flex items-center gap-2">
+              <Image size={20} style={{ color: themeColor }} />
+              <h3 
+                className="font-semibold text-lg"
+                style={{ color: themeColor }}
+              >
+                ASCII Art
+              </h3>
+            </div>
+          </div>
+          
+          {/* Fullscreen icon */}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Maximize2 size={20} style={{ color: themeColor }} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
