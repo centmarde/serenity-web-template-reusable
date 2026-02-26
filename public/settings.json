@@ -22,6 +22,7 @@
   "songTitle": "falling",
   "songArtist": "iration",
   "songUrl": "/songs/falling.mp3",
+  "posterImageSrc": "/assets/ascii/set3.jpg",
   "dialogMessages": {
     "welcomeMessage": "Welcome to your personal love space",
     "workInProgressNotice": "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",

@@ -25,6 +25,7 @@ export interface Settings {
   songTitle: string;
   songArtist: string;
   songUrl: string;
+  posterImageSrc: string;
   dialogMessages: DialogMessages;
 }
 
@@ -49,6 +50,7 @@ interface SettingsStore {
   getSongTitle: () => string;
   getSongArtist: () => string;
   getSongUrl: () => string;
+  getPosterImageSrc: () => string;
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForIsDarkMode: () => Promise<boolean>;
@@ -62,6 +64,7 @@ interface SettingsStore {
   waitForSongTitle: () => Promise<string>;
   waitForSongArtist: () => Promise<string>;
   waitForSongUrl: () => Promise<string>;
+  waitForPosterImageSrc: () => Promise<string>;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
@@ -289,6 +292,15 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.dialogMessages;
   },
 
+  getPosterImageSrc: () => {
+    const { settings } = get();
+    if (!settings) {
+      // Provide fallback poster image
+      return "/assets/ascii/set3.jpg";
+    }
+    return settings.posterImageSrc ?? "/assets/ascii/set3.jpg";
+  },
+
   waitForThemeColor: async () => {
     await get().loadSettings();
     return get().getThemeColor();
@@ -347,5 +359,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForSongUrl: async () => {
     await get().loadSettings();
     return get().getSongUrl();
+  },
+
+  waitForPosterImageSrc: async () => {
+    await get().loadSettings();
+    return get().getPosterImageSrc();
   }
 }));

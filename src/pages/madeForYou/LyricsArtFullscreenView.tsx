@@ -11,10 +11,11 @@ interface LyricsArtFullscreenViewProps {
 }
 
 const LyricsArtFullscreenView: React.FC<LyricsArtFullscreenViewProps> = ({ onNavigate }) => {
-  const { loadSettings } = useSettingsStore();
+  const { loadSettings, waitForPosterImageSrc } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
   
   const [themeColor, setThemeColor] = useState("#F2A6A6");
+  const [posterImageSrc, setPosterImageSrc] = useState("/assets/ascii/set3.jpg");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,16 +26,18 @@ const LyricsArtFullscreenView: React.FC<LyricsArtFullscreenViewProps> = ({ onNav
         await loadSettings();
 
         setThemeColor(getCurrentThemeColor());
+        setPosterImageSrc(await waitForPosterImageSrc());
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to initialize LyricsArtFullscreenView:", error);
         setThemeColor("#F2A6A6");
+        setPosterImageSrc("/assets/ascii/set3.jpg");
         setIsLoading(false);
       }
     };
 
     initialize();
-  }, [initializeTheme, waitForInitialization, loadSettings, getCurrentThemeColor]);
+  }, [initializeTheme, waitForInitialization, loadSettings, getCurrentThemeColor, waitForPosterImageSrc]);
 
   if (isLoading) {
     return (
@@ -87,7 +90,7 @@ const LyricsArtFullscreenView: React.FC<LyricsArtFullscreenViewProps> = ({ onNav
       {/* Main Content */}
       <div className="flex-1 w-full flex flex-col">
         {/* The poster — full width */}
-        <LyricsPoster />
+        <LyricsPoster posterImageSrc={posterImageSrc} />
 
         {/* Spotify-style player below the art */}
         <div
