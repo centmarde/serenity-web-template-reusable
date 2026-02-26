@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useSettingsStore } from "@/stores/settings";
 // ── canvas ASCII-art engine ──────────────────────────────────────────────────
-const POSTER_IMAGE = "/assets/ascii/set2.jpg";
 const CHAR_W = 5;
 const CHAR_H = 9;
 
@@ -121,7 +120,13 @@ function renderLyricsPoster(
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-const LyricsPoster: React.FC = () => {
+interface LyricsPosterProps {
+  posterImageSrc?: string;
+}
+
+const LyricsPoster: React.FC<LyricsPosterProps> = ({ 
+  posterImageSrc = "/assets/ascii/set3.jpg" 
+}) => {
   const { waitForSongTitle, waitForSongArtist, waitForThemeColor } = useSettingsStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rendering, setRendering] = useState(true);
@@ -168,7 +173,7 @@ const LyricsPoster: React.FC = () => {
             }
           };
           img.onerror = () => { if (!cancelled) setRendering(false); };
-          img.src = POSTER_IMAGE;
+          img.src = posterImageSrc;
         }, 30);
 
       } catch (error) {
@@ -182,7 +187,7 @@ const LyricsPoster: React.FC = () => {
 
     loadAndRender();
     return () => { cancelled = true; };
-  }, [waitForThemeColor, waitForSongTitle, waitForSongArtist]);
+  }, [waitForThemeColor, waitForSongTitle, waitForSongArtist, posterImageSrc]);
 
   const CANVAS_W = 900;
   const CANVAS_H = 1350;
