@@ -133,6 +133,75 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
         />
       </div>
 
+      {/* Hero Header Section */}
+      <div
+        className="w-full flex flex-col items-center justify-center gap-4 px-6 py-12 text-center"
+      >
+        {/* Floating gifs */}
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          <img
+            src="/assets/peach-goma.gif"
+            alt="peach goma"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain animate-bounce"
+            style={{ animationDelay: "0s", animationDuration: "2s" }}
+          />
+          <img
+            src="/assets/dudu-cute.gif"
+            alt="dudu cute"
+            className="w-20 h-20 sm:w-28 sm:h-28 object-contain"
+          />
+          <img
+            src="/assets/peach-goma.gif"
+            alt="peach goma"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain animate-bounce"
+            style={{ animationDelay: "0.4s", animationDuration: "2s" }}
+          />
+        </div>
+
+        {/* Message */}
+        <div className="flex flex-col items-center gap-2 max-w-xl">
+          <h2
+            className="font-bold leading-snug"
+            style={{
+              fontSize: "clamp(1.3rem, 4.5vw, 2rem)",
+              color: data.themeColor,
+            }}
+          >
+            Here are my efforts for you,{" "}
+            <span >{data.gfName}</span> 💗
+          </h2>
+          <p
+            className="opacity-80 leading-relaxed"
+            style={{
+              fontSize: "clamp(0.85rem, 2.5vw, 1.05rem)",
+              color: `${data.themeColor}cc`,
+            }}
+          >
+            I poured my heart into every little detail of this.
+            I hope it makes you smile, feel loved, and know just how much you
+            mean to me. 🌸
+          </p>
+        </div>
+
+        {/* Small gif row */}
+        <div className="flex items-center justify-center gap-4 mt-2">
+          <img src="/assets/listen.gif" alt="listen" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+          <img src="/assets/blee.gif" alt="blee" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+          <img src="/assets/listen.gif" alt="listen" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{ transform: "scaleX(-1)" }} />
+        </div>
+
+        {/* Coming soon note */}
+        <p
+          className="mt-4 italic opacity-60"
+          style={{
+            fontSize: "clamp(0.75rem, 2vw, 0.9rem)",
+            color: `${data.themeColor}99`,
+          }}
+        >
+          ✨ and more art & efforts are still on the way — stay tuned 🎨💕
+        </p>
+      </div>
+
       {/* Main Content */}
       <div className="flex-1 w-full ">
 
