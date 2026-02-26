@@ -3,7 +3,7 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Gift, Music2, Image } from "lucide-react";
+import { Heart, ArrowLeft, Gift } from "lucide-react";
 import FlowerCard from "./components/FlowerCard";
 
 interface MadeForYouViewProps {
@@ -217,8 +217,6 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
           {/* Lyrics Art Flower */}
           <FlowerCard
-            title="Lyrics Art"
-            icon={<Music2 size={24} />}
             flowerImage="/flowers/rose.png"
             route="/girlfriend/madeforyou/lyrics-art"
             onNavigate={onNavigate}
@@ -226,8 +224,6 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
 
           {/* ASCII Art Flower */}
           <FlowerCard
-            title="ASCII Art"
-            icon={<Image size={24} />}
             flowerImage="/flowers/rose1.png"
             route="/girlfriend/madeforyou/ascii-art"
             onNavigate={onNavigate}
