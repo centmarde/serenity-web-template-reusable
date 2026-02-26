@@ -131,6 +131,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   const handleFeatureClick = (featureName: string) => {
     if (featureName === "Love Letters" && onNavigate) {
       onNavigate('/love-letters');
+    } else if (featureName === "Made for You" && onNavigate) {
+      onNavigate('/girlfriend/madeforyou');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);

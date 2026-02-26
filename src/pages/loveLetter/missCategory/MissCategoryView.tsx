@@ -16,7 +16,11 @@ interface ComponentData {
   bfName: string;
 }
 
-const MissCategoryView: React.FC = () => {
+interface MissCategoryViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const MissCategoryView: React.FC<MissCategoryViewProps> = ({ onNavigate }) => {
   const {
     getCallsign,
     getAppName,
@@ -48,8 +52,11 @@ const MissCategoryView: React.FC = () => {
   } | null>(null);
 
   const handleGoBack = () => {
-    // Use browser's back button functionality
-    window.history.back();
+    if (onNavigate) {
+      onNavigate('/love-letters');
+    } else {
+      window.history.back();
+    }
   };
 
   useEffect(() => {
