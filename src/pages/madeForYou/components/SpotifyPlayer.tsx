@@ -34,13 +34,11 @@ const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({ themeColor }) => {
       });
   }, [waitForSongTitle, waitForSongArtist, waitForSongUrl]);
 
-  // Auto-play when src is set
+  // Set initial volume when src is ready (no autoplay)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !songInfo.url) return;
     audio.volume = volume;
-    // Attempt autoplay
-    audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songInfo.url]);
 
