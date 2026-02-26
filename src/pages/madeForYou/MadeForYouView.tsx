@@ -191,27 +191,13 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
             color: `${data.themeColor}99`,
           }}
         >
-          ✨ More flowers blooming soon — new bouquets are on the way �💕
+          More flowers blooming soon — new bouquets are on the way 
         </p>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 w-full px-4 sm:px-6 lg:px-8">
-        {/* Bouquet Selection Header */}
-        <div className="text-center mb-8">
-          <h2
-            className="font-bold text-2xl mb-2"
-            style={{ color: data.themeColor }}
-          >
-            💐 Choose Your Bouquet
-          </h2>
-          <p
-            className="text-sm opacity-80"
-            style={{ color: `${data.themeColor}cc` }}
-          >
-            Each flower leads to a special creation made just for you
-          </p>
-        </div>
+    
 
         {/* Flower Cards Grid */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
