@@ -22,6 +22,8 @@ export interface Settings {
   coupleOfficialDate: string;
   startingGreetings: string;
   traits: string[];
+  songTitle: string;
+  songArtist: string;
   dialogMessages: DialogMessages;
 }
 
@@ -43,6 +45,8 @@ interface SettingsStore {
   getStartingGreetings: () => string;
   getTraits: () => string[];
   getRandomTrait: () => string;
+  getSongTitle: () => string;
+  getSongArtist: () => string;
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForIsDarkMode: () => Promise<boolean>;
@@ -53,6 +57,8 @@ interface SettingsStore {
   waitForCoupleOfficialDate: () => Promise<string>;
   waitForStartingGreetings: () => Promise<string>;
   waitForTraits: () => Promise<string[]>;
+  waitForSongTitle: () => Promise<string>;
+  waitForSongArtist: () => Promise<string>;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
@@ -125,6 +131,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       
       if (!fetchedSettings.traits || !Array.isArray(fetchedSettings.traits) || fetchedSettings.traits.length === 0) {
         throw new Error('Traits array not found or empty in settings.json');
+      }
+
+      if (!fetchedSettings.songTitle) {
+        throw new Error('songTitle not found in settings.json');
+      }
+
+      if (!fetchedSettings.songArtist) {
+        throw new Error('songArtist not found in settings.json');
       }
       
       // DialogMessages is optional - if not present, fallbacks will be used
@@ -230,6 +244,22 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return traits[randomIndex];
   },
 
+  getSongTitle: () => {
+    const { settings } = get();
+    if (!settings || !settings.songTitle) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.songTitle;
+  },
+
+  getSongArtist: () => {
+    const { settings } = get();
+    if (!settings || !settings.songArtist) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.songArtist;
+  },
+
   getDialogMessages: () => {
     const { settings } = get();
     if (!settings || !settings.dialogMessages) {
@@ -291,5 +321,15 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForTraits: async () => {
     await get().loadSettings();
     return get().getTraits();
+  },
+
+  waitForSongTitle: async () => {
+    await get().loadSettings();
+    return get().getSongTitle();
+  },
+
+  waitForSongArtist: async () => {
+    await get().loadSettings();
+    return get().getSongArtist();
   }
 }));

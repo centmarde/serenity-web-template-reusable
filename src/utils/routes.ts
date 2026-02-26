@@ -73,9 +73,9 @@ export const routes: Route[] = [
     showInNav: true,
   },
   {
-    path: '/gifts',
+    path: '/girlfriend/madeforyou',
     name: 'Made for You',
-    component: 'ComingSoon',
+    component: 'MadeForYouView',
     icon: 'Gift',
     isPublic: true,
     showInNav: true,
