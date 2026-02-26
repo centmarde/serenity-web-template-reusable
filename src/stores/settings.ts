@@ -24,6 +24,7 @@ export interface Settings {
   traits: string[];
   songTitle: string;
   songArtist: string;
+  songUrl: string;
   dialogMessages: DialogMessages;
 }
 
@@ -47,6 +48,7 @@ interface SettingsStore {
   getRandomTrait: () => string;
   getSongTitle: () => string;
   getSongArtist: () => string;
+  getSongUrl: () => string;
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForIsDarkMode: () => Promise<boolean>;
@@ -59,6 +61,7 @@ interface SettingsStore {
   waitForTraits: () => Promise<string[]>;
   waitForSongTitle: () => Promise<string>;
   waitForSongArtist: () => Promise<string>;
+  waitForSongUrl: () => Promise<string>;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
@@ -260,6 +263,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.songArtist;
   },
 
+  getSongUrl: () => {
+    const { settings } = get();
+    if (!settings) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.songUrl ?? '';
+  },
+
   getDialogMessages: () => {
     const { settings } = get();
     if (!settings || !settings.dialogMessages) {
@@ -331,5 +342,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForSongArtist: async () => {
     await get().loadSettings();
     return get().getSongArtist();
+  },
+
+  waitForSongUrl: async () => {
+    await get().loadSettings();
+    return get().getSongUrl();
   }
 }));

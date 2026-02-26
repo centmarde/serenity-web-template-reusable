@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useSettingsStore } from "@/stores/settings";
 // ── canvas ASCII-art engine ──────────────────────────────────────────────────
 const POSTER_IMAGE = "/assets/ascii/set2.jpg";
@@ -126,54 +126,63 @@ const LyricsPoster: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rendering, setRendering] = useState(true);
   const [themeColor, setThemeColor] = useState<string | null>(null);
-  const [lyrics, setLyrics] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
+    let cancelled = false;
+
+    const loadAndRender = async () => {
       try {
         const [color, title, artist] = await Promise.all([
           waitForThemeColor(),
           waitForSongTitle(),
           waitForSongArtist(),
         ]);
+
+        if (cancelled) return;
         setThemeColor(color);
 
-        // Fetch lyrics from lyrics.ovh — free, no API key, CORS-friendly
+        // Fetch lyrics from lrclib.net — free, no API key, CORS-friendly
         const res = await fetch(
-          `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`
+          `https://lrclib.net/api/search?q=${encodeURIComponent(title)}+${encodeURIComponent(artist)}`
         );
-        if (!res.ok) throw new Error(`lyrics.ovh returned ${res.status}`);
+        if (!res.ok) throw new Error(`lrclib returned ${res.status}`);
         const json = await res.json();
-        if (!json.lyrics) throw new Error('No lyrics in response');
-        setLyrics(json.lyrics as string);
+        const track = Array.isArray(json) && json.length > 0 ? json[0] : null;
+        if (!track?.plainLyrics) throw new Error('No lyrics in response');
+
+        if (cancelled) return;
+        const lyrics: string = track.plainLyrics;
+
+        // Defer so spinner mounts before the heavy canvas work
+        setTimeout(() => {
+          if (cancelled) return;
+          const canvas = canvasRef.current;
+          if (!canvas) { setRendering(false); return; }
+
+          const img = new Image();
+          img.onload = () => {
+            if (!cancelled) {
+              renderLyricsPoster(canvas, img, lyrics, color);
+              setRendering(false);
+            }
+          };
+          img.onerror = () => { if (!cancelled) setRendering(false); };
+          img.src = POSTER_IMAGE;
+        }, 30);
+
       } catch (error) {
         console.error('Failed to load lyrics for LyricsPoster:', error);
-        setFetchError('Could not load lyrics.');
-        setRendering(false);
+        if (!cancelled) {
+          setFetchError('Could not load lyrics.');
+          setRendering(false);
+        }
       }
     };
-    loadData();
+
+    loadAndRender();
+    return () => { cancelled = true; };
   }, [waitForThemeColor, waitForSongTitle, waitForSongArtist]);
-
-  const doRender = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !lyrics || !themeColor) return;
-    const img = new Image();
-    img.onload = () => {
-      renderLyricsPoster(canvas, img, lyrics, themeColor);
-      setRendering(false);
-    };
-    img.onerror = () => setRendering(false);
-    img.src = POSTER_IMAGE;
-  }, [lyrics, themeColor]);
-
-  useEffect(() => {
-    if (!lyrics || !themeColor) return;
-    // setTimeout defers the heavy render so the spinner mounts first
-    const id = setTimeout(() => doRender(), 30);
-    return () => clearTimeout(id);
-  }, [doRender, lyrics, themeColor]);
 
   const CANVAS_W = 900;
   const CANVAS_H = 1350;

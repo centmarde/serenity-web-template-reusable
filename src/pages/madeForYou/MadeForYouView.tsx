@@ -3,9 +3,8 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Gift } from "lucide-react";
-import AsciiWidget from "./components/AsciiWidget";
-import LyricsArtWidget from "./components/LyricsArtWidget";
+import { Heart, ArrowLeft, Gift, Music2, Image } from "lucide-react";
+import FlowerCard from "./components/FlowerCard";
 
 interface MadeForYouViewProps {
   onNavigate?: (path: string) => void;
@@ -133,14 +132,107 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
         />
       </div>
 
+      {/* Hero Header Section */}
+      <div
+        className="w-full flex flex-col items-center justify-center gap-4 px-6 py-12 text-center"
+      >
+        {/* Floating gifs */}
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          <img
+            src="/assets/peach-goma.gif"
+            alt="peach goma"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain animate-bounce"
+            style={{ animationDelay: "0s", animationDuration: "2s" }}
+          />
+          <img
+            src="/assets/dudu-cute.gif"
+            alt="dudu cute"
+            className="w-20 h-20 sm:w-28 sm:h-28 object-contain"
+          />
+          <img
+            src="/assets/peach-goma.gif"
+            alt="peach goma"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain animate-bounce"
+            style={{ animationDelay: "0.4s", animationDuration: "2s" }}
+          />
+        </div>
+
+        {/* Message */}
+        <div className="flex flex-col items-center gap-2 max-w-xl">
+          <h2
+            className="font-bold leading-snug"
+            style={{
+              fontSize: "clamp(1.3rem, 4.5vw, 2rem)",
+              color: data.themeColor,
+            }}
+          >
+            A Bouquet of Love for you,{" "}
+            <span >{data.gfName}</span>
+          </h2>
+          <p
+            className="opacity-80 leading-relaxed"
+            style={{
+              fontSize: "clamp(0.85rem, 2.5vw, 1.05rem)",
+              color: `${data.themeColor}cc`,
+            }}
+          >
+            Like picking flowers from a garden, each creation below is a special gift.
+            Choose a bouquet and discover something beautiful I made just for you. 🌸
+          </p>
+        </div>
+
+       
+
+        {/* Coming soon note */}
+        <p
+          className="mt-4 italic opacity-60"
+          style={{
+            fontSize: "clamp(0.75rem, 2vw, 0.9rem)",
+            color: `${data.themeColor}99`,
+          }}
+        >
+          ✨ More flowers blooming soon — new bouquets are on the way �💕
+        </p>
+      </div>
+
       {/* Main Content */}
-      <div className="flex-1 w-full ">
+      <div className="flex-1 w-full px-4 sm:px-6 lg:px-8">
+        {/* Bouquet Selection Header */}
+        <div className="text-center mb-8">
+          <h2
+            className="font-bold text-2xl mb-2"
+            style={{ color: data.themeColor }}
+          >
+            💐 Choose Your Bouquet
+          </h2>
+          <p
+            className="text-sm opacity-80"
+            style={{ color: `${data.themeColor}cc` }}
+          >
+            Each flower leads to a special creation made just for you
+          </p>
+        </div>
 
-        {/* ASCII Art Widget */}
-        <AsciiWidget />
+        {/* Flower Cards Grid */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+          {/* Lyrics Art Flower */}
+          <FlowerCard
+            title="Lyrics Art"
+            icon={<Music2 size={24} />}
+            flowerImage="/flowers/rose.png"
+            route="/girlfriend/madeforyou/lyrics-art"
+            onNavigate={onNavigate}
+          />
 
-        {/* Lyrics Poster Widget — full bleed, no px */}
-        <LyricsArtWidget />
+          {/* ASCII Art Flower */}
+          <FlowerCard
+            title="ASCII Art"
+            icon={<Image size={24} />}
+            flowerImage="/flowers/rose1.png"
+            route="/girlfriend/madeforyou/ascii-art"
+            onNavigate={onNavigate}
+          />
+        </div>
 
         {/* Footer note */}
         <div className="text-center px-6 pb-8">
