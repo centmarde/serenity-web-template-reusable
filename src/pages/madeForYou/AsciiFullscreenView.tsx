@@ -18,7 +18,7 @@ const AsciiFullscreenView: React.FC<AsciiFullscreenViewProps> = ({ onNavigate })
   const [themeColor, setThemeColor] = useState("#F2A6A6");
   const [isLoading, setIsLoading] = useState(true);
   const [resolution, setResolution] = useState(
-    window.innerWidth >= LARGE_SCREEN_BREAKPOINT ? 200 : 120
+    window.innerWidth >= LARGE_SCREEN_BREAKPOINT ? 180 : 120
   );
 
   useEffect(() => {
@@ -97,20 +97,25 @@ const AsciiFullscreenView: React.FC<AsciiFullscreenViewProps> = ({ onNavigate })
         </div>
       </div>
 
-      {/* Main Content - Full Screen ASCII Art */}
-      <div className="flex-1 w-full relative overflow-hidden">
-        <AsciiArt
-          src="/assets/ascii/set1.jpg"
-          resolution={resolution}
-          charset="dense"
-          colored={true}
-          backgroundColor="#0a0a0a"
-          animated={true}
-          animationStyle="matrix"
-          animateOnView={true}
-          objectFit="contain"
-          className="absolute inset-0 w-full h-full"
-        />
+      {/* Main Content - Scrollable ASCII Art */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+        <div 
+          className="w-full flex justify-center"
+        >
+          <AsciiArt
+            src="/assets/ascii/set1.jpg"
+            resolution={resolution}
+            charset="dense"
+            colored={true}
+            backgroundColor="#0a0a0a"
+            animated={true}
+            animationStyle="matrix"
+            animateOnView={true}
+            objectFit="contain"
+            className="w-full"
+           
+          />
+        </div>
       </div>
     </div>
   );

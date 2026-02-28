@@ -154,13 +154,13 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
       icon: Calendar,
       label: 'Years',
       value: stats.years,
-      subtitle: stats.years === 1 ? 'year' : 'years'
+      subtitle: stats.years === 1 ? 'years together' : 'years together'
     },
     {
       icon: Calendar,
       label: 'Months',
       value: stats.months,
-      subtitle: stats.months === 1 ? 'month' : 'months'
+      subtitle: stats.months === 1 ? 'months together' : 'months together'
     },
   
     {
