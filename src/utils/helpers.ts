@@ -30,22 +30,21 @@ export const calculateRelationshipStats = (startDate: string): RelationshipStats
     exactDays: diffTime / (1000 * 60 * 60 * 24)
   });
   
-  // Calculate years, months, and remaining days
-  let years = current.getFullYear() - start.getFullYear();
-  let months = current.getMonth() - start.getMonth();
-  let days = current.getDate() - start.getDate();
+  // Calculate total months elapsed since start date
+  const totalMonthsElapsed = (current.getFullYear() - start.getFullYear()) * 12 + (current.getMonth() - start.getMonth());
   
-  // Adjust for negative days
+  // If we haven't reached the day of the month yet, subtract one month
+  const adjustedTotalMonths = current.getDate() >= start.getDate() ? totalMonthsElapsed : totalMonthsElapsed - 1;
+  
+  // Calculate years (remaining months after full years) and total months
+  const years = Math.floor(adjustedTotalMonths / 12);
+  const months = adjustedTotalMonths; // Total months, not remaining months
+  
+  // Calculate remaining days for the current month period
+  let days = current.getDate() - start.getDate();
   if (days < 0) {
-    months--;
     const lastMonth = new Date(current.getFullYear(), current.getMonth(), 0);
     days += lastMonth.getDate();
-  }
-  
-  // Adjust for negative months
-  if (months < 0) {
-    years--;
-    months += 12;
   }
   
   const result = {
