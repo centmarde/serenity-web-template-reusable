@@ -10,7 +10,9 @@ import { Heart, Camera, Music, Gift, Mail, Gamepad2, Target } from "lucide-react
 import {
   calculateRelationshipStats,
   calculateAnniversaryCountdown,
-  createThemedShadow,
+  createActiveCardStyles,
+  createInactiveCardStyles,
+  isFeatureActive,
   type RelationshipStats,
   type AnniversaryCountdown,
 } from "../../utils/helpers";
@@ -34,6 +36,72 @@ interface ComponentData {
 interface LandingViewProps {
   onNavigate?: (path: string) => void;
 }
+
+interface FeatureCardProps {
+  title: string;
+  icon: React.ReactNode;
+  themeColor: string;
+  onClick: () => void;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, themeColor, onClick }) => {
+  const isActive = isFeatureActive(title);
+  const cardStyles = isActive ? createActiveCardStyles(themeColor) : createInactiveCardStyles(themeColor);
+  const buttonBgColor = isActive ? `${themeColor}10` : `${cardStyles.color}10`;
+  
+  return (
+    <Card
+      className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
+      style={{
+        backgroundColor: cardStyles.backgroundColor,
+        boxShadow: cardStyles.boxShadow,
+        border: cardStyles.border,
+        transition: "all 0.3s ease",
+        opacity: isActive ? 1 : 0.75,
+      }}
+      onMouseEnter={(e) => {
+        const shadowColor = isActive ? themeColor : cardStyles.color;
+        e.currentTarget.style.boxShadow = `0 0 30px ${shadowColor}80, ${cardStyles.boxShadow}`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = cardStyles.boxShadow;
+      }}
+      onClick={onClick}
+    >
+      <CardContent className="p-6 text-center">
+        <Button
+          variant="ghost"
+          className="w-full h-auto flex flex-col gap-3 p-4"
+          style={{
+            color: cardStyles.color,
+            backgroundColor: buttonBgColor,
+          }}
+        >
+          {icon}
+          <span
+            className="font-semibold"
+            style={{
+              fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
+            }}
+          >
+            {title}
+            {!isActive && (
+              <span 
+                className="block text-xs mt-1" 
+                style={{ 
+                  color: cardStyles.color,
+                  opacity: 0.8,
+                }}
+              >
+                Coming Soon
+              </span>
+            )}
+          </span>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   const {
@@ -254,257 +322,47 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
         {/* 6 Button Cards Grid - 1 Row, 6 Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
-          {/* Love Letters Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          <FeatureCard
+            title="Love Letters"
+            icon={<Mail size={32} color={isFeatureActive("Love Letters") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Love Letters")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Mail 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Love Letters
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Our Memories Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          />
+          
+          <FeatureCard
+            title="Our Memories"
+            icon={<Camera size={32} color={isFeatureActive("Our Memories") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Memories")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Camera 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Our Memories
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Our Music Playlist Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          />
+          
+          <FeatureCard
+            title="Our Music Playlist"
+            icon={<Music size={32} color={isFeatureActive("Our Music Playlist") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Music Playlist")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Music 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Our Music Playlist
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Made for You Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          />
+          
+          <FeatureCard
+            title="Made for You"
+            icon={<Gift size={32} color={isFeatureActive("Made for You") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Made for You")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Gift 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Made for You
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Play with Me Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          />
+          
+          <FeatureCard
+            title="Play with Me"
+            icon={<Gamepad2 size={32} color={isFeatureActive("Play with Me") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Play with Me")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Gamepad2 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Play with Me
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Future Goals Button Card */}
-          <Card
-            className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              boxShadow: createThemedShadow(data.themeColor),
-              border: `4px solid ${data.themeColor}`,
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 30px ${data.themeColor}80, ${createThemedShadow(data.themeColor)}`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = createThemedShadow(data.themeColor);
-            }}
+          />
+          
+          <FeatureCard
+            title="Future Goals"
+            icon={<Target size={32} color={isFeatureActive("Future Goals") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Future Goals")}
-          >
-            <CardContent className="p-6 text-center">
-              <Button
-                variant="ghost"
-                className="w-full h-auto flex flex-col gap-3 p-4"
-                style={{
-                  color: data.themeColor,
-                  backgroundColor: `${data.themeColor}10`,
-                }}
-              >
-                <Target 
-                  size={32} 
-                  color={data.themeColor}
-                />
-                <span
-                  className="font-semibold"
-                  style={{
-                    fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
-                  }}
-                >
-                  Future Goals
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
+          />
         </div>
       </div>
 

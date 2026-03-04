@@ -235,3 +235,54 @@ export const createThemedGradient = (themeColor: string, opacity1: number = 0.1,
 export const createThemedShadow = (themeColor: string, opacity: number = 0.3): string => {
   return `0 8px 25px ${themeColor}${Math.round(opacity * 100).toString(16).padStart(2, '0')}`;
 };
+
+/**
+ * Generate secondary/inactive color from primary theme color
+ */
+export const generateInactiveColor = (themeColor: string): string => {
+  // Convert hex to RGB then create a muted version
+  const hex = themeColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Create a muted version by reducing saturation and increasing lightness
+  const mutedR = Math.round(r * 0.6 + 156 * 0.4); // Mix with light gray (156)
+  const mutedG = Math.round(g * 0.6 + 163 * 0.4); // Mix with light gray (163)
+  const mutedB = Math.round(b * 0.6 + 175 * 0.4); // Mix with light gray (175)
+  
+  return `rgb(${mutedR}, ${mutedG}, ${mutedB})`;
+};
+
+/**
+ * Create inactive/secondary card styling
+ */
+export const createInactiveCardStyles = (themeColor: string) => {
+  const inactiveColor = generateInactiveColor(themeColor);
+  return {
+    backgroundColor: "rgba(249, 250, 251, 0.85)", // Lighter background
+    border: `3px solid ${inactiveColor}40`, // More transparent border
+    boxShadow: `0 4px 15px ${inactiveColor}20`, // Softer shadow
+    color: inactiveColor,
+  };
+};
+
+/**
+ * Create active card styling
+ */
+export const createActiveCardStyles = (themeColor: string) => {
+  return {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    border: `4px solid ${themeColor}`,
+    boxShadow: createThemedShadow(themeColor),
+    color: themeColor,
+  };
+};
+
+/**
+ * Determine if a feature is active (has a route) or inactive (under development)
+ */
+export const isFeatureActive = (featureName: string): boolean => {
+  const activeFeatures = ["Love Letters", "Made for You"];
+  return activeFeatures.includes(featureName);
+};
