@@ -25,7 +25,10 @@ A sophisticated, feature-rich web application template designed for couples to c
 
 ### 🎵 Musical & Creative Features
 - **🎼 Lyric Art Poster Generator**: Advanced canvas-based system that transforms song lyrics into ASCII art using image processing
-- **🎵 Interactive Music Player**: Spotify-style player with dynamic theming
+- **🎵 Advanced Music Player**: Spotify-style player with shuffle functionality using Fisher-Yates algorithm and dynamic theming
+- **🎶 Smart Playlist Management**: Search, pagination (5 songs per page), and intelligent song filtering
+- **✏️ Role-Based Song Editing**: Edit and delete functionality with permission-based access control
+- **🔄 Intelligent Shuffling**: Advanced shuffle system that plays all songs regardless of ownership
 - **🖼️ ASCII Art Gallery**: Custom ASCII art generation with image processing algorithms
 - **🎨 Color Mapping Technology**: Advanced contrast curves and brightness mapping for artistic effects
 
@@ -40,6 +43,16 @@ A sophisticated, feature-rich web application template designed for couples to c
 - **📱 Mobile-First Navigation**: Advanced responsive navigation with gesture support
 - **🎭 Animated Narrator**: Interactive storytelling with animated GIFs and timed messages
 - **🎨 Dynamic Widgets**: Reusable widget system for different content types
+
+### 🎵 Advanced Playlist Features
+- **🔍 Smart Search**: Real-time song search across titles and descriptions with instant filtering
+- **📄 Intelligent Pagination**: Clean 5-songs-per-page layout with responsive navigation controls
+- **👥 Role-Based Permissions**: Edit/delete access control based on song ownership (girlfriend's songs only)
+- **✏️ Inline Song Editing**: Modal-based editing system for titles and descriptions with form validation
+- **🗑️ Secure Delete System**: Confirmation dialogs with loading states and "cannot undo" warnings
+- **🔄 Advanced Shuffle Algorithm**: Fisher-Yates shuffle implementation with reshuffle capabilities
+- **🎯 Smart Song Filtering**: Intelligent handling of null values in song ownership detection
+- **📱 Mobile-Optimized Controls**: Touch-friendly buttons with proper spacing and visual feedback
 
 ---
 
@@ -133,14 +146,24 @@ interface AuthStore {
 - **LyricsArtFullscreenView**: Advanced canvas-based lyric art generation
 - **AsciiFullscreenView**: ASCII art gallery with image processing
 - **AuthView**: Secure authentication interface
-- **PlayListView**: Music playlist management with Spotify-style player
-- **Dialog System**: Reusable modal components with animations
+- **PlayListView**: Advanced music playlist management with intelligent filtering
+- **PlayListWidget**: Individual playlist components with search, pagination, and CRUD operations
+- **PlaylistPlayer**: Global music player with shuffle functionality and audio controls
+- **Dialog System**: Modular dialog architecture with separate components:
+  - **EditSongDialog**: Form-based song editing with validation and Enter key support
+  - **DeleteSongDialog**: Confirmation dialogs with loading states and secure deletion
+- **Responsive Widget System**: Mobile-first components with adaptive layouts
 
-#### 4. **Creative Technology Stack**
+#### 4. **Advanced Technology Stack**
 - **Canvas Processing**: Advanced image-to-ASCII conversion algorithms
 - **Color Theory Engine**: Brightness mapping, contrast curves, and color blending
 - **Animation System**: Framer Motion integration for smooth transitions
 - **Responsive Design**: Clamp() functions and viewport-based scaling
+- **State Management**: Advanced Zustand stores with selectors and actions pattern
+- **Audio Processing**: HTML5 audio with smart playlist management and shuffle algorithms
+- **Database Integration**: Supabase with real-time updates and file storage
+- **Form Validation**: Type-safe form handling with async save operations
+- **Search & Pagination**: Real-time filtering with optimized pagination controls
 
 ---
 
@@ -332,14 +355,22 @@ future-love-letter/
 │   │   │   ├── AsciiFullscreenView.tsx
 │   │   │   ├── components/    # Feature-specific components
 │   │   │   └── dialogs/       # Interactive modals
-│   │   ├── Playlist/          # Music playlist features
+│   │   ├── Playlist/          # Advanced music playlist system
+│   │   │   ├── PlayListView.tsx         # Main playlist container
+│   │   │   ├── components/
+│   │   │   │   └── PlayListWidget.tsx   # Individual playlist with search/pagination
+│   │   │   └── dialogs/       # Modular dialog system
+│   │   │       ├── EditPlaylistDialog.tsx    # Song editing modal
+│   │   │       └── DeletePlaylistDialog.tsx  # Delete confirmation modal
 │   │   ├── loveLetter/        # Love letter functionality
 │   │   └── boyfriendDashboard/ # Partner dashboard
 │   ├── components/
-│   │   ├── ui/                # shadcn/ui components
+│   │   ├── ui/                # shadcn/ui components (50+ components)
 │   │   │   ├── lyricsPoster.tsx  # Advanced canvas art generator
 │   │   │   ├── ascii-art.tsx     # ASCII processing component
-│   │   │   └── [50+ UI components]
+│   │   │   ├── pagination.tsx    # Advanced pagination controls
+│   │   │   └── [47+ other UI components]
+│   │   ├── PlaylistPlayer.tsx # Global music player with shuffle & audio controls
 │   │   ├── Navbar.tsx         # Navigation component
 │   │   ├── Waves.tsx          # Animated wave effects
 │   │   └── dialogs/           # Reusable dialog components
@@ -426,6 +457,68 @@ const { getThemeColor, getCallsign, waitForThemeColor } = useSettingsStore();
 const themeColor = await waitForThemeColor(); // Async-safe loading
 ```
 
+### Advanced Playlist Management System
+The template features sophisticated playlist management with modular architecture:
+
+```typescript
+// Smart Song Filtering with Null Handling
+const getBoyfriendSongs = () => {
+  return songs.filter(song => 
+    song.is_girlfriend === false || song.is_girlfriend === null
+  );
+};
+
+// Fisher-Yates Shuffle Algorithm
+const shuffleArray = <T,>(arr: T[]): T[] => {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
+
+// Real-time Search with Pagination
+const searchedSongs = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
+  if (!q) return allFilteredSongs;
+  return allFilteredSongs.filter(song =>
+    song.title?.toLowerCase().includes(q) ||
+    song.description?.toLowerCase().includes(q)
+  );
+}, [allFilteredSongs, searchQuery]);
+
+// Role-based CRUD Operations
+const canEditSong = (song: Song) => {
+  return isGirlfriend && song.is_girlfriend === true;
+};
+```
+
+### Dialog Architecture Pattern
+```typescript
+// Modular Dialog System with Separation of Concerns
+interface EditSongDialogProps {
+  song: Song | null;
+  themeColor: string;
+  onClose: () => void;
+  onSave: (id: number, title: string, description: string) => Promise<void>;
+}
+
+interface DeleteSongDialogProps {
+  song: Song | null;
+  onClose: () => void;
+  onConfirm: (id: number) => Promise<void>;
+}
+
+// Async Form Validation with Loading States
+const handleSave = async () => {
+  if (!song) return;
+  setIsSaving(true);
+  await onSave(song.id, editTitle, editDescription);
+  setIsSaving(false);
+};
+```
+
 ## 🚀 Advanced Deployment Options
 
 ### Environment-Specific Builds
@@ -455,20 +548,27 @@ npm run preview
 
 ## 💝 Perfect For
 
-- **🎭 Creative Couples**: Generate artistic content from your favorite songs
-- **🎵 Music Lovers**: Transform lyrics into visual art with advanced algorithms
-- **💑 Anniversary Gifts**: Create personalized digital experiences  
-- **🌈 Art Enthusiasts**: Explore canvas-based image processing and ASCII art
-- **👩‍💻 Developers**: Learn advanced React patterns and creative programming
-- **🎨 Designers**: Understand color theory implementation in web apps
-- **📱 Mobile-First Projects**: Study responsive design best practices
-- **🚀 Template Builders**: Use as foundation for other personalized apps
+- **🎭 Creative Couples**: Generate artistic content from your favorite songs and manage personal playlists
+- **🎵 Music Lovers**: Advanced playlist management with shuffle algorithms, search, and role-based editing
+- **💑 Anniversary Gifts**: Create personalized digital experiences with custom songs and memories
+- **🌈 Art Enthusiasts**: Explore canvas-based image processing and ASCII art generation
+- **👩‍💻 Developers**: Learn advanced React patterns, Zustand state management, and modular dialog architecture
+- **🎨 Designers**: Understand color theory implementation and responsive design patterns
+- **📱 Mobile-First Projects**: Study advanced responsive design with clamp() functions and touch-friendly interfaces
+- **🚀 Template Builders**: Use as foundation with comprehensive CRUD operations and permissions system
+- **🔍 UX Researchers**: Analyze search and pagination patterns with role-based access control
+- **🎧 Audio App Developers**: Study HTML5 audio integration with playlist management systems
 
 ## 🔮 Upcoming Features
 
 - **🎬 Video Background Processing**: Convert videos to ASCII animations
 - **🎯 AI-Powered Art Suggestions**: Machine learning for artistic recommendations  
-- **🌍 Internationalization**: Multi-language support for global couples
+- **�️ Advanced Audio Controls**: Equalizer, volume normalization, and crossfade effects
+- **📊 Playlist Analytics**: Play count tracking, favorite song statistics, and listening patterns
+- **🔄 Real-time Collaboration**: Live playlist editing with conflict resolution
+- **📁 Playlist Categories**: Smart grouping by mood, genre, and occasion
+- **🎨 Dynamic Audio Visualizer**: Canvas-based real-time audio visualization
+- **�🌍 Internationalization**: Multi-language support for global couples
 - **📊 Relationship Analytics**: Data visualization for couple milestones
 - **🎪 VR/AR Integration**: Immersive romantic experiences
 - **🤖 Advanced AI Chatbot**: Intelligent romantic conversation partner
