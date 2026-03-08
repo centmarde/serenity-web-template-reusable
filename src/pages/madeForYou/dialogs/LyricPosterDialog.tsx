@@ -27,13 +27,6 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [showingMessage, setShowingMessage] = useState(false);
 
-  // Randomly select GIF for narrator (only once when component mounts)
-  const [narratorGif] = useState(() => {
-    const gifs = ['listen.gif', 'peach-goma.gif', 'dudu-cute.gif', 'blee.gif'];
-    const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
-    return `/assets/${randomGif}`;
-  });
-
   const narratorMessages = [
     {
       text: `Hey gorgeous ${getCallsign() || "baby"}! 🎵`,
@@ -184,7 +177,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                   }}
                 >
                   <img
-                    src={narratorGif}
+                    src="/assets/explain.gif"
                     alt="Your boyfriend explaining his musical creation"
                     className="w-16 h-16 rounded-full object-cover"
                     style={{
