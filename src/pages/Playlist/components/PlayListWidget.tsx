@@ -15,7 +15,7 @@ import { Heart, Music, Search, X, Pencil, Trash2 } from "lucide-react";
 import { useSongsSelectors, useSongsActions } from "../../../stores/songsData";
 import type { Song } from "../../../stores/songsData";
 import { EditSongDialog } from "../dialogs/EditPlaylistDialog";
-import { DeleteSongDialog } from "../dialogs/deletePlaylistDialog";
+import { DeleteSongDialog } from "../dialogs/DeletePlaylistDialog";
 
 const SONGS_PER_PAGE = 5;
 
