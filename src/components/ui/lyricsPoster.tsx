@@ -125,8 +125,15 @@ interface LyricsPosterProps {
 }
 
 const LyricsPoster: React.FC<LyricsPosterProps> = ({ 
-  posterImageSrc = "/assets/ascii/set3.jpg" 
+  posterImageSrc 
 }) => {
+  // Randomize image source from set1.jpg to set5.jpg
+  const [randomImageSrc] = useState(() => {
+    const randomNum = Math.floor(Math.random() * 5) + 1; // 1-5
+    return `/assets/ascii/set${randomNum}.jpg`;
+  });
+  
+  const finalImageSrc = posterImageSrc || randomImageSrc;
   const { waitForSongTitle, waitForSongArtist, waitForThemeColor } = useSettingsStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rendering, setRendering] = useState(true);
@@ -173,7 +180,7 @@ const LyricsPoster: React.FC<LyricsPosterProps> = ({
             }
           };
           img.onerror = () => { if (!cancelled) setRendering(false); };
-          img.src = posterImageSrc;
+          img.src = finalImageSrc;
         }, 30);
 
       } catch (error) {
@@ -187,7 +194,7 @@ const LyricsPoster: React.FC<LyricsPosterProps> = ({
 
     loadAndRender();
     return () => { cancelled = true; };
-  }, [waitForThemeColor, waitForSongTitle, waitForSongArtist, posterImageSrc]);
+  }, [waitForThemeColor, waitForSongTitle, waitForSongArtist, finalImageSrc]);
 
   const CANVAS_W = 900;
   const CANVAS_H = 1350;
