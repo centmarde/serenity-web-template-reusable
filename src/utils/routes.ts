@@ -67,7 +67,7 @@ export const routes: Route[] = [
   {
     path: '/music',
     name: 'Our Music Playlist',
-    component: 'ComingSoon',
+    component: 'PlayListView',
     icon: 'Music',
     isPublic: true,
     showInNav: true,
