@@ -7,6 +7,7 @@ import AuthView from './pages/auth/AuthView';
 import BoyFriendDashboardView from './pages/boyfriendDashboard/BoyFriendDashboardView';
 import LyricsArtFullscreenView from './pages/madeForYou/LyricsArtFullscreenView';
 import AsciiFullscreenView from './pages/madeForYou/AsciiFullscreenView';
+import PlaylistPlayer from './components/PlaylistPlayer';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
 import { useInitializeAuth } from './stores/authData';
@@ -106,7 +107,9 @@ function App() {
       )}
       
       {currentView === 'main' && renderMainContent()}
-      
+
+      {/* Playlist Player - Mounted immediately on App load, plays across all views */}
+      <PlaylistPlayer />
     </div>
     
   );

@@ -181,7 +181,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                   }}
                 >
                   <img
-                    src="/assets/peach-goma.gif"
+                    src="/assets/explain.gif"
                     alt="Your boyfriend explaining his creation"
                     className="w-16 h-16 rounded-full object-cover"
                     style={{
