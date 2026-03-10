@@ -11,11 +11,13 @@ import {
   PaginationLink,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { Heart, Music, Search, X, Pencil, Trash2 } from "lucide-react";
+import { Heart, Music, Search, X, Pencil, Trash2, Plus } from "lucide-react";
 import { useSongsSelectors, useSongsActions } from "../../../stores/songsData";
 import type { Song } from "../../../stores/songsData";
 import { EditSongDialog } from "../dialogs/EditPlaylistDialog";
 import { DeleteSongDialog } from "../dialogs/DeletePlaylistDialog";
+import { UploadSongDialog } from "../dialogs/UploadSongDialog";
+import { Button } from "@/components/ui/button";
 
 const SONGS_PER_PAGE = 5;
 
@@ -41,14 +43,15 @@ const PlayListWidget: React.FC<PlayListWidgetProps> = ({
     getGirlfriendSongs,
     getBoyfriendSongs 
   } = useSongsSelectors();
-  const { fetchSongs, updateSong, deleteSong } = useSongsActions();
+  const { fetchSongs, updateSong, deleteSong, addSongWithFile } = useSongsActions();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Edit / Delete dialog state
+  // Edit / Delete / Upload dialog state
   const [editingSong, setEditingSong] = useState<Song | null>(null);
   const [deletingSong, setDeletingSong] = useState<Song | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   const handleSaveEdit = async (id: number, title: string, description: string) => {
     await updateSong(id, {
@@ -65,6 +68,20 @@ const PlayListWidget: React.FC<PlayListWidgetProps> = ({
     if (paginatedSongs.length === 1 && safePage > 1) {
       setCurrentPage((p) => p - 1);
     }
+  };
+
+  const handleUploadSong = async (file: File, title: string, description: string) => {
+    await addSongWithFile(
+      {
+        title: title || null,
+        description: description || null,
+        is_girlfriend: true, // Always true for GF uploads
+      },
+      file
+    );
+    setIsUploadDialogOpen(false);
+    // Reset to page 1 to show new song
+    setCurrentPage(1);
   };
 
   // Fetch songs on component mount
@@ -184,6 +201,21 @@ const PlayListWidget: React.FC<PlayListWidgetProps> = ({
         >
           {ownerName}'s Favorites · {allFilteredSongs.length} song{allFilteredSongs.length !== 1 ? 's' : ''}
         </Badge>
+
+        {/* Upload Button (GF only) */}
+        {isGirlfriend && (
+          <Button
+            onClick={() => setIsUploadDialogOpen(true)}
+            className="mx-auto mt-3 h-8 text-xs"
+            style={{
+              backgroundColor: themeColor,
+              color: "white",
+            }}
+          >
+            <Plus size={14} className="mr-1" />
+            Add Song
+          </Button>
+        )}
 
         {/* Search Input */}
         <div className="relative mt-3">
@@ -384,7 +416,7 @@ const PlayListWidget: React.FC<PlayListWidgetProps> = ({
         )}
       </CardContent>
 
-      {/* ── Edit & Delete Dialogs (GF only) ── */}
+      {/* ── Edit, Delete & Upload Dialogs (GF only) ── */}
       <EditSongDialog
         key={editingSong?.id}
         song={editingSong}
@@ -396,6 +428,12 @@ const PlayListWidget: React.FC<PlayListWidgetProps> = ({
         song={deletingSong}
         onClose={() => setDeletingSong(null)}
         onConfirm={handleConfirmDelete}
+      />
+      <UploadSongDialog
+        isOpen={isUploadDialogOpen}
+        themeColor={themeColor}
+        onClose={() => setIsUploadDialogOpen(false)}
+        onUpload={handleUploadSong}
       />
     </Card>
   );
