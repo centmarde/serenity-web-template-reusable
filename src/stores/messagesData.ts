@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import { supabase, supabaseAdmin, STORAGE_BASE_URL } from '@/lib/supabase';
+import axios from 'axios';
 
 // Types
+interface MessageJsonFormat {
+  title: string;
+  category: string;
+  message: string;
+}
+
 export interface LoveLetter {
   id?: number;
   created_at?: string;
@@ -94,11 +101,42 @@ const useMessagesStore = create<MessagesState>((set, get) => ({
         isLoading: false 
       });
     } catch (error) {
-      console.error('Error fetching letters:', error);
-      set({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch letters',
-        isLoading: false 
-      });
+      console.error('Error fetching letters from Supabase:', error);
+      
+      // Fallback to messages.json using axios
+      try {
+        console.log('Attempting fallback to messages.json...');
+        const response = await axios.get('/data/messages.json');
+        
+        if (response.data && response.data.messages) {
+          // Transform messages.json format to match LoveLetter interface
+          const fallbackLetters: LoveLetter[] = response.data.messages.map((msg: MessageJsonFormat, index: number) => ({
+            id: index + 1,
+            created_at: new Date().toISOString(),
+            title: msg.title,
+            message: msg.message,
+            category: msg.category,
+            is_girlfriend: false,
+            attach_image: undefined,
+            user_id: undefined
+          }));
+          
+          set({ 
+            letters: fallbackLetters, 
+            isLoading: false,
+            error: null // Clear error since fallback succeeded
+          });
+          console.log('Successfully loaded letters from fallback messages.json');
+        } else {
+          throw new Error('Invalid messages.json format');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback to messages.json also failed:', fallbackError);
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to fetch letters from both Supabase and fallback',
+          isLoading: false 
+        });
+      }
     }
   },
 
