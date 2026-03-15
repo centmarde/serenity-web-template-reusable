@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
-import { baseAIService } from '../../../lib/AiResponse';
+import { baseAIService } from '../../../lib/aiCelebrationResponse';
 import {
   Dialog,
   DialogContent,
@@ -66,26 +66,33 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
       const timeUnit = celebrationType === 'monthsary' ? 'month' : 'year';
       const timeUnitPlural = celebrationType === 'monthsary' ? 'months' : 'years';
       
-      const prompt = `Write a short, sweet personal message (max 25 words) for ${gfName} celebrating our ${count} ${count === 1 ? timeUnit : timeUnitPlural} ${celebrationType}. Use romantic but not overly dramatic tone. Address them as ${callsign}.`;
+      const prompt = `Write a heartfelt personal message for ${callsign} celebrating our ${count} ${count === 1 ? timeUnit : timeUnitPlural} ${celebrationType}. 
+      
+      The message should be:
+      - Personal and romantic, but authentic (not overly dramatic)
+      - About 60-80 words long
+      - Express gratitude for the time together
+      - Mention how special they make every day
+      - Include hope for the future together
+      - End with a loving sentiment
+      
+      Write as if you're ${gfName} writing to ${callsign}. Make it warm, loving, and genuine.`;
 
       const response = await baseAIService.generateSimpleMessage({
         prompt,
         userName: callsign,
-        maxWords: 25
+        maxWords: 80
       });
       
       if (response.success && response.generatedMessage) {
         return response.generatedMessage;
       } else {
         console.warn('AI message generation failed, using fallback:', response.error);
-        return `Thank you for ${count} amazing ${count === 1 ? timeUnit : timeUnitPlural}, ${callsign}. You make every day special! 💖`;
+        return `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${callsign}. I love you more than words can express! 💖`;
       }
     } catch (error) {
       console.error('Error generating personal message:', error);
-      const count = celebrationType === 'monthsary' ? monthsCompleted : yearsCompleted;
-      const timeUnit = celebrationType === 'monthsary' ? 'month' : 'year';
-      const timeUnitPlural = celebrationType === 'monthsary' ? 'months' : 'years';
-      return `Thank you for ${count} amazing ${count === 1 ? timeUnit : timeUnitPlural}, ${callsign}. You make every day special! 💖`;
+      return `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${callsign}. I love you more than words can express! 💖`;
     } finally {
       setIsGeneratingMessage(false);
     }
@@ -193,12 +200,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
         // Generate fallback AI personal message if it's a celebration
         let fallbackAiPersonalMessage = undefined;
         if (fallbackCelebration.isCelebration && fallbackCelebration.celebrationType) {
-          const count = fallbackCelebration.celebrationType === 'monthsary' 
-            ? fallbackCelebration.monthsCompleted 
-            : fallbackCelebration.yearsCompleted;
-          const timeUnit = fallbackCelebration.celebrationType === 'monthsary' ? 'month' : 'year';
-          const timeUnitPlural = fallbackCelebration.celebrationType === 'monthsary' ? 'months' : 'years';
-          fallbackAiPersonalMessage = `Thank you for ${count} amazing ${count === 1 ? timeUnit : timeUnitPlural}, ${fallbackCallsign}. You make every day special! 💖`;
+          fallbackAiPersonalMessage = `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${fallbackCallsign}. I love you more than words can express! 💖`;
         }
         
         setDisplayData({
@@ -237,7 +239,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
     return null;
   }
 
-  const { callsign, gfName, themeColor, celebration, aiPersonalMessage } = displayData;
+  const { callsign, themeColor, celebration, aiPersonalMessage } = displayData;
   const { celebrationType, monthsCompleted, yearsCompleted } = celebration;
 
   // Static messages for main content
@@ -247,7 +249,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
       subtitle: `${monthsCompleted} month${monthsCompleted === 1 ? '' : 's'} of love, laughter, and beautiful memories`,
       description: `Today marks ${monthsCompleted} wonderful month${monthsCompleted === 1 ? '' : 's'} since we officially became a couple. Every moment with you has been a treasure, and I can't wait for all the adventures still to come! 💕`,
       badge: `${monthsCompleted} Month Milestone`,
-      gif: '/assets/peach-goma.gif'
+      gif: '/assets/celeb.gif'
     },
     anniversary: {
       title: `Happy ${yearsCompleted} Year Anniversary! 🎊`,
@@ -360,7 +362,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
                         <Heart className="w-3 h-3 animate-pulse" style={{ color: themeColor }} />
                       </span>
                     ) : (
-                      aiPersonalMessage || `Thank you for being the most amazing partner. Every day with you is a celebration! I love you more than words can express, ${gfName}. 💖`
+                      aiPersonalMessage || `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${callsign}. I love you more than words can express! 💖`
                     )}
                   </p>
                 </CardContent>
@@ -505,7 +507,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
                         <Heart className="w-4 h-4 animate-pulse" style={{ color: themeColor }} />
                       </span>
                     ) : (
-                      aiPersonalMessage || `Thank you for being the most amazing partner. Every day with you is a celebration! I love you more than words can express, ${gfName}. 💖`
+                      aiPersonalMessage || `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${callsign}. I love you more than words can express! 💖`
                     )}
                   </p>
                 </CardContent>
