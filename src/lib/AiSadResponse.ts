@@ -1,4 +1,5 @@
 import { Groq } from 'groq-sdk';
+import { getTimeBasedGreeting, formatResponse, getFallbackComfortMessage } from './helpers';
 
 // Initialize Groq client
 const groq = new Groq({
@@ -316,33 +317,14 @@ export const aiUtils = {
       .map(result => result.value);
   },
 
-  // Create a personalized greeting based on time of day
-  getTimeBasedGreeting(userName: string): string {
-    const hour = new Date().getHours();
-    let greeting = '';
-    
-    if (hour < 6) {
-      greeting = `Good night, ${userName} 🌙`;
-    } else if (hour < 12) {
-      greeting = `Good morning, ${userName} ☀️`;
-    } else if (hour < 17) {
-      greeting = `Good afternoon, ${userName} 🌤️`;
-    } else if (hour < 21) {
-      greeting = `Good evening, ${userName} 🌆`;
-    } else {
-      greeting = `Good night, ${userName} 🌙`;
-    }
-    
-    return greeting;
+  // Generate fallback comfort message when AI fails
+  getFallbackComfortMessage(userName: string, partnerName: string) {
+    return getFallbackComfortMessage(userName, partnerName);
   },
 
-  // Format AI response for display
-  formatResponse(response: string): string {
-    return response
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>')
-      .trim();
-  }
+  // Re-export common utility functions from helpers
+  getTimeBasedGreeting,
+  formatResponse
 };
 
 // Export singleton instance

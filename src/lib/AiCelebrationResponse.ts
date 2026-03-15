@@ -1,4 +1,5 @@
 import { Groq } from 'groq-sdk';
+import { getTimeBasedGreeting, formatResponse, getFallbackCelebrationMessage } from './helpers';
 
 // Initialize Groq client
 const groq = new Groq({
@@ -326,57 +327,10 @@ export const aiUtils = {
     }
   },
 
-  // Create time-based greetings
-  getTimeBasedGreeting(userName: string): string {
-    const hour = new Date().getHours();
-    let greeting = '';
-    
-    if (hour < 6) {
-      greeting = `Good night, ${userName} 🌙`;
-    } else if (hour < 12) {
-      greeting = `Good morning, ${userName} ☀️`;
-    } else if (hour < 17) {
-      greeting = `Good afternoon, ${userName} 🌤️`;
-    } else if (hour < 21) {
-      greeting = `Good evening, ${userName} 🌆`;
-    } else {
-      greeting = `Good night, ${userName} 🌙`;
-    }
-    
-    return greeting;
-  },
-
-  // Format AI response for display
-  formatResponse(response: string): string {
-    return response
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>')
-      .trim();
-  },
-
-  // Generate celebration fallback messages
-  getFallbackCelebrationMessage(celebrationType: 'monthsary' | 'anniversary', count: number, userName: string): {
-    title: string;
-    subtitle: string;
-    personalMessage: string;
-    tone: 'romantic' | 'playful' | 'heartfelt' | 'joyful';
-  } {
-    if (celebrationType === 'monthsary') {
-      return {
-        title: `Happy ${count} Month${count === 1 ? '' : 's'} Together! 🎉`,
-        subtitle: `${count} month${count === 1 ? '' : 's'} of love, laughter, and beautiful memories`,
-        personalMessage: `My dearest ${userName}, today marks ${count} wonderful month${count === 1 ? '' : 's'} since we officially became a couple. Every moment with you has been a treasure, and I can't wait for all the adventures still to come! Thank you for being the most amazing partner. Every day with you is a celebration! 💕`,
-        tone: 'romantic' as const
-      };
-    } else {
-      return {
-        title: `Happy ${count} Year Anniversary! 🎊`,
-        subtitle: `${count} amazing year${count === 1 ? '' : 's'} of love and togetherness`,
-        personalMessage: `Today we celebrate ${count} incredible year${count === 1 ? '' : 's'} together! From our first day to this moment, every memory we've created has been precious. Here's to many more years of love, growth, and happiness together! Thank you for being my everything, ${userName}. 💖`,
-        tone: 'heartfelt' as const
-      };
-    }
-  }
+  // Re-export common utility functions from helpers
+  getTimeBasedGreeting,
+  formatResponse,
+  getFallbackCelebrationMessage
 };
 
 // Export singleton instance
