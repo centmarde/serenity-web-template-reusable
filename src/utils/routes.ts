@@ -5,6 +5,7 @@ export interface Route {
   icon?: string;
   isPublic?: boolean;
   showInNav?: boolean;
+  requiresAuth?: boolean; // New property to control authentication requirement
 }
 
 export const routes: Route[] = [
@@ -15,6 +16,7 @@ export const routes: Route[] = [
     icon: 'Heart',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true, // Requires authentication after first visit
   },
   {
     path: '/auth',
@@ -23,6 +25,7 @@ export const routes: Route[] = [
     icon: 'Lock',
     isPublic: true,
     showInNav: false,
+    requiresAuth: false, // Auth route doesn't require authentication
   },
   {
     path: '/boyfriend-dashboard',
@@ -31,6 +34,7 @@ export const routes: Route[] = [
     icon: 'Heart',
     isPublic: false,
     showInNav: false,
+    requiresAuth: false, // Special boyfriend access (handled separately)
   },
   {
     path: '/love-letters',
@@ -39,6 +43,7 @@ export const routes: Route[] = [
     icon: 'Mail',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
   {
     path: '/girlfriend-sad',
@@ -47,6 +52,7 @@ export const routes: Route[] = [
     icon: 'Frown',
     isPublic: true,
     showInNav: false,
+    requiresAuth: true,
   },
   {
     path: '/girlfriend-miss',
@@ -55,6 +61,7 @@ export const routes: Route[] = [
     icon: 'HeartHandshake',
     isPublic: true,
     showInNav: false,
+    requiresAuth: true,
   },
   {
     path: '/memories',
@@ -63,6 +70,7 @@ export const routes: Route[] = [
     icon: 'Camera',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
   {
     path: '/music',
@@ -71,6 +79,7 @@ export const routes: Route[] = [
     icon: 'Music',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
   {
     path: '/girlfriend/madeforyou',
@@ -79,6 +88,7 @@ export const routes: Route[] = [
     icon: 'Gift',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
   {
     path: '/girlfriend/madeforyou/lyrics-art',
@@ -87,6 +97,7 @@ export const routes: Route[] = [
     icon: 'Music',
     isPublic: true,
     showInNav: false,
+    requiresAuth: true,
   },
   {
     path: '/girlfriend/madeforyou/ascii-art',
@@ -95,6 +106,7 @@ export const routes: Route[] = [
     icon: 'Image',
     isPublic: true,
     showInNav: false,
+    requiresAuth: true,
   },
   {
     path: '/games',
@@ -103,6 +115,7 @@ export const routes: Route[] = [
     icon: 'Gamepad2',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
   {
     path: '/goals',
@@ -111,6 +124,7 @@ export const routes: Route[] = [
     icon: 'Target',
     isPublic: true,
     showInNav: true,
+    requiresAuth: true,
   },
 ];
 

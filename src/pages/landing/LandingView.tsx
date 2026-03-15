@@ -18,6 +18,7 @@ import {
 } from "../../utils/helpers";
 import NoticeDialog from "./dialogs/NoticeDialog";
 import CelebrationDialog from "./dialogs/CelebrationDialog";
+import { useCurrentDialog, useDialogActions } from '../../composables/dialogControll';
 import CounterDialog from "./dialogs/CounterDialog";
 import OpsDialog from "./dialogs/OpsDialog";
 import ChatBot from "./components/ChatBot";
@@ -122,9 +123,11 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   const [data, setData] = useState<ComponentData | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [showNoticeDialog, setShowNoticeDialog] = useState(true);
-  const [showCelebrationDialog, setShowCelebrationDialog] = useState(false);
   const [showCounterDialog, setShowCounterDialog] = useState(false);
+  
+  // Dialog controller
+  const currentDialog = useCurrentDialog();
+  const { markNoticeAsSeen, markCelebrationAsSeen } = useDialogActions();
   const [showOpsDialog, setShowOpsDialog] = useState(false);
   const [showChatBot, setShowChatBot] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<string>("");
@@ -198,11 +201,19 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     getRandomTrait,
   ]);
 
+
+
   const handleNoticeDialogClose = (open: boolean) => {
-    setShowNoticeDialog(open);
     if (!open) {
-      // When NoticeDialog closes, show CelebrationDialog
-      setShowCelebrationDialog(true);
+      // Mark notice as seen and let dialog controller handle the flow
+      markNoticeAsSeen();
+    }
+  };
+
+  const handleCelebrationDialogClose = (open: boolean) => {
+    if (!open) {
+      // Mark celebration as seen 
+      markCelebrationAsSeen();
     }
   };
 
@@ -396,18 +407,22 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         </Button>
       </div>
       
-      {/* Notice Dialog */}
-      <NoticeDialog 
-        open={showNoticeDialog} 
-        onOpenChange={handleNoticeDialogClose} 
-        onNavigate={onNavigate}
-      />
+      {/* Notice Dialog - Controlled by dialog controller */}
+      {currentDialog === 'notice' && (
+        <NoticeDialog 
+          open={true} 
+          onOpenChange={handleNoticeDialogClose} 
+          onNavigate={onNavigate}
+        />
+      )}
       
-      {/* Celebration Dialog - Shows after Notice Dialog closes */}
-      <CelebrationDialog 
-        open={showCelebrationDialog} 
-        onOpenChange={setShowCelebrationDialog} 
-      />
+      {/* Celebration Dialog - Controlled by dialog controller */}
+      {currentDialog === 'celebration' && (
+        <CelebrationDialog 
+          open={true} 
+          onOpenChange={handleCelebrationDialogClose} 
+        />
+      )}
       
       {/* Counter Dialog */}
       <CounterDialog 
