@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
-import { baseAIService } from '../../../lib/AiCelebrationResponse;
+import { baseAIService } from '../../../lib/AiCelebrationResponse';
 import {
   Dialog,
   DialogContent,
