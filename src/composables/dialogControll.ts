@@ -94,7 +94,7 @@ export const useDialogController = create<DialogStore>((set, get) => ({
       // If not authenticated, ONLY show auth dialog
       queue.push('auth');
     } else {
-      // Only add other dialogs if already authenticated
+      // Only add other dialogs if already authenticated and not seen this session
       if (!hasSeenNoticeSession) {
         queue.push('notice');
       }
@@ -125,7 +125,16 @@ export const useDialogController = create<DialogStore>((set, get) => ({
 
   handleAuthSuccess: () => {
     get().setAuthenticated(true);
-    get().closeCurrentDialog();
+    
+    // After successful authentication, automatically queue the notice and celebration dialogs
+    const queue: DialogType[] = ['notice', 'celebration'];
+    
+    set({
+      currentDialog: queue[0], // Start with notice dialog
+      dialogQueue: queue.slice(1), // Queue celebration dialog next
+      hasSeenNotice: false, // Reset to ensure they show
+      hasSeenCelebration: false, // Reset to ensure they show
+    });
   },
 
   // Dialog completion tracking

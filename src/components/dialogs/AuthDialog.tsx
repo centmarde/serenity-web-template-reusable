@@ -66,7 +66,8 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
         setInputDate(''); // Reset form
       } else {
         setError(`Oops! I think you forgot our special day... 💕 
-                 It's the day when ${bfName} and ${gfName} officially became us! ✨`);
+                 It's the day when ${bfName} and ${gfName} officially became us! ✨
+                 Try again! 💖`);
       }
     } catch (error) {
       console.error('Authentication error:', error);
@@ -76,9 +77,18 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
     }
   };
 
+  // Handle input change and clear error
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputDate(e.target.value);
+    // Clear error when user starts typing again
+    if (error) {
+      setError('');
+    }
+  };
+
   // Format date for display (YYYY-MM-DD to a more readable format)
   const formatDateHint = () => {
-    return "YYYY-MM-DD format (e.g., 2024-02-14)";
+    return "MM-DD-YYYY format (e.g., 02-14-2024)";
   };
 
   return (
@@ -125,7 +135,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
           </DialogTitle>
           
           <DialogDescription 
-            className="text-gray-600"
+            className="text-gray-600 text-center"
             style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}
           >
             {description}
@@ -149,7 +159,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
                   id="official-date"
                   type="date"
                   value={inputDate}
-                  onChange={(e) => setInputDate(e.target.value)}
+                  onChange={handleInputChange}
                   className="w-full"
                   style={{ 
                     borderColor: error ? '#ef4444' : `${themeColor}60`,
@@ -185,7 +195,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
                   }}
                   disabled={isLoading || !inputDate.trim()}
                 >
-                  {isLoading ? 'Verifying...' : 'Verify 💕'}
+                  {isLoading ? 'Verifying...' : (error ? 'Try Again 💕' : 'Verify 💕')}
                 </Button>
               </div>
             </form>

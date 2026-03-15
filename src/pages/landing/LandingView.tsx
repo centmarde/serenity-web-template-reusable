@@ -127,7 +127,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   
   // Dialog controller
   const currentDialog = useCurrentDialog();
-  const { markNoticeAsSeen, markCelebrationAsSeen } = useDialogActions();
+  const { closeCurrentDialog } = useDialogActions();
   const [showOpsDialog, setShowOpsDialog] = useState(false);
   const [showChatBot, setShowChatBot] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<string>("");
@@ -205,15 +205,15 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
   const handleNoticeDialogClose = (open: boolean) => {
     if (!open) {
-      // Mark notice as seen and let dialog controller handle the flow
-      markNoticeAsSeen();
+      // Use dialog controller to properly close and show next dialog
+      closeCurrentDialog();
     }
   };
 
   const handleCelebrationDialogClose = (open: boolean) => {
     if (!open) {
-      // Mark celebration as seen 
-      markCelebrationAsSeen();
+      // Use dialog controller to properly close and show next dialog
+      closeCurrentDialog();
     }
   };
 
