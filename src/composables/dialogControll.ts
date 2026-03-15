@@ -84,8 +84,6 @@ export const useDialogController = create<DialogStore>((set, get) => ({
   resetDialogFlow: () => {
     // Reset to initial state and determine which dialogs should be shown
     const isGirlfriendAuth = localStorage.getItem('girlfriend-authenticated') === 'true';
-    const hasSeenNoticeSession = sessionStorage.getItem('notice-seen') === 'true';
-    const hasSeenCelebrationSession = sessionStorage.getItem('celebration-seen') === 'true';
     
     const queue: DialogType[] = [];
     
@@ -94,22 +92,17 @@ export const useDialogController = create<DialogStore>((set, get) => ({
       // If not authenticated, ONLY show auth dialog
       queue.push('auth');
     } else {
-      // Only add other dialogs if already authenticated and not seen this session
-      if (!hasSeenNoticeSession) {
-        queue.push('notice');
-      }
-      
-      if (!hasSeenCelebrationSession) {
-        queue.push('celebration');
-      }
+      // Always show notice and celebration dialogs on page reload for authenticated users
+      queue.push('notice');
+      queue.push('celebration');
     }
     
     set({
       currentDialog: queue.length > 0 ? queue[0] : 'none',
       dialogQueue: queue.slice(1),
       isAuthenticated: isGirlfriendAuth,
-      hasSeenNotice: hasSeenNoticeSession,
-      hasSeenCelebration: hasSeenCelebrationSession,
+      hasSeenNotice: false, // Always reset to false - no session management
+      hasSeenCelebration: false, // Always reset to false - no session management
     });
   },
 
@@ -140,12 +133,12 @@ export const useDialogController = create<DialogStore>((set, get) => ({
   // Dialog completion tracking
   markNoticeAsSeen: () => {
     set({ hasSeenNotice: true });
-    sessionStorage.setItem('notice-seen', 'true');
+    // No sessionStorage - dialogs will show again on page reload
   },
 
   markCelebrationAsSeen: () => {
     set({ hasSeenCelebration: true });
-    sessionStorage.setItem('celebration-seen', 'true');
+    // No sessionStorage - dialogs will show again on page reload
   },
 
   // Utility functions
