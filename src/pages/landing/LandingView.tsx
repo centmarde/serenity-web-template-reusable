@@ -17,6 +17,7 @@ import {
   type AnniversaryCountdown,
 } from "../../utils/helpers";
 import NoticeDialog from "./dialogs/NoticeDialog";
+import CelebrationDialog from "./dialogs/CelebrationDialog";
 import CounterDialog from "./dialogs/CounterDialog";
 import OpsDialog from "./dialogs/OpsDialog";
 import ChatBot from "./components/ChatBot";
@@ -122,6 +123,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showNoticeDialog, setShowNoticeDialog] = useState(true);
+  const [showCelebrationDialog, setShowCelebrationDialog] = useState(false);
   const [showCounterDialog, setShowCounterDialog] = useState(false);
   const [showOpsDialog, setShowOpsDialog] = useState(false);
   const [showChatBot, setShowChatBot] = useState(false);
@@ -195,6 +197,14 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     getTraits,
     getRandomTrait,
   ]);
+
+  const handleNoticeDialogClose = (open: boolean) => {
+    setShowNoticeDialog(open);
+    if (!open) {
+      // When NoticeDialog closes, show CelebrationDialog
+      setShowCelebrationDialog(true);
+    }
+  };
 
   const handleFeatureClick = (featureName: string) => {
     if (featureName === "Love Letters" && onNavigate) {
@@ -389,8 +399,14 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       {/* Notice Dialog */}
       <NoticeDialog 
         open={showNoticeDialog} 
-        onOpenChange={setShowNoticeDialog} 
+        onOpenChange={handleNoticeDialogClose} 
         onNavigate={onNavigate}
+      />
+      
+      {/* Celebration Dialog - Shows after Notice Dialog closes */}
+      <CelebrationDialog 
+        open={showCelebrationDialog} 
+        onOpenChange={setShowCelebrationDialog} 
       />
       
       {/* Counter Dialog */}
