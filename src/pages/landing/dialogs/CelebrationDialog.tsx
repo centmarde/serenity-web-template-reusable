@@ -234,8 +234,8 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
     onOpenChange(false);
   };
 
-  // Don't render if no data or not a celebration
-  if (!displayData || !displayData.celebration.isCelebration) {
+  // Don't render if no data is loaded yet
+  if (!displayData) {
     return null;
   }
 
@@ -257,10 +257,20 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
       description: `Today we celebrate ${yearsCompleted} incredible year${yearsCompleted === 1 ? '' : 's'} together! From our first day to this moment, every memory we've created has been precious. Here's to many more years of love, growth, and happiness together! 💖`,
       badge: `${yearsCompleted} Year${yearsCompleted === 1 ? '' : 's'} Strong`,
       gif: '/assets/blee.gif'
+    },
+    general: {
+      title: `Welcome Back, ${callsign}! 💖`,
+      subtitle: `Every day with you is worth celebrating`,
+      description: `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together brings so much joy, love, and happiness to my life. I'm grateful for every second we spend together! 💕`,
+      badge: `Made with Love`,
+      gif: '/assets/dudu-cute.gif'
     }
   };
 
-  const currentMessage = celebrationType ? celebrationMessages[celebrationType] : celebrationMessages.monthsary;
+  // Choose appropriate message based on celebration status
+  const currentMessage = celebration.isCelebration 
+    ? (celebrationType ? celebrationMessages[celebrationType] : celebrationMessages.general)
+    : celebrationMessages.general;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

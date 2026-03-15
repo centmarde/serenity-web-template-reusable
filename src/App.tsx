@@ -12,6 +12,8 @@ import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
 import { useInitializeAuth } from './stores/authData';
 import { getRouteByPath, isValidRoute } from './utils/routes';
+import { useCurrentDialog, useDialogActions, initializeDialogFlow } from './composables/dialogControll';
+import AuthDialog from './components/dialogs/AuthDialog';
 import './styles/romantic-fonts.css';
 
 function App() {
@@ -22,20 +24,28 @@ function App() {
     return isValidRoute(path) ? path : '/';
   });
   
+  // Dialog controller
+  const currentDialog = useCurrentDialog();
+  const { handleAuthSuccess: dialogHandleAuthSuccess } = useDialogActions();
+  
   const { loadSettings } = useSettingsStore();
   const { initializeTheme } = useThemeStore();
   const initializeAuth = useInitializeAuth();
 
-  // Initialize settings, theme, and auth when app starts  
+  // Initialize settings, theme, auth and dialog flow when app starts  
   useEffect(() => {
     const initialize = async () => {
       try {
         await loadSettings();
         await initializeTheme();
         await initializeAuth(); // Initialize authentication state (has built-in safeguard)
+        
+        // Initialize dialog flow after everything is loaded
+        initializeDialogFlow();
       } catch (error) {
         console.error('Failed to initialize app:', error);
         // Continue anyway with fallback values
+        initializeDialogFlow(); // Still initialize dialog flow
       }
     };
     
@@ -55,11 +65,19 @@ function App() {
 
   const handleLoadingComplete = () => {
     setCurrentView('main');
+    // Dialog flow will be handled automatically by the dialog controller
   };
 
   const handleNavigate = (path: string) => {
     const route = getRouteByPath(path);
     if (route) {
+      // Check if route requires authentication
+      const isGirlfriendAuth = localStorage.getItem('girlfriend-authenticated') === 'true';
+      if (route.requiresAuth && !isGirlfriendAuth) {
+        // If not authenticated, dialog controller will handle showing auth dialog
+        return;
+      }
+      
       // Update browser URL without page refresh
       window.history.pushState({}, '', path);
       setCurrentPath(path);
@@ -110,6 +128,17 @@ function App() {
 
       {/* Playlist Player - Mounted immediately on App load, plays across all views */}
       <PlaylistPlayer />
+
+      {/* Global Authentication Dialog - Only show after loading is complete */}
+      {currentView === 'main' && currentDialog === 'auth' && (
+        <AuthDialog 
+          open={true}
+          onOpenChange={() => {}} // Dialog controller handles opening/closing
+          onAuthSuccess={dialogHandleAuthSuccess}
+          title="Welcome Back! 💕"
+          description="Let's verify our special day to continue"
+        />
+      )}
     </div>
     
   );

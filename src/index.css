@@ -137,3 +137,9 @@
     }
   }
 }
+
+/* Auth Dialog Backdrop Blur */
+[data-radix-dialog-overlay] {
+  backdrop-filter: blur(12px) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
