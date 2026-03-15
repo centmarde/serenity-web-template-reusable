@@ -1,4 +1,4 @@
-import { aiService } from "../../../../lib/AiSadResponse";
+import { aiService } from "../../../../lib/aiSadResponse";
 import useMessagesStore, { type LoveLetter } from "../../../../stores/messagesData";
 
 export interface Question {

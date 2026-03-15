@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../stores/settings';
 import { useThemeStore } from '../../../stores/theme';
 import { useIsMobile } from '../../../hooks/use-mobile';
-import { baseAIService } from '../../../lib/AiCelebrationResponse';
+import { baseAIService } from '../../../lib/aiCelebrationResponse';
 import {
   Dialog,
   DialogContent,
@@ -249,7 +249,7 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
       subtitle: `${monthsCompleted} month${monthsCompleted === 1 ? '' : 's'} of love, laughter, and beautiful memories`,
       description: `Today marks ${monthsCompleted} wonderful month${monthsCompleted === 1 ? '' : 's'} since we officially became a couple. Every moment with you has been a treasure, and I can't wait for all the adventures still to come! 💕`,
       badge: `${monthsCompleted} Month Milestone`,
-      gif: '/assets/peach-goma.gif'
+      gif: '/assets/celeb.gif'
     },
     anniversary: {
       title: `Happy ${yearsCompleted} Year Anniversary! 🎊`,
