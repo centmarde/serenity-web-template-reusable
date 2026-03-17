@@ -9,6 +9,7 @@ import SadCategoryView from "../pages/loveLetter/sadCategory/SadCategoryView";
 import MissCategoryView from "../pages/loveLetter/missCategory/MissCategoryView";
 import MadeForYouView from "../pages/madeForYou/MadeForYouView";
 import PlayListView from "../pages/Playlist/PlayListView";
+import MemoriesView from "../pages/memories/MemoriesView";
 import { useThemeStore } from "../stores/theme";
 
 // Coming soon component
@@ -67,6 +68,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ currentPath, onNavigate }
         return <MadeForYouView onNavigate={onNavigate} />;
       case 'PlayListView':
         return <PlayListView />;
+      case 'MemoriesView':
+        return <MemoriesView />;
       case 'ComingSoon':
         return <ComingSoonView routeName={route.name} />;
       default:

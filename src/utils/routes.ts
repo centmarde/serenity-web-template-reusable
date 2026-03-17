@@ -66,7 +66,7 @@ export const routes: Route[] = [
   {
     path: '/memories',
     name: 'Our Memories',
-    component: 'ComingSoon',
+    component: 'MemoriesView',
     icon: 'Camera',
     isPublic: true,
     showInNav: true,
