@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { DeleteMemoriesDialog } from '../dialogs/deleteMemoriesDialog';
-import { EditMemoriesDialog } from '../dialogs/editMemoriesDialog';
+import { DeleteMemoriesDialog } from '../dialogs/DeleteMemoriesDialog';
+import { EditMemoriesDialog } from '../dialogs/EditMemoriesDialog';
 import { useThemeStore } from '../../../stores/theme';
 import { useMemoriesStore, type Memory } from '../../../stores/memoriesData';
 import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
