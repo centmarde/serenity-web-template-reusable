@@ -110,7 +110,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
       <DialogContent 
         className="p-0 overflow-hidden border-0 z-50 animate-in zoom-in-95 duration-300"
         style={{
-          background: `linear-gradient(135deg, ${themeColor}10, ${themeColor}20, #ffffff)`,
+          background: '#ffffff',
           border: `3px solid ${themeColor}`,
           borderRadius: isMobile ? '16px' : '20px',
           maxWidth: isMobile ? 'min(350px, 95vw)' : 'min(500px, 90vw)',
@@ -125,7 +125,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
           <div 
             className="relative text-center"
             style={{
-              background: `linear-gradient(135deg, ${themeColor}20, ${themeColor}30)`,
+              background: '#ffffff',
               borderBottom: `2px solid ${themeColor}40`,
               padding: isMobile ? 'min(12px, 3vw) min(16px, 4vw)' : 'min(16px, 4vw) min(24px, 6vw)'
             }}
@@ -177,7 +177,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                   className="shrink-0 rounded-full p-2 border-2"
                   style={{ 
                     borderColor: themeColor,
-                    background: `${themeColor}10`
+                    background: '#ffffff'
                   }}
                 >
                   <img
@@ -194,7 +194,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                 <div 
                   className="flex-1 p-4 rounded-2xl relative"
                   style={{
-                    background: `${themeColor}15`,
+                    background: '#ffffff',
                     border: `2px solid ${themeColor}30`
                   }}
                 >
@@ -204,7 +204,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                     style={{
                       borderTop: '8px solid transparent',
                       borderBottom: '8px solid transparent',
-                      borderRight: `12px solid ${themeColor}15`,
+                      borderRight: `12px solid #ffffff`,
                       marginLeft: '-12px'
                     }}
                   />
