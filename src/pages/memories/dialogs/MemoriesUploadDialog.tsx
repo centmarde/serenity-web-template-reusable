@@ -12,6 +12,7 @@ import { useMemoriesStore } from '../../../stores/memoriesData';
 import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
 import { useMemoryImagesStore } from '../../../stores/memoriesImagesData';
 import { toast } from 'sonner';
+import { AiSuggestion } from '../components/AiSuggestion';
 
 interface MemoriesUploadDialogProps {
   isOpen: boolean;
@@ -272,17 +273,32 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
               <FileText className="w-4 h-4" />
               Memory Title *
             </Label>
-            <Input
-              id="title"
-              placeholder="Our first date, Anniversary celebration..."
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              className="w-full"
-              style={{ 
-                borderColor: formData.title ? themeColor : undefined,
-                '--tw-ring-color': themeColor 
-              } as React.CSSProperties}
-            />
+            <div className="relative overflow-visible">
+              <Input
+                id="title"
+                placeholder="Our first date, Anniversary celebration..."
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                className="w-full pr-32"
+                style={{ 
+                  borderColor: formData.title ? themeColor : undefined,
+                  '--tw-ring-color': themeColor 
+                } as React.CSSProperties}
+              />
+              <div className="absolute top-1 right-1 z-10">
+                <AiSuggestion
+                  type="title"
+                  currentText={formData.title}
+                  context={{
+                    date: formData.date,
+                    existingDescription: formData.description,
+                    details: formData.details
+                  }}
+                  onSuggestionSelect={(suggestion) => handleInputChange('title', suggestion)}
+                  themeColor={themeColor}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Memory Date */}
@@ -309,17 +325,32 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
             <Label htmlFor="description" className="text-sm font-medium">
               Description
             </Label>
-            <Textarea
-              id="description"
-              placeholder="Tell the story of this beautiful memory..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              className="min-h-[80px] resize-none"
-              style={{ 
-                borderColor: formData.description ? themeColor : undefined,
-                '--tw-ring-color': themeColor 
-              } as React.CSSProperties}
-            />
+            <div className="relative overflow-visible">
+              <Textarea
+                id="description"
+                placeholder="Tell the story of this beautiful memory..."
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className="min-h-[80px] resize-none pr-32"
+                style={{ 
+                  borderColor: formData.description ? themeColor : undefined,
+                  '--tw-ring-color': themeColor 
+                } as React.CSSProperties}
+              />
+              <div className="absolute top-1 right-1 z-10">
+                <AiSuggestion
+                  type="description"
+                  currentText={formData.description}
+                  context={{
+                    date: formData.date,
+                    existingTitle: formData.title,
+                    details: formData.details
+                  }}
+                  onSuggestionSelect={(suggestion) => handleInputChange('description', suggestion)}
+                  themeColor={themeColor}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Details */}
@@ -328,18 +359,34 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
               Details (Optional)
             </Label>
             <div className="flex gap-2">
-              <Input
-                id="details"
-                placeholder="First Date, Anniversary, Birthday..."
-                value={currentDetail}
-                onChange={(e) => setCurrentDetail(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddDetail()}
-                className="flex-1"
-                style={{ 
-                  borderColor: currentDetail ? themeColor : undefined,
-                  '--tw-ring-color': themeColor 
-                } as React.CSSProperties}
-              />
+              <div className="flex-1 relative overflow-visible">
+                <Input
+                  id="details"
+                  placeholder="First Date, Anniversary, Birthday..."
+                  value={currentDetail}
+                  onChange={(e) => setCurrentDetail(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddDetail()}
+                  className="w-full pr-32"
+                  style={{ 
+                    borderColor: currentDetail ? themeColor : undefined,
+                    '--tw-ring-color': themeColor 
+                  } as React.CSSProperties}
+                />
+                <div className="absolute top-1 right-1 z-10">
+                  <AiSuggestion
+                    type="detail"
+                    currentText={currentDetail}
+                    context={{
+                      date: formData.date,
+                      existingTitle: formData.title,
+                      existingDescription: formData.description,
+                      details: formData.details
+                    }}
+                    onSuggestionSelect={(suggestion) => setCurrentDetail(suggestion)}
+                    themeColor={themeColor}
+                  />
+                </div>
+              </div>
               <Button
                 type="button"
                 onClick={handleAddDetail}
