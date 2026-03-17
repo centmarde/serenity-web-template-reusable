@@ -224,6 +224,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate('/girlfriend/madeforyou');
     } else if (featureName === "Our Music Playlist" && onNavigate) {
       onNavigate('/music');
+    } else if (featureName === "Our Memories" && onNavigate) {
+      onNavigate('/memories');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);

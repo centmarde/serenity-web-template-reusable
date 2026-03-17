@@ -283,6 +283,13 @@ export const createActiveCardStyles = (themeColor: string) => {
  * Determine if a feature is active (has a route) or inactive (under development)
  */
 export const isFeatureActive = (featureName: string): boolean => {
-  const activeFeatures = ["Love Letters", "Made for You", "Our Music Playlist"];
+  const activeFeatures = ["Love Letters", "Made for You", "Our Music Playlist", "Our Memories"];
   return activeFeatures.includes(featureName);
+};
+
+/**
+ * Generate a random 6-digit verification code
+ */
+export const generateSixDigitCode = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };

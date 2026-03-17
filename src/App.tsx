@@ -14,6 +14,7 @@ import { useInitializeAuth } from './stores/authData';
 import { getRouteByPath, isValidRoute } from './utils/routes';
 import { useCurrentDialog, useDialogActions, initializeDialogFlow } from './composables/dialogControll';
 import AuthDialog from './components/dialogs/AuthDialog';
+import { Toaster } from './components/ui/sonner';
 import './styles/romantic-fonts.css';
 
 function App() {
@@ -139,6 +140,9 @@ function App() {
           description="Let's verify our special day to continue"
         />
       )}
+      
+      {/* Toast notifications */}
+      <Toaster />
     </div>
     
   );
