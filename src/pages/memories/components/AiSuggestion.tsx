@@ -4,6 +4,7 @@ import { Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../components/ui/tooltip';
 import { aiSuggestionsService, type MemorySuggestionRequest } from '../../../lib/AiSuggestions';
 import { toast } from 'sonner';
 
@@ -192,7 +193,7 @@ export const AiSuggestion: React.FC<AiSuggestionProps> = ({
     <Sparkles className="w-3 h-3" />
   );
 
-  const getButtonText = () => {
+  const getTooltipText = () => {
     if (isGenerating) {
       return type === 'detail' ? 'Suggesting...' : currentText.trim() ? 'Enhancing...' : 'Generating...';
     }
@@ -202,34 +203,50 @@ export const AiSuggestion: React.FC<AiSuggestionProps> = ({
     return type === 'detail' ? 'AI Suggest' : 'AI Suggest';
   };
 
-  const buttonText = getButtonText();
+  const tooltipText = getTooltipText();
 
   return (
     <div className={`relative z-10 ${className}`}>
-      {/* AI Enhancement Button */}
-      <Button
-        ref={buttonRef}
-        variant="outline"
-        size="sm"
-        onClick={handleGenerateSuggestions}
-        disabled={isGenerating}
-        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:shadow-md"
-        style={{
-          borderColor: themeColor,
-          color: themeColor,
-          backgroundColor: 'transparent',
-        }}
-      >
-        {buttonIcon}
-        <span className="ml-1.5">{buttonText}</span>
-      </Button>
+      {/* AI Enhancement Button with Tooltip */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              ref={buttonRef}
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateSuggestions}
+              disabled={isGenerating}
+              className="h-8 w-8 p-0 transition-all duration-200 hover:shadow-md"
+              style={{
+                borderColor: themeColor,
+                color: themeColor,
+                backgroundColor: 'transparent',
+              }}
+            >
+              {buttonIcon}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="top" 
+            className="text-xs"
+            style={{ 
+              backgroundColor: themeColor,
+              color: 'white',
+              border: 'none'
+            }}
+          >
+            {tooltipText}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Suggestions Panel - Rendered as Portal */}
       {showSuggestions && (suggestions.length > 0 || enhancedText) && buttonPosition && 
         createPortal(
           <div 
             ref={suggestionsPanelRef}
-            className="fixed z-[9999] pointer-events-auto w-96 animate-in fade-in-0 zoom-in-95 duration-200"
+            className="fixed z-50 pointer-events-auto w-96 animate-in fade-in-0 zoom-in-95 duration-200"
             style={{
               top: buttonPosition.top,
               left: buttonPosition.left,

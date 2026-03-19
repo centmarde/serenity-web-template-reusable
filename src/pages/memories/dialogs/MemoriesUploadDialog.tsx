@@ -273,16 +273,18 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
               <FileText className="w-4 h-4" />
               Memory Title *
             </Label>
-            <div className="relative overflow-visible">
+            <div className="relative overflow-hidden">
               <Input
                 id="title"
                 placeholder="Our first date, Anniversary celebration..."
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full pr-32"
+                className="w-full pr-32 overflow-hidden"
                 style={{ 
                   borderColor: formData.title ? themeColor : undefined,
-                  '--tw-ring-color': themeColor 
+                  '--tw-ring-color': themeColor,
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
                 } as React.CSSProperties}
               />
               <div className="absolute top-1 right-1 z-10">
@@ -325,16 +327,18 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
             <Label htmlFor="description" className="text-sm font-medium">
               Description
             </Label>
-            <div className="relative overflow-visible">
+            <div className="relative overflow-hidden">
               <Textarea
                 id="description"
                 placeholder="Tell the story of this beautiful memory..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="min-h-[80px] resize-none pr-32"
+                className="min-h-[80px] resize-none pr-32 whitespace-pre-wrap break-all overflow-hidden"
                 style={{ 
                   borderColor: formData.description ? themeColor : undefined,
-                  '--tw-ring-color': themeColor 
+                  '--tw-ring-color': themeColor,
+                  wordBreak: 'break-all',
+                  overflowWrap: 'anywhere'
                 } as React.CSSProperties}
               />
               <div className="absolute top-1 right-1 z-10">
@@ -359,17 +363,19 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
               Details (Optional)
             </Label>
             <div className="flex gap-2">
-              <div className="flex-1 relative overflow-visible">
+              <div className="flex-1 relative overflow-hidden">
                 <Input
                   id="details"
                   placeholder="First Date, Anniversary, Birthday..."
                   value={currentDetail}
                   onChange={(e) => setCurrentDetail(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddDetail()}
-                  className="w-full pr-32"
+                  className="w-full pr-32 overflow-hidden"
                   style={{ 
                     borderColor: currentDetail ? themeColor : undefined,
-                    '--tw-ring-color': themeColor 
+                    '--tw-ring-color': themeColor,
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   } as React.CSSProperties}
                 />
                 <div className="absolute top-1 right-1 z-10">
