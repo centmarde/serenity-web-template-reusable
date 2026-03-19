@@ -54,6 +54,7 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
   
   const [existingImages, setExistingImages] = useState<Array<{id: number, image_src: string | null}>>([]);
   const [existingMilestones, setExistingMilestones] = useState<Array<{id: number, milestone: string | null}>>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [currentDetail, setCurrentDetail] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +92,9 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
       // Load existing images
       const memoryImages = imagesStore.images.filter(img => img.memories_id === memory.id);
       setExistingImages(memoryImages);
+      
+      // Reset images to delete
+      setImagesToDelete([]);
     }
   }, [memory, milestonesStore.milestones, imagesStore.images]);
 
@@ -168,6 +172,11 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
     }));
   };
 
+  const handleDeleteExistingImage = (imageId: number) => {
+    setImagesToDelete(prev => [...prev, imageId]);
+    setExistingImages(prev => prev.filter(img => img.id !== imageId));
+  };
+
   const validateForm = (): boolean => {
     if (!formData.title.trim()) {
       setError('Please enter a memory title');
@@ -225,7 +234,12 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
         }
       }
 
-      // 3. Upload new images
+      // 3. Delete marked existing images
+      for (const imageId of imagesToDelete) {
+        await imagesStore.deleteImage(imageId);
+      }
+
+      // 4. Upload new images
       for (const imageFile of memoryImages) {
         await imagesStore.uploadImage(imageFile, memory.id);
       }
@@ -272,6 +286,7 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
     // Clean up preview URLs
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     setPreviewUrls([]);
+    setImagesToDelete([]);
     
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -354,7 +369,7 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
               placeholder="Tell the story of this beautiful memory..."
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              className="min-h-[80px] resize-none"
+              className="min-h-20 resize-none"
               style={{ 
                 borderColor: formData.description ? themeColor : undefined,
                 '--tw-ring-color': themeColor 
@@ -406,10 +421,13 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
                     }}
                   >
                     {detail}
-                    <X 
-                      className="w-3 h-3 cursor-pointer hover:bg-red-100 rounded" 
+                    <span 
+                      className="cursor-pointer hover:bg-red-500 hover:text-white rounded p-0.5 transition-colors duration-200"
                       onClick={() => handleRemoveDetail(index)}
-                    />
+                      title="Remove this detail"
+                    >
+                      <X className="w-3 h-3" />
+                    </span>
                   </Badge>
                 ))}
               </div>
@@ -436,6 +454,15 @@ export const EditMemoriesDialog: React.FC<EditMemoriesDialogProps> = ({
                             e.currentTarget.style.display = 'none';
                           }}
                         />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-1 right-1 w-6 h-6 p-0"
+                          onClick={() => handleDeleteExistingImage(image.id)}
+                          title="Delete this image"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
                       </div>
                       <Badge variant="secondary" className="mt-1 text-xs">
                         Current Image
