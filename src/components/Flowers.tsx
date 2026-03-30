@@ -1,9 +1,13 @@
 import React from "react";
-import "./Flowers.scoped.css";
+import "@/styles/Flowers.scoped.css";
 
-const Flowers: React.FC = () => {
+interface FlowersProps {
+  animationPaused?: boolean;
+}
+
+const Flowers: React.FC<FlowersProps> = ({ animationPaused = false }) => {
   return (
-    <div className="flowers-component">
+    <div className={`flowers-component ${animationPaused ? 'animation-paused' : ''}`}>
       <div className="night"></div>
       <div className="flowers">
         <div className="flower flower--1">

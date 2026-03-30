@@ -3,8 +3,9 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Flower, Heart } from "lucide-react";
+import { ArrowLeft, Flower, Heart, Info } from "lucide-react";
 import Flowers from "../../components/Flowers";
+import FlowersDialog from "./dialogs/FlowersDialog";
 
 interface FlowerGardenViewProps {
   onNavigate?: (path: string) => void;
@@ -24,6 +25,7 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTrait, setCurrentTrait] = useState("");
+  const [showDialog, setShowDialog] = useState(true); // Show dialog immediately
 
   useEffect(() => {
     const initialize = async () => {
@@ -84,11 +86,15 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
     <div className="min-h-screen relative overflow-hidden" style={{ background: "#010113" }}>
       {/* Header */}
       <div
-        className="absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center gap-3"
+        className={`absolute top-0 left-0 right-0 z-20 px-4 py-3 flex items-center gap-3 transition-all duration-500 ${
+          showDialog ? 'blur-sm' : 'blur-none'
+        }`}
         style={{
           background: "rgba(1, 1, 19, 0.8)",
           backdropFilter: "blur(12px)",
           borderBottom: `2px solid ${data.themeColor}30`,
+          filter: showDialog ? 'blur(4px) brightness(0.7)' : 'none',
+          pointerEvents: showDialog ? 'none' : 'auto',
         }}
       >
         <Button
@@ -125,21 +131,40 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
           </Badge>
         </div>
 
-        <Heart
-          size={20}
-          fill={data.themeColor}
-          color={data.themeColor}
-          className="animate-pulse"
-        />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowDialog(true)}
+          style={{ color: data.themeColor }}
+          className="hover:bg-transparent"
+        >
+          <Info size={20} />
+        </Button>
       </div>
 
       {/* Flowers Component - Full Screen */}
-      <div className="absolute inset-0 z-10">
-        <Flowers />
+      <div 
+        className={`absolute inset-0 z-10 transition-all duration-500 ${
+          showDialog ? 'blur-lg scale-95' : 'blur-none scale-100'
+        }`}
+        style={{
+          filter: showDialog ? 'blur(8px) brightness(0.6)' : 'none',
+          pointerEvents: showDialog ? 'none' : 'auto',
+        }}
+      >
+        <Flowers animationPaused={showDialog} />
       </div>
 
       {/* Romantic Message Overlay */}
-      <div className="absolute bottom-20 left-0 right-0 z-30 px-6 text-center">
+      <div 
+        className={`absolute bottom-20 left-0 right-0 z-30 px-6 text-center transition-all duration-500 ${
+          showDialog ? 'blur-lg scale-95' : 'blur-none scale-100'
+        }`}
+        style={{
+          filter: showDialog ? 'blur(8px) brightness(0.6)' : 'none',
+          pointerEvents: showDialog ? 'none' : 'auto',
+        }}
+      >
         <div
           className="max-w-2xl mx-auto p-6 rounded-3xl"
           style={{
@@ -177,7 +202,7 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
                   fontSize: "clamp(0.8rem, 2.2vw, 1rem)",
                 }}
               >
-                Like these flowers, my love blooms endlessly for you
+                Like these flowers, my love blooms endlessly for you, IGIT!
               </span>
               <Heart size={16} fill={data.themeColor} color={data.themeColor} />
             </div>
@@ -185,20 +210,12 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Bottom Navigation Helper */}
-      <div className="absolute bottom-4 left-0 right-0 z-30 text-center">
-        <p
-          className="text-xs opacity-60"
-          style={{ color: `${data.themeColor}99` }}
-        >
-          Tap anywhere to return to the garden menu
-        </p>
-      </div>
+      {/* Bottom Navigation Helper - Removed tap anywhere functionality */}
 
-      {/* Full Screen Click Handler */}
-      <div
-        className="absolute inset-0 z-25 cursor-pointer"
-        onClick={() => onNavigate?.("/girlfriend/madeforyou")}
+      {/* Flowers Explanation Dialog */}
+      <FlowersDialog
+        isOpen={showDialog}
+        onClose={() => setShowDialog(false)}
       />
     </div>
   );

@@ -647,3 +647,11 @@
     opacity: 0;
   }
 }
+
+/* Pause all animations when dialog is open */
+.flowers-component.animation-paused *,
+.flowers-component.animation-paused *::before,
+.flowers-component.animation-paused *::after {
+  -webkit-animation-play-state: paused !important;
+  animation-play-state: paused !important;
+}

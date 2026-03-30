@@ -217,7 +217,7 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
 
           {/* Animated Garden Flower */}
           <FlowerCard
-            flowerImage="/flowers/rose.png"
+            flowerImage="/flowers/tulips.png"
             route="/girlfriend/madeforyou/flower-garden"
             onNavigate={onNavigate}
           />
