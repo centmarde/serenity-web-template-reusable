@@ -22,12 +22,14 @@ import { useThemeStore } from '../../../stores/theme';
 import { useMemoriesStore, type Memory } from '../../../stores/memoriesData';
 import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
 import { useMemoryImagesStore } from '../../../stores/memoriesImagesData';
+import { useIsMobile } from '../../../hooks/use-mobile';
 
 export const MemoriesWidget: React.FC = () => {
   const { getCurrentThemeColor } = useThemeStore();
   const memoriesStore = useMemoriesStore();
   const milestonesStore = useMemoryMilestonesStore();
   const imagesStore = useMemoryImagesStore();
+  const isMobile = useIsMobile();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -187,21 +189,23 @@ export const MemoriesWidget: React.FC = () => {
       content: (
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-start gap-4">
-            <div 
-              className="p-3 rounded-lg flex-shrink-0"
-              style={{
-                backgroundColor: `${themeColor}15`,
-                border: `1px solid ${themeColor}30`,
-              }}
-            >
-              {getMilestoneIcon(primaryMilestone?.milestone || null)}
-            </div>
+            {!isMobile && (
+              <div 
+                className="p-3 rounded-lg shrink-0"
+                style={{
+                  backgroundColor: `${themeColor}15`,
+                  border: `1px solid ${themeColor}30`,
+                }}
+              >
+                {getMilestoneIcon(primaryMilestone?.milestone || null)}
+              </div>
+            )}
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
                   {memory.title || 'Untitled Memory'}
                 </h3>
-                <div className="flex items-center gap-1 flex-shrink-0 ml-4">
+                <div className="flex items-center gap-1 shrink-0 ml-4">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -237,7 +241,7 @@ export const MemoriesWidget: React.FC = () => {
                         className="flex items-center gap-2 text-sm"
                       >
                         <div 
-                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: themeColor }}
                         />
                         <span 

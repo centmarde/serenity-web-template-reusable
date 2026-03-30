@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Flower, Heart, Info } from "lucide-react";
 import Flowers from "../../components/Flowers";
 import FlowersDialog from "./dialogs/FlowersDialog";
+import { useIsMobile } from "../../hooks/use-mobile";
 
 interface FlowerGardenViewProps {
   onNavigate?: (path: string) => void;
@@ -21,6 +22,7 @@ interface ComponentData {
 const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
   const { getCallsign, getGfName, getAppName, loadSettings, getRandomTrait } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
+  const isMobile = useIsMobile();
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,7 +159,7 @@ const FlowerGardenView: React.FC<FlowerGardenViewProps> = ({ onNavigate }) => {
 
       {/* Romantic Message Overlay */}
       <div 
-        className={`absolute bottom-20 left-0 right-0 z-30 px-6 text-center transition-all duration-500 ${
+        className={`absolute ${isMobile ? 'top-20' : 'bottom-20'} left-0 right-0 z-30 px-6 text-center transition-all duration-500 ${
           showDialog ? 'blur-lg scale-95' : 'blur-none scale-100'
         }`}
         style={{

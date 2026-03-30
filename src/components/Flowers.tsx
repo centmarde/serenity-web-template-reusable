@@ -1,15 +1,27 @@
 import React from "react";
 import "@/styles/Flowers.scoped.css";
+import { useIsMobile } from "../hooks/use-mobile";
 
 interface FlowersProps {
   animationPaused?: boolean;
 }
 
 const Flowers: React.FC<FlowersProps> = ({ animationPaused = false }) => {
+  const isMobile = useIsMobile();
+
+  const mobileFlowersStyle = isMobile ? {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    position: 'relative' as const,
+  } : {};
+
   return (
     <div className={`flowers-component ${animationPaused ? 'animation-paused' : ''}`}>
       <div className="night"></div>
-      <div className="flowers">
+      <div className="flowers" style={mobileFlowersStyle}>
         <div className="flower flower--1">
           <div className="flower__leafs flower__leafs--1">
             <div className="flower__leaf flower__leaf--1"></div>
