@@ -109,6 +109,15 @@ export const routes: Route[] = [
     requiresAuth: true,
   },
   {
+    path: '/girlfriend/madeforyou/flower-garden',
+    name: 'Animated Flower Garden',
+    component: 'FlowerGardenView',
+    icon: 'Flower',
+    isPublic: true,
+    showInNav: false,
+    requiresAuth: true,
+  },
+  {
     path: '/games',
     name: 'Play with Me',
     component: 'ComingSoon',

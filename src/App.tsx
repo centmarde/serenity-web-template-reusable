@@ -7,6 +7,7 @@ import AuthView from './pages/auth/AuthView';
 import BoyFriendDashboardView from './pages/boyfriendDashboard/BoyFriendDashboardView';
 import LyricsArtFullscreenView from './pages/madeForYou/LyricsArtFullscreenView';
 import AsciiFullscreenView from './pages/madeForYou/AsciiFullscreenView';
+import FlowerGardenView from './pages/madeForYou/FlowerGardenView';
 import PlaylistPlayer from './components/PlaylistPlayer';
 import { useSettingsStore } from './stores/settings';
 import { useThemeStore } from './stores/theme';
@@ -108,6 +109,10 @@ function App() {
 
     if (currentPath === '/girlfriend/madeforyou/ascii-art') {
       return <AsciiFullscreenView onNavigate={handleNavigate} />;
+    }
+
+    if (currentPath === '/girlfriend/madeforyou/flower-garden') {
+      return <FlowerGardenView onNavigate={handleNavigate} />;
     }
     
     // All other routes use DefaultLayout

@@ -200,7 +200,7 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
     
 
         {/* Flower Cards Grid */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
           {/* Lyrics Art Flower */}
           <FlowerCard
             flowerImage="/flowers/rose.png"
@@ -212,6 +212,13 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
           <FlowerCard
             flowerImage="/flowers/rose1.png"
             route="/girlfriend/madeforyou/ascii-art"
+            onNavigate={onNavigate}
+          />
+
+          {/* Animated Garden Flower */}
+          <FlowerCard
+            flowerImage="/flowers/rose.png"
+            route="/girlfriend/madeforyou/flower-garden"
             onNavigate={onNavigate}
           />
         </div>
