@@ -26,35 +26,43 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
   const [themeColor, setThemeColor] = useState("#F2A6A6");
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [showingMessage, setShowingMessage] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const narratorMessages = [
     {
       text: `Hey my beautiful ${getCallsign() || "baby"}! 💕`,
-      delay: 0
+      delay: 0,
+      image: "/assets/blee.gif"
     },
     {
       text: `I spent countless hours learning ASCII art conversion algorithms just for you! ✨`,
-      delay: 2000
+      delay: 2000,
+      image: "/assets/explain.gif"
     },
     {
       text: "I researched different character sets, experimented with resolution settings, and fine-tuned every parameter...",
-      delay: 4000
+      delay: 4000,
+      image: "/assets/ascii/set1.jpg"
     },
     {
       text: "All to transform your precious memories into this unique digital art form! Each character represents my love and dedication 💖",
-      delay: 6000
+      delay: 6000,
+      image: "/assets/ascii/set2.jpg"
     },
     {
       text: "I even made it responsive so it looks perfect whether you're on your phone or computer!",
-      delay: 8000
+      delay: 8000,
+      image: "/assets/ascii/set3.jpg"
     },
     {
       text: "The animated effects? I coded those late into the night, thinking of your smile when you'd see them ✨",
-      delay: 10000
+      delay: 10000,
+      image: "/assets/ascii/set4.jpg"
     },
     {
       text: `Every line of code was written with you in mind, ${getCallsign() || "beautiful"}. This is my love letter in pixels and characters! 💝`,
-      delay: 12000
+      delay: 12000,
+      image: "/assets/ascii/set5.jpg"
     }
   ];
 
@@ -76,15 +84,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (showingMessage && currentMessageIndex < narratorMessages.length - 1) {
-      const timer = setTimeout(() => {
-        setCurrentMessageIndex(prev => prev + 1);
-      }, 4000); // Increased to 4 seconds for better readability
-
-      return () => clearTimeout(timer);
-    }
-  }, [showingMessage, currentMessageIndex, narratorMessages.length]);
+  // Removed auto-next functionality - user now controls navigation manually
 
   const handleSkip = () => {
     setCurrentMessageIndex(narratorMessages.length - 1);
@@ -210,15 +210,35 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                   />
                   
                   {showingMessage && (
-                    <p 
-                      className="text-sm font-medium leading-relaxed animate-fade-in"
-                      style={{ 
-                        color: '#333',
-                        fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
-                      }}
-                    >
-                      {narratorMessages[currentMessageIndex]?.text}
-                    </p>
+                    <div className="space-y-3 animate-fade-in">
+                      {/* Message Image */}
+                      {narratorMessages[currentMessageIndex]?.image && (
+                        <div 
+                          className="rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                          onClick={() => setFullscreenImage(narratorMessages[currentMessageIndex].image)}
+                        >
+                          <img
+                            src={narratorMessages[currentMessageIndex].image}
+                            alt="Message attachment"
+                            className="w-full h-32 object-cover hover:scale-105 transition-transform duration-200"
+                            style={{ 
+                              maxHeight: isMobile ? '120px' : '128px'
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Message Text */}
+                      <p 
+                        className="text-sm font-medium leading-relaxed"
+                        style={{ 
+                          color: '#333',
+                          fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
+                        }}
+                      >
+                        {narratorMessages[currentMessageIndex]?.text}
+                      </p>
+                    </div>
                   )}
 
                   {!showingMessage && (
@@ -356,6 +376,63 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </DialogContent>
+      
+      {/* Image Preview Dialog */}
+      <Dialog open={!!fullscreenImage} onOpenChange={() => setFullscreenImage(null)}>
+        <DialogContent 
+          className="p-0 border-0 bg-transparent shadow-none max-w-[95vw] max-h-[95vh] w-fit h-fit"
+          style={{
+            maxWidth: '95vw',
+            maxHeight: '95vh',
+            width: 'fit-content',
+            height: 'fit-content'
+          }}
+        >
+          <div className="relative bg-white rounded-lg overflow-hidden">
+            {/* Close Button */}
+            <Button
+              onClick={() => setFullscreenImage(null)}
+              variant="outline"
+              size="sm"
+              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white border-gray-300 shadow-lg"
+              style={{
+                borderColor: themeColor,
+                color: themeColor
+              }}
+            >
+              <span className="text-lg">✕</span>
+            </Button>
+            
+            {/* Image Container */}
+            <div className="p-6">
+              {fullscreenImage && (
+                <img
+                  src={fullscreenImage}
+                  alt="Image preview"
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-lg"
+                  style={{
+                    minWidth: isMobile ? '280px' : '600px',
+                    minHeight: isMobile ? '200px' : '400px'
+                  }}
+                />
+              )}
+            </div>
+            
+            {/* Image Caption */}
+            <div 
+              className="px-6 pb-6 pt-2 text-center border-t"
+              style={{ borderColor: `${themeColor}30` }}
+            >
+              <p 
+                className="text-sm font-medium"
+                style={{ color: themeColor }}
+              >
+                Click outside or press ESC to close
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

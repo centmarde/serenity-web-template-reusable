@@ -26,31 +26,38 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
   const [themeColor, setThemeColor] = useState("#F2A6A6");
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [showingMessage, setShowingMessage] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const narratorMessages = [
     {
       text: `Hey gorgeous ${getCallsign() || "baby"}! 🎵`,
-      delay: 0
+      delay: 0,
+      image: "/assets/listen.gif"
     },
     {
       text: `I spent weeks learning canvas programming and image processing just to create this magical lyrics poster for you! ✨`,
-      delay: 2000
+      delay: 2000,
+      image: "/assets/explain.gif"
     },
     {
       text: "I researched color theory, contrast algorithms, and text rendering techniques to make your favorite song lyrics come alive visually...",
-      delay: 4000
+      delay: 4000,
+      image: "/assets/navbar.gif"
     },
     {
       text: "Every character you see is actually a letter from the song lyrics! I mapped the brightness of each pixel to create this unique art form 💖",
-      delay: 6000
+      delay: 6000,
+      image: "/assets/peach-goma.gif"
     },
     {
       text: "The colors blend from our theme color in the shadows to pure white in the highlights - representing how your love brightens my world ✨",
-      delay: 8000
+      delay: 8000,
+      image: "/assets/celeb.gif"
     },
     {
       text: `Every pixel was crafted with love, ${getCallsign() || "beautiful"}. This is our song, painted in words, just for you! 💝`,
-      delay: 10000
+      delay: 10000,
+      image: "/assets/blee.gif"
     }
   ];
 
@@ -72,15 +79,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (showingMessage && currentMessageIndex < narratorMessages.length - 1) {
-      const timer = setTimeout(() => {
-        setCurrentMessageIndex(prev => prev + 1);
-      }, 4000); // 4 seconds between messages
-
-      return () => clearTimeout(timer);
-    }
-  }, [showingMessage, currentMessageIndex, narratorMessages.length]);
+  // Removed auto-next functionality - user now controls navigation manually
 
   const handleSkip = () => {
     setCurrentMessageIndex(narratorMessages.length - 1);
@@ -206,15 +205,35 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                   />
                   
                   {showingMessage && (
-                    <p 
-                      className="text-sm font-medium leading-relaxed animate-fade-in"
-                      style={{ 
-                        color: '#333',
-                        fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
-                      }}
-                    >
-                      {narratorMessages[currentMessageIndex]?.text}
-                    </p>
+                    <div className="space-y-3 animate-fade-in">
+                      {/* Message Image */}
+                      {narratorMessages[currentMessageIndex]?.image && (
+                        <div 
+                          className="rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                          onClick={() => setFullscreenImage(narratorMessages[currentMessageIndex].image)}
+                        >
+                          <img
+                            src={narratorMessages[currentMessageIndex].image}
+                            alt="Message attachment"
+                            className="w-full h-32 object-cover hover:scale-105 transition-transform duration-200"
+                            style={{ 
+                              maxHeight: isMobile ? '120px' : '128px'
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Message Text */}
+                      <p 
+                        className="text-sm font-medium leading-relaxed"
+                        style={{ 
+                          color: '#333',
+                          fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
+                        }}
+                      >
+                        {narratorMessages[currentMessageIndex]?.text}
+                      </p>
+                    </div>
                   )}
 
                   {!showingMessage && (
@@ -352,6 +371,63 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
           </div>
         </div>
       </DialogContent>
+      
+      {/* Image Preview Dialog */}
+      <Dialog open={!!fullscreenImage} onOpenChange={() => setFullscreenImage(null)}>
+        <DialogContent 
+          className="p-0 border-0 bg-transparent shadow-none max-w-[95vw] max-h-[95vh] w-fit h-fit"
+          style={{
+            maxWidth: '95vw',
+            maxHeight: '95vh',
+            width: 'fit-content',
+            height: 'fit-content'
+          }}
+        >
+          <div className="relative bg-white rounded-lg overflow-hidden">
+            {/* Close Button */}
+            <Button
+              onClick={() => setFullscreenImage(null)}
+              variant="outline"
+              size="sm"
+              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white border-gray-300 shadow-lg"
+              style={{
+                borderColor: themeColor,
+                color: themeColor
+              }}
+            >
+              <span className="text-lg">✕</span>
+            </Button>
+            
+            {/* Image Container */}
+            <div className="p-6">
+              {fullscreenImage && (
+                <img
+                  src={fullscreenImage}
+                  alt="Image preview"
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-lg"
+                  style={{
+                    minWidth: isMobile ? '280px' : '600px',
+                    minHeight: isMobile ? '200px' : '400px'
+                  }}
+                />
+              )}
+            </div>
+            
+            {/* Image Caption */}
+            <div 
+              className="px-6 pb-6 pt-2 text-center border-t"
+              style={{ borderColor: `${themeColor}30` }}
+            >
+              <p 
+                className="text-sm font-medium"
+                style={{ color: themeColor }}
+              >
+                Click outside or press ESC to close
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
