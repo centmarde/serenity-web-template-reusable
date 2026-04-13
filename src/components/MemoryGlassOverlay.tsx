@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useMemoryImagesStore, type MemoryImage } from '../stores/memoriesImagesData';
+import { useMemoryImagesStore} from '../stores/memoriesImagesData';
 import { useSettingsStore } from '../stores/settings';
 
 interface GlassPanel {
