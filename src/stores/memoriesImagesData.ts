@@ -28,6 +28,7 @@ interface MemoryImagesStore {
 
   // Actions
   fetchImages: () => Promise<void>;
+  fetchLimitedImages: (limit: number) => Promise<MemoryImage[]>;
   createImage: (input: CreateMemoryImageInput) => Promise<MemoryImage>;
   updateImage: (input: UpdateMemoryImageInput) => Promise<MemoryImage>;
   deleteImage: (id: number) => Promise<void>;
@@ -82,6 +83,27 @@ export const useMemoryImagesStore = create<MemoryImagesStore>((set, get) => ({
         isInitialized: false 
       });
       throw new Error(errorMessage);
+    }
+  },
+
+  fetchLimitedImages: async (limit: number) => {
+    try {
+      const { data, error } = await supabase
+        .from('memory_images')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(limit);
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch limited images';
+      console.error('Failed to fetch limited images:', errorMessage);
+      return [];
     }
   },
 

@@ -15,6 +15,7 @@ export interface DialogMessages {
 export interface Settings {
   themeColor: string;
   isDarkMode: boolean;
+  useImagePreview: boolean;
   callsign: string;
   gf_name: string;
   bf_name: string;
@@ -39,6 +40,7 @@ interface SettingsStore {
   loadSettings: () => Promise<void>;
   getThemeColor: () => string;
   getIsDarkMode: () => boolean;
+  getUseImagePreview: () => boolean;
   getCallsign: () => string;
   getGfName: () => string;
   getBfName: () => string;
@@ -54,6 +56,7 @@ interface SettingsStore {
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForIsDarkMode: () => Promise<boolean>;
+  waitForUseImagePreview: () => Promise<boolean>;
   waitForCallsign: () => Promise<string>;
   waitForGfName: () => Promise<string>;
   waitForBfName: () => Promise<string>;
@@ -185,6 +188,15 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.isDarkMode;
   },
 
+  getUseImagePreview: () => {
+    const { settings } = get();
+    if (!settings || settings.useImagePreview === undefined) {
+      // Default to true if not specified
+      return true;
+    }
+    return settings.useImagePreview;
+  },
+
   getCallsign: () => {
     const { settings } = get();
     if (!settings || settings.callsign === undefined) {
@@ -309,6 +321,11 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForIsDarkMode: async () => {
     await get().loadSettings();
     return get().getIsDarkMode();
+  },
+
+  waitForUseImagePreview: async () => {
+    await get().loadSettings();
+    return get().getUseImagePreview();
   },
 
   waitForCallsign: async () => {
