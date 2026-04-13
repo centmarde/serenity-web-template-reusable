@@ -196,12 +196,24 @@ export const MemoriesWidget: React.FC = () => {
             >
               {getMilestoneIcon(primaryMilestone?.milestone || null)}
             </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
-                  {memory.title || 'Untitled Memory'}
-                </h3>
-                <div className="flex items-center gap-1 flex-shrink-0 ml-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 
+                    className="text-xl font-semibold text-neutral-800 dark:text-neutral-200 leading-tight"
+                    style={{
+                      wordBreak: 'break-word',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: '1.3'
+                    }}
+                  >
+                    {memory.title || 'Untitled Memory'}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"

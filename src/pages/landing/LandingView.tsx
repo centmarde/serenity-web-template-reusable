@@ -42,64 +42,90 @@ interface LandingViewProps {
 interface FeatureCardProps {
   title: string;
   icon: React.ReactNode;
+  imageSrc?: string;
   themeColor: string;
   onClick: () => void;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, themeColor, onClick }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, themeColor, onClick }) => {
   const isActive = isFeatureActive(title);
   const cardStyles = isActive ? createActiveCardStyles(themeColor) : createInactiveCardStyles(themeColor);
   const buttonBgColor = isActive ? `${themeColor}10` : `${cardStyles.color}10`;
+  const [imageError, setImageError] = useState(false);
   
   return (
     <Card
-      className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
+      className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-lg"
       style={{
-        backgroundColor: cardStyles.backgroundColor,
-        boxShadow: cardStyles.boxShadow,
-        border: cardStyles.border,
+        backgroundColor: "white",
+        border: `2px solid ${themeColor}40`,
+        borderRadius: "16px",
         transition: "all 0.3s ease",
         opacity: isActive ? 1 : 0.75,
       }}
       onMouseEnter={(e) => {
-        const shadowColor = isActive ? themeColor : cardStyles.color;
-        e.currentTarget.style.boxShadow = `0 0 30px ${shadowColor}80, ${cardStyles.boxShadow}`;
+        e.currentTarget.style.boxShadow = `0 8px 25px ${themeColor}30`;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = cardStyles.boxShadow;
+        e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
       }}
       onClick={onClick}
     >
-      <CardContent className="p-6 text-center">
-        <Button
-          variant="ghost"
-          className="w-full h-auto flex flex-col gap-3 p-4"
-          style={{
-            color: cardStyles.color,
-            backgroundColor: buttonBgColor,
-          }}
-        >
-          {icon}
-          <span
-            className="font-semibold"
+      <CardContent className="p-4 text-center flex flex-col items-center justify-center h-full min-h-[160px]">
+        {/* Wide, short pink background with large overlapping image */}
+        <div className="relative mb-3 flex-1 flex items-center justify-center">
+          <div 
+            className="rounded-lg"
             style={{
-              fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
+              backgroundColor: buttonBgColor,
+              width: "140px",
+              height: "60px",
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            {imageSrc && !imageError ? (
+              <img
+                src={imageSrc}
+                alt={title}
+                className="object-contain transform hover:scale-110 transition-transform duration-300"
+                onError={() => setImageError(true)}
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  filter: isActive ? 'none' : 'grayscale(30%) opacity(80%)'
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center" style={{ width: "120px", height: "120px" }}>
+                {icon}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Minimal text below */}
+        <div className="mt-auto">
+          <h3
+            className="font-medium text-center leading-tight"
+            style={{
+              fontSize: "clamp(0.75rem, 2vw, 0.875rem)",
+              color: isActive ? themeColor : `${themeColor}80`,
             }}
           >
             {title}
-            {!isActive && (
-              <span 
-                className="block text-xs mt-1" 
-                style={{ 
-                  color: cardStyles.color,
-                  opacity: 0.8,
-                }}
-              >
-                Coming Soon
-              </span>
-            )}
-          </span>
-        </Button>
+          </h3>
+          {!isActive && (
+            <p 
+              className="text-xs mt-1 opacity-60"
+              style={{ 
+                color: themeColor,
+                fontSize: "clamp(0.625rem, 1.5vw, 0.7rem)",
+              }}
+            >
+              Coming Soon
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -349,6 +375,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
           <FeatureCard
             title="Love Letters"
+            imageSrc="/assets/images/LoveLetter.png"
             icon={<Mail size={32} color={isFeatureActive("Love Letters") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Love Letters")}
@@ -356,6 +383,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Our Memories"
+            imageSrc="/assets/images/OurMemories.png"
             icon={<Camera size={32} color={isFeatureActive("Our Memories") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Memories")}
@@ -363,6 +391,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Our Music Playlist"
+            imageSrc="/assets/images/OurPlaylist.png"
             icon={<Music size={32} color={isFeatureActive("Our Music Playlist") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Music Playlist")}
@@ -370,6 +399,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Made for You"
+            imageSrc="/assets/images/MadeForYou.png"
             icon={<Gift size={32} color={isFeatureActive("Made for You") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Made for You")}
