@@ -28,6 +28,7 @@ interface ThemeStore {
   toggleDarkMode: () => void;
   setDarkMode: (isDark: boolean) => void;
   getCurrentThemeColor: () => string;
+  getSafeThemeColor: (fallback?: string) => string;
   isThemeInitialized: () => boolean;
   waitForInitialization: () => Promise<void>;
 }
@@ -119,6 +120,11 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
       throw new Error('Theme color not initialized. Settings must be loaded first.');
     }
     return currentThemeColor;
+  },
+
+  getSafeThemeColor: (fallback: string = '#F2A6A6') => {
+    const { currentThemeColor } = get();
+    return currentThemeColor || fallback;
   },
 
   isThemeInitialized: () => {
