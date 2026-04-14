@@ -18,6 +18,12 @@ interface LyricPosterDialogProps {
   onClose: () => void;
 }
 
+interface NarratorMessage {
+  text: string;
+  delay: number;
+  image?: string;
+}
+
 const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }) => {
   const { getCallsign } = useSettingsStore();
   const { getCurrentThemeColor } = useThemeStore();
@@ -27,32 +33,33 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [showingMessage, setShowingMessage] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [imageLoadError, setImageLoadError] = useState<boolean>(false);
 
-  const narratorMessages = [
+  const narratorMessages: NarratorMessage[] = [
     {
       text: `Hey gorgeous ${getCallsign() || "baby"}! 🎵`,
       delay: 0,
-      image: "/assets/listen.gif"
+      
     },
     {
       text: `I spent weeks learning canvas programming and image processing just to create this magical lyrics poster for you! ✨`,
       delay: 2000,
-      image: "/assets/explain.gif"
+     
     },
     {
       text: "I researched color theory, contrast algorithms, and text rendering techniques to make your favorite song lyrics come alive visually...",
       delay: 4000,
-      image: "/assets/navbar.gif"
+     
     },
     {
       text: "Every character you see is actually a letter from the song lyrics! I mapped the brightness of each pixel to create this unique art form 💖",
       delay: 6000,
-      image: "/assets/peach-goma.gif"
+     
     },
     {
       text: "The colors blend from our theme color in the shadows to pure white in the highlights - representing how your love brightens my world ✨",
       delay: 8000,
-      image: "/assets/celeb.gif"
+     
     },
     {
       text: `Every pixel was crafted with love, ${getCallsign() || "beautiful"}. This is our song, painted in words, just for you! 💝`,
@@ -69,6 +76,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
     if (isOpen) {
       setCurrentMessageIndex(0);
       setShowingMessage(false);
+      setImageLoadError(false);
       
       // Start the message sequence
       const timer = setTimeout(() => {
@@ -78,6 +86,11 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    // Reset image error state when message changes
+    setImageLoadError(false);
+  }, [currentMessageIndex]);
 
   // Removed auto-next functionality - user now controls navigation manually
 
@@ -90,6 +103,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
     if (currentMessageIndex < narratorMessages.length - 1) {
       setCurrentMessageIndex(prev => prev + 1);
       setShowingMessage(true);
+      setImageLoadError(false);
     }
   };
 
@@ -97,7 +111,13 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
     if (currentMessageIndex > 0) {
       setCurrentMessageIndex(prev => prev - 1);
       setShowingMessage(true);
+      setImageLoadError(false);
     }
+  };
+
+  // Helper function to check if image path is valid
+  const isValidImagePath = (imagePath?: string): boolean => {
+    return Boolean(imagePath && imagePath.trim() !== '' && imagePath !== '/assets/' && imagePath.includes('.'));
   };
 
   return (
@@ -207,18 +227,27 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                   {showingMessage && (
                     <div className="space-y-3 animate-fade-in">
                       {/* Message Image */}
-                      {narratorMessages[currentMessageIndex]?.image && (
+                      {isValidImagePath(narratorMessages[currentMessageIndex]?.image) && !imageLoadError && (
                         <div 
                           className="rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                          onClick={() => setFullscreenImage(narratorMessages[currentMessageIndex].image)}
+                          onClick={() => {
+                            const image = narratorMessages[currentMessageIndex]?.image;
+                            if (image && !imageLoadError) {
+                              setFullscreenImage(image);
+                            }
+                          }}
                         >
                           <img
-                            src={narratorMessages[currentMessageIndex].image}
+                            src={narratorMessages[currentMessageIndex]?.image || ''}
                             alt="Message attachment"
-                            className="w-full h-32 object-cover hover:scale-105 transition-transform duration-200"
+                            className="w-full object-contain hover:scale-105 transition-transform duration-200"
                             style={{ 
-                              maxHeight: isMobile ? '120px' : '128px'
+                              maxHeight: isMobile ? 'min(200px, 30vh)' : 'min(250px, 35vh)',
+                              minHeight: isMobile ? '120px' : '150px',
+                              height: 'auto'
                             }}
+                            onError={() => setImageLoadError(true)}
+                            onLoad={() => setImageLoadError(false)}
                           />
                         </div>
                       )}
@@ -375,39 +404,63 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
       {/* Image Preview Dialog */}
       <Dialog open={!!fullscreenImage} onOpenChange={() => setFullscreenImage(null)}>
         <DialogContent 
-          className="p-0 border-0 bg-transparent shadow-none max-w-[95vw] max-h-[95vh] w-fit h-fit"
+          className="p-0 border-0 bg-transparent shadow-none"
           style={{
-            maxWidth: '95vw',
-            maxHeight: '95vh',
-            width: 'fit-content',
-            height: 'fit-content'
+            maxWidth: '100vw',
+            maxHeight: '100vh',
+            width: 'auto',
+            height: 'auto'
           }}
         >
-          <div className="relative bg-white rounded-lg overflow-hidden">
+          <div 
+            className="relative bg-white overflow-hidden"
+            style={{
+              borderRadius: isMobile ? '8px' : '16px',
+              border: isMobile ? `1px solid ${themeColor}` : `3px solid ${themeColor}`,
+              maxWidth: isMobile ? 'calc(100vw - 16px)' : '95vw',
+              maxHeight: isMobile ? 'calc(100vh - 16px)' : '95vh',
+              margin: isMobile ? '8px auto' : 'auto',
+              width: isMobile ? 'calc(100vw - 16px)' : 'auto',
+              height: isMobile ? 'calc(100vh - 16px)' : 'auto'
+            }}
+          >
             {/* Close Button */}
             <Button
               onClick={() => setFullscreenImage(null)}
               variant="outline"
-              size="sm"
-              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white border-gray-300 shadow-lg"
+              size={isMobile ? "sm" : "default"}
+              className="absolute z-10 bg-white/95 hover:bg-white border-gray-300 shadow-lg"
               style={{
+                top: isMobile ? '8px' : '12px',
+                right: isMobile ? '8px' : '12px',
                 borderColor: themeColor,
-                color: themeColor
+                color: themeColor,
+                fontSize: isMobile ? '16px' : '18px',
+                minWidth: isMobile ? '32px' : '40px',
+                minHeight: isMobile ? '32px' : '40px'
               }}
             >
-              <span className="text-lg">✕</span>
+              <span>✕</span>
             </Button>
             
             {/* Image Container */}
-            <div className="p-6">
+            <div 
+              style={{
+                padding: isMobile ? 'min(12px, 3vw)' : 'min(24px, 6vw)'
+              }}
+            >
               {fullscreenImage && (
                 <img
                   src={fullscreenImage}
                   alt="Image preview"
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-lg"
+                  className="object-contain shadow-lg"
                   style={{
-                    minWidth: isMobile ? '280px' : '600px',
-                    minHeight: isMobile ? '200px' : '400px'
+                    maxWidth: '100%',
+                    maxHeight: isMobile ? 'calc(100vh - 32px)' : '85vh',
+                    width: 'auto',
+                    height: 'auto',
+                    borderRadius: isMobile ? '6px' : '12px',
+                    display: 'block'
                   }}
                 />
               )}
@@ -415,14 +468,20 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
             
             {/* Image Caption */}
             <div 
-              className="px-6 pb-6 pt-2 text-center border-t"
-              style={{ borderColor: `${themeColor}30` }}
+              className="text-center border-t"
+              style={{ 
+                borderColor: `${themeColor}30`,
+                padding: isMobile ? 'min(12px, 3vw) min(16px, 4vw)' : 'min(16px, 4vw) min(24px, 6vw)'
+              }}
             >
               <p 
-                className="text-sm font-medium"
-                style={{ color: themeColor }}
+                className="font-medium"
+                style={{ 
+                  color: themeColor,
+                  fontSize: isMobile ? 'clamp(0.75rem, 2.5vw, 0.875rem)' : 'clamp(0.875rem, 2vw, 1rem)'
+                }}
               >
-                Click outside or press ESC to close
+                {isMobile ? "Tap outside to close" : "Click outside or press ESC to close"}
               </p>
             </div>
           </div>
