@@ -71,7 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
 
   return (
     <Card 
-      className="w-full shadow-sm sticky top-0 z-50 border-0 rounded-none"
+      className="w-full shadow-sm sticky top-0 z-[9999] border-0 rounded-none"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.98)",
         backdropFilter: "blur(8px)",
