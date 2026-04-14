@@ -11,6 +11,19 @@ import { TarotReading } from "./TarotReading";
  * Orchestrates the tarot card selection experience with animations
  */
 
+/**
+ * Fisher-Yates shuffle algorithm for randomizing card order
+ * Uses function declaration to avoid JSX parsing issues with generics
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({ 
   themeColor, 
   isMobile,
@@ -23,18 +36,30 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
   const [internalShowReading, setInternalShowReading] = useState(false);
   const [animatingCard, setAnimatingCard] = useState<string | null>(null);
   
-  // Use external state for mobile, internal state for desktop
-  const selectedCards = isMobile && externalSelectedCards !== undefined ? externalSelectedCards : internalSelectedCards;
-  const setSelectedCards = isMobile && externalSetSelectedCards ? externalSetSelectedCards : setInternalSelectedCards;
-  const showReading = isMobile && externalSetShowReading ? false : internalShowReading; // Mobile reading handled externally
-  const setShowReading = isMobile && externalSetShowReading ? externalSetShowReading : setInternalShowReading;
+  // Create shuffled cards array once on component mount
+  const [shuffledCards] = useState<TarotCard[]>(() => shuffleArray(tarotCards));
   
+  // Create a second shuffle for compression phase
+  const [compressedCards] = useState<TarotCard[]>(() => shuffleArray(tarotCards));
+  
+  // Animation sequence hook (must be before currentCards calculation)
   const {
     isLoading,
     animationPhase,
     revealedCards,
     flippedCards,
   } = useAnimationSequence();
+  
+  // Determine which card array to use based on animation phase
+  const currentCards = animationPhase === 'compressing' || animationPhase === 'flipping' || animationPhase === 'selecting' 
+    ? compressedCards 
+    : shuffledCards;
+  
+  // Use external state for mobile, internal state for desktop
+  const selectedCards = isMobile && externalSelectedCards !== undefined ? externalSelectedCards : internalSelectedCards;
+  const setSelectedCards = isMobile && externalSetSelectedCards ? externalSetSelectedCards : setInternalSelectedCards;
+  const showReading = isMobile && externalSetShowReading ? false : internalShowReading; // Mobile reading handled externally
+  const setShowReading = isMobile && externalSetShowReading ? externalSetShowReading : setInternalShowReading;
 
   // Sync animation phase to external state for mobile
   useEffect(() => {
@@ -104,7 +129,7 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
             maxWidth: isMobile ? '400px' : '1200px',
           }}
         >
-          {tarotCards.map((card, index) => {
+          {currentCards.map((card, index) => {
             const isRevealed = revealedCards.includes(card.name);
             const isFlipped = flippedCards.includes(card.name);
             const isSelected = !!selectedCards.find(c => c.name === card.name);
@@ -112,7 +137,7 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
             
             return (
               <TarotCardComponent
-                key={index}
+                key={`${card.name}-${animationPhase}`} // Include phase in key to trigger re-render on reshuffle
                 card={card}
                 index={index}
                 themeColor={themeColor}
@@ -124,6 +149,7 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
                 selectedCards={selectedCards}
                 onClick={() => handleCardClick(card)}
                 isMobile={isMobile}
+                totalCards={currentCards.length}
               />
             );
           })}

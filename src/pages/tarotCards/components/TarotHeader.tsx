@@ -52,7 +52,8 @@ export const TarotHeader: React.FC<TarotHeaderProps> = ({
         className="text-gray-600"
         style={{
           fontSize: isMobile ? "clamp(0.8rem, 3vw, 0.95rem)" : "clamp(0.875rem, 2.5vw, 1rem)",
-          paddingX: isMobile ? "min(16px, 3vw)" : "0",
+          paddingLeft: isMobile ? "min(16px, 3vw)" : "0",
+          paddingRight: isMobile ? "min(16px, 3vw)" : "0",
         }}
       >
         {getSubText()}

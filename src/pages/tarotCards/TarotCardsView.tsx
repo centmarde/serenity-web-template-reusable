@@ -6,6 +6,7 @@ import { Target } from "lucide-react";
 import TarotCardsWidget from "./components/TarotCardsWidget";
 import { TarotHeader } from "./components/TarotHeader";
 import type { TarotCard } from "../../composables/tarotConstant";
+import type { AnimationPhase } from "./types";
 
 
 interface ComponentData {
@@ -24,7 +25,7 @@ const TarotCardsView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCards, setSelectedCards] = useState<TarotCard[]>([]);
   const [showReading, setShowReading] = useState(false);
-  const [animationPhase, setAnimationPhase] = useState<'loading' | 'revealing' | 'flipping' | 'selecting'>('loading');
+  const [animationPhase, setAnimationPhase] = useState<AnimationPhase>('loading');
 
   useEffect(() => {
     const initialize = async () => {

@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import type { TarotCardProps } from "../types";
 import { getImagePath, calculateCardPosition } from "../utils";
-import { tarotCards } from "../../../composables/tarotConstant";
 
 /**
  * Individual tarot card component with animations and interactions
@@ -20,10 +19,16 @@ export const TarotCardComponent: React.FC<TarotCardProps> = ({
   animationPhase,
   selectedCards,
   onClick,
-  isMobile
+  isMobile,
+  totalCards
 }) => {
   const canSelect = (animationPhase === 'selecting') && (selectedCards.length < 6 || isSelected);
-  const { leftPosition, topPosition, rotation, isMobileLayout } = calculateCardPosition(index, tarotCards.length, isMobile);
+  const { leftPosition, topPosition, rotation, isMobileLayout } = calculateCardPosition(index, totalCards, isMobile, animationPhase);
+  
+  // Add slight rotation variation during compression for visual reshuffling effect
+  const compressionRotation = animationPhase === 'compressing' 
+    ? rotation + (index % 3 - 1) * 5 // Slight rotation variation (-5, 0, +5 degrees)
+    : rotation;
 
   return (
     <div
@@ -35,27 +40,34 @@ export const TarotCardComponent: React.FC<TarotCardProps> = ({
         top: isMobileLayout ? `calc(50% + ${topPosition}px)` : '50%',
         transform: `
           ${isMobileLayout ? 'translate(-50%, -50%)' : 'translate(-50%, -50%)'} 
-          rotate(${rotation}deg)
+          rotate(${compressionRotation}deg)
+          ${animationPhase === 'compressing' ? 'scale(0.85) rotateY(10deg)' : ''}
           ${isAnimating ? (isMobileLayout ? 'scale(1.1)' : 'translateY(-20px) scale(1.1)') : ''}
           ${isSelected ? (isMobileLayout ? 'scale(1.15)' : 'translateY(-30px) scale(1.1)') : ''}
         `,
         transformOrigin: 'center center',
         zIndex: isSelected ? 1000 : isAnimating ? 999 : 100 + index,
         opacity: isRevealed || animationPhase === 'selecting' ? 1 : 0,
-        transition: `all 0.7s ease-in-out ${index * 50}ms`,
+        transition: animationPhase === 'compressing' 
+          ? `all 1.2s ease-in-out ${index * 80}ms` // Longer, staggered transition for compression
+          : `all 0.7s ease-in-out ${index * 50}ms`,
       }}
       onClick={() => canSelect && onClick()}
     >
       <Card
         className={`transition-all duration-500 ${
           isSelected ? 'ring-4 ring-opacity-75 shadow-2xl' : ''
-        } ${isAnimating ? 'animate-pulse' : ''}`}
+        } ${isAnimating ? 'animate-pulse' : ''} ${
+          animationPhase === 'compressing' ? 'animate-pulse' : ''
+        }`}
         style={{
           width: isMobileLayout ? '70px' : '100px',
           height: isMobileLayout ? '105px' : '150px',
           borderColor: isSelected ? themeColor : '#e5e7eb',
           '--tw-ring-color': isSelected ? themeColor : 'transparent',
-          boxShadow: isSelected ? `0 0 40px ${themeColor}60` : '0 4px 8px rgba(0,0,0,0.1)',
+          boxShadow: isSelected ? `0 0 40px ${themeColor}60` : 
+                     animationPhase === 'compressing' ? `0 0 20px ${themeColor}40` : 
+                     '0 4px 8px rgba(0,0,0,0.1)',
           background: isFlipped && !isSelected ? '#4a5568' : 'white',
         } as React.CSSProperties}
       >

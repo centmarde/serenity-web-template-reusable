@@ -1,7 +1,7 @@
 import type { TarotCard } from "../../../composables/tarotConstant";
 
 // Animation phase type
-export type AnimationPhase = 'loading' | 'revealing' | 'flipping' | 'selecting';
+export type AnimationPhase = 'loading' | 'revealing' | 'compressing' | 'flipping' | 'selecting';
 
 // Main widget props
 export interface TarotCardsWidgetProps {
@@ -36,6 +36,7 @@ export interface TarotCardProps {
   selectedCards: TarotCard[];
   onClick: () => void;
   isMobile: boolean;
+  totalCards: number;
 }
 
 
