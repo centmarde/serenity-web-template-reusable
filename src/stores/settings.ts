@@ -15,12 +15,14 @@ export interface DialogMessages {
 export interface Settings {
   themeColor: string;
   isDarkMode: boolean;
+  useImagePreview: boolean;
   callsign: string;
   gf_name: string;
   bf_name: string;
   appName: string;
   coupleOfficialDate: string;
   startingGreetings: string;
+  bfThoughtsPassword: string;
   traits: string[];
   songTitle: string;
   songArtist: string;
@@ -39,12 +41,14 @@ interface SettingsStore {
   loadSettings: () => Promise<void>;
   getThemeColor: () => string;
   getIsDarkMode: () => boolean;
+  getUseImagePreview: () => boolean;
   getCallsign: () => string;
   getGfName: () => string;
   getBfName: () => string;
   getAppName: () => string;
   getCoupleOfficialDate: () => string;
   getStartingGreetings: () => string;
+  getBfThoughtsPassword: () => string;
   getTraits: () => string[];
   getRandomTrait: () => string;
   getSongTitle: () => string;
@@ -54,6 +58,7 @@ interface SettingsStore {
   getDialogMessages: () => DialogMessages;
   waitForThemeColor: () => Promise<string>;
   waitForIsDarkMode: () => Promise<boolean>;
+  waitForUseImagePreview: () => Promise<boolean>;
   waitForCallsign: () => Promise<string>;
   waitForGfName: () => Promise<string>;
   waitForBfName: () => Promise<string>;
@@ -135,6 +140,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         throw new Error('Starting greetings not found in settings.json');
       }
       
+      if (fetchedSettings.bfThoughtsPassword === undefined) {
+        throw new Error('bfThoughtsPassword not found in settings.json');
+      }
+      
       if (!fetchedSettings.traits || !Array.isArray(fetchedSettings.traits) || fetchedSettings.traits.length === 0) {
         throw new Error('Traits array not found or empty in settings.json');
       }
@@ -185,6 +194,15 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     return settings.isDarkMode;
   },
 
+  getUseImagePreview: () => {
+    const { settings } = get();
+    if (!settings || settings.useImagePreview === undefined) {
+      // Default to true if not specified
+      return true;
+    }
+    return settings.useImagePreview;
+  },
+
   getCallsign: () => {
     const { settings } = get();
     if (!settings || settings.callsign === undefined) {
@@ -231,6 +249,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       throw new Error('Settings not loaded. Call loadSettings() first.');
     }
     return settings.startingGreetings;
+  },
+
+  getBfThoughtsPassword: () => {
+    const { settings } = get();
+    if (!settings || settings.bfThoughtsPassword === undefined) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.bfThoughtsPassword;
   },
 
   getTraits: () => {
@@ -309,6 +335,11 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   waitForIsDarkMode: async () => {
     await get().loadSettings();
     return get().getIsDarkMode();
+  },
+
+  waitForUseImagePreview: async () => {
+    await get().loadSettings();
+    return get().getUseImagePreview();
   },
 
   waitForCallsign: async () => {

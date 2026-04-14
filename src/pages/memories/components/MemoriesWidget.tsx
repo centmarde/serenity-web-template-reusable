@@ -189,23 +189,33 @@ export const MemoriesWidget: React.FC = () => {
       content: (
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-start gap-4">
-            {!isMobile && (
-              <div 
-                className="p-3 rounded-lg shrink-0"
-                style={{
-                  backgroundColor: `${themeColor}15`,
-                  border: `1px solid ${themeColor}30`,
-                }}
-              >
-                {getMilestoneIcon(primaryMilestone?.milestone || null)}
-              </div>
-            )}
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
-                  {memory.title || 'Untitled Memory'}
-                </h3>
-                <div className="flex items-center gap-1 shrink-0 ml-4">
+            <div 
+              className="p-3 rounded-lg flex-shrink-0"
+              style={{
+                backgroundColor: `${themeColor}15`,
+                border: `1px solid ${themeColor}30`,
+              }}
+            >
+              {getMilestoneIcon(primaryMilestone?.milestone || null)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 
+                    className="text-xl font-semibold text-neutral-800 dark:text-neutral-200 leading-tight"
+                    style={{
+                      wordBreak: 'break-word',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: '1.3'
+                    }}
+                  >
+                    {memory.title || 'Untitled Memory'}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"

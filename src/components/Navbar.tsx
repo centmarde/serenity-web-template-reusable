@@ -13,7 +13,8 @@ import {
   Target,
   Heart,
   Sun,
-  Moon
+  Moon,
+  Zap
 } from "lucide-react";
 
 interface NavbarProps {
@@ -57,6 +58,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
       case 'Gift': return Gift;
       case 'Gamepad2': return Gamepad2;
       case 'Target': return Target;
+      case 'Zap': return Zap;
       default: return Heart;
     }
   };

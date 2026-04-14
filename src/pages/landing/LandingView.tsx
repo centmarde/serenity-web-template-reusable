@@ -6,7 +6,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Camera, Music, Gift, Mail, Gamepad2, Target } from "lucide-react";
+import { Heart, Camera, Music, Gift, Mail, Target, Zap } from "lucide-react";
 import {
   calculateRelationshipStats,
   calculateAnniversaryCountdown,
@@ -22,6 +22,7 @@ import { useCurrentDialog, useDialogActions } from '../../composables/dialogCont
 import CounterDialog from "./dialogs/CounterDialog";
 import OpsDialog from "./dialogs/OpsDialog";
 import ChatBot from "./components/ChatBot";
+import MemoryGlassOverlay from "../../components/MemoryGlassOverlay";
 
 interface ComponentData {
   themeColor: string;
@@ -31,6 +32,7 @@ interface ComponentData {
   startingGreetings: string;
   coupleOfficialDate: string;
   traits: string[];
+  useImagePreview: boolean;
   relationshipStats: RelationshipStats;
   anniversaryCountdown: AnniversaryCountdown;
 }
@@ -42,64 +44,91 @@ interface LandingViewProps {
 interface FeatureCardProps {
   title: string;
   icon: React.ReactNode;
+  imageSrc?: string;
+  useImagePreview: boolean;
   themeColor: string;
   onClick: () => void;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, themeColor, onClick }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useImagePreview, themeColor, onClick }) => {
   const isActive = isFeatureActive(title);
   const cardStyles = isActive ? createActiveCardStyles(themeColor) : createInactiveCardStyles(themeColor);
   const buttonBgColor = isActive ? `${themeColor}10` : `${cardStyles.color}10`;
+  const [imageError, setImageError] = useState(false);
   
   return (
     <Card
-      className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl"
+      className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-lg"
       style={{
-        backgroundColor: cardStyles.backgroundColor,
-        boxShadow: cardStyles.boxShadow,
-        border: cardStyles.border,
+        backgroundColor: "white",
+        border: `2px solid ${themeColor}40`,
+        borderRadius: "16px",
         transition: "all 0.3s ease",
         opacity: isActive ? 1 : 0.75,
       }}
       onMouseEnter={(e) => {
-        const shadowColor = isActive ? themeColor : cardStyles.color;
-        e.currentTarget.style.boxShadow = `0 0 30px ${shadowColor}80, ${cardStyles.boxShadow}`;
+        e.currentTarget.style.boxShadow = `0 8px 25px ${themeColor}30`;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = cardStyles.boxShadow;
+        e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
       }}
       onClick={onClick}
     >
-      <CardContent className="p-6 text-center">
-        <Button
-          variant="ghost"
-          className="w-full h-auto flex flex-col gap-3 p-4"
-          style={{
-            color: cardStyles.color,
-            backgroundColor: buttonBgColor,
-          }}
-        >
-          {icon}
-          <span
-            className="font-semibold"
+      <CardContent className="p-4 text-center flex flex-col items-center justify-center h-full min-h-[160px]">
+        {/* Wide, short pink background with large overlapping image */}
+        <div className="relative mb-3 flex-1 flex items-center justify-center">
+          <div 
+            className="rounded-lg"
             style={{
-              fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
+              backgroundColor: buttonBgColor,
+              width: "140px",
+              height: "60px",
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            {useImagePreview && imageSrc && !imageError ? (
+              <img
+                src={imageSrc}
+                alt={title}
+                className="object-contain transform hover:scale-110 transition-transform duration-300"
+                onError={() => setImageError(true)}
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  filter: isActive ? 'none' : 'grayscale(30%) opacity(80%)'
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center" style={{ width: "120px", height: "120px" }}>
+                {icon}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Minimal text below */}
+        <div className="mt-auto">
+          <h3
+            className="font-medium text-center leading-tight"
+            style={{
+              fontSize: "clamp(0.75rem, 2vw, 0.875rem)",
+              color: isActive ? themeColor : `${themeColor}80`,
             }}
           >
             {title}
-            {!isActive && (
-              <span 
-                className="block text-xs mt-1" 
-                style={{ 
-                  color: cardStyles.color,
-                  opacity: 0.8,
-                }}
-              >
-                Coming Soon
-              </span>
-            )}
-          </span>
-        </Button>
+          </h3>
+          {!isActive && (
+            <p 
+              className="text-xs mt-1 opacity-60"
+              style={{ 
+                color: themeColor,
+                fontSize: "clamp(0.625rem, 1.5vw, 0.7rem)",
+              }}
+            >
+              Coming Soon
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -114,10 +143,11 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     getCoupleOfficialDate,
     getTraits,
     getRandomTrait,
+    getUseImagePreview,
     loadSettings,
   } = useSettingsStore();
 
-  const { initializeTheme, getCurrentThemeColor, waitForInitialization } =
+  const { initializeTheme, getCurrentThemeColor, getSafeThemeColor, waitForInitialization } =
     useThemeStore();
 
   const [data, setData] = useState<ComponentData | null>(null);
@@ -156,6 +186,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           startingGreetings: getStartingGreetings(),
           coupleOfficialDate,
           traits: getTraits(),
+          useImagePreview: getUseImagePreview(),
           relationshipStats,
           anniversaryCountdown,
         };
@@ -169,7 +200,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         const fallbackDate = "2025-01-01";
         const fallbackStats = calculateRelationshipStats(fallbackDate);
         const fallbackCountdown = calculateAnniversaryCountdown(fallbackDate);
-        const fallbackThemeColor = getCurrentThemeColor() || "#F2A6A6";
+        const fallbackThemeColor = getSafeThemeColor();
 
         setData({
           themeColor: fallbackThemeColor,
@@ -178,6 +209,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           appName: "Love Space",
           startingGreetings: "baby",
           coupleOfficialDate: fallbackDate,
+          useImagePreview: true,
           traits: ["You are amazing"],
           relationshipStats: fallbackStats,
           anniversaryCountdown: fallbackCountdown,
@@ -226,6 +258,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate('/music');
     } else if (featureName === "Our Memories" && onNavigate) {
       onNavigate('/memories');
+    } else if (featureName === "Evil Thoughts" && onNavigate) {
+      onNavigate('/evil-thoughts');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -233,16 +267,17 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   };
 
   if (isLoading || !data) {
+    const safeThemeColor = getSafeThemeColor();
     return (
       <div 
         className="min-h-screen flex items-center justify-center"
         style={{
-          background: `linear-gradient(135deg, ${data?.themeColor || '#F2A6A6'}20, ${data?.themeColor || '#F2A6A6'}40, #ffffff)`,
+          background: `linear-gradient(135deg, ${safeThemeColor}20, ${safeThemeColor}40, #ffffff)`,
         }}
       >
         <div
           className="animate-spin rounded-full h-12 w-12 border-b-2"
-          style={{ borderColor: data?.themeColor || getCurrentThemeColor() }}
+          style={{ borderColor: safeThemeColor }}
         ></div>
       </div>
     );
@@ -250,13 +285,16 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative"
       style={{
         background: `linear-gradient(135deg, ${data.themeColor}20, ${data.themeColor}40, #ffffff)`,
       }}
     >
+      {/* Memory Glass Background Overlay */}
+      <MemoryGlassOverlay />
+      
       {/* Main Container - Fluid */}
-      <div className="w-full container mx-auto space-y-8 px-4">
+      <div className="w-full container mx-auto space-y-8 px-4 relative z-10">
         {/* Greeting Section */}
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-4">
@@ -316,7 +354,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
             <div 
               className="inline-block px-6 py-3 rounded-full cursor-pointer hover:scale-105 transition-all duration-300"
               style={{
-                backgroundColor: `${data.themeColor}15`,
+                backgroundColor: `white`,
                 border: `2px solid ${data.themeColor}30`,
               }}
               onClick={() => setShowCounterDialog(true)}
@@ -349,6 +387,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
           <FeatureCard
             title="Love Letters"
+            imageSrc="/assets/images/LoveLetters.png"
+            useImagePreview={data.useImagePreview}
             icon={<Mail size={32} color={isFeatureActive("Love Letters") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Love Letters")}
@@ -356,6 +396,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Our Memories"
+            imageSrc="/assets/images/OurMemories.png"
+            useImagePreview={data.useImagePreview}
             icon={<Camera size={32} color={isFeatureActive("Our Memories") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Memories")}
@@ -363,6 +405,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Our Music Playlist"
+            imageSrc="/assets/images/OurPlaylist.png"
+            useImagePreview={data.useImagePreview}
             icon={<Music size={32} color={isFeatureActive("Our Music Playlist") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Music Playlist")}
@@ -370,20 +414,26 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           
           <FeatureCard
             title="Made for You"
+            imageSrc="/assets/images/MadeForYou.png"
+            useImagePreview={data.useImagePreview}
             icon={<Gift size={32} color={isFeatureActive("Made for You") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Made for You")}
           />
           
           <FeatureCard
-            title="Play with Me"
-            icon={<Gamepad2 size={32} color={isFeatureActive("Play with Me") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            title="Evil Thoughts"
+            imageSrc="/assets/images/EvilThoughts.png"
+            useImagePreview={data.useImagePreview}
+            icon={<Zap size={32} color={isFeatureActive("Evil Thoughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
-            onClick={() => handleFeatureClick("Play with Me")}
+            onClick={() => handleFeatureClick("Evil Thoughts")}
           />
           
           <FeatureCard
             title="Future Goals"
+            imageSrc="/assets/images/FutureGoals.png"
+            useImagePreview={data.useImagePreview}
             icon={<Target size={32} color={isFeatureActive("Future Goals") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Future Goals")}
@@ -392,7 +442,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       </div>
 
       {/* Floating Chat Bot Icon */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setShowChatBot(true)}
           className="w-16 h-16 rounded-full p-0 shadow-2xl hover:scale-110 transition-all duration-300 group"
