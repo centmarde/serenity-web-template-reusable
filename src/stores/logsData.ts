@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
+import * as geolocator from 'geolocator';
 
 // Device detection utility
 export const detectDevice = (): string => {
@@ -96,36 +97,64 @@ const getTimezoneLocation = (): string => {
   }
 };
 
-// Enhanced location detection with multiple fallback methods
+// Enhanced location detection with geolocator and fallback methods
 export const detectLocation = async (): Promise<string> => {
-  // Method 1: Try GPS/Network location first (most accurate)
+  // Method 1: Try Geolocator (most accurate with additional features)
   try {
-    if (typeof window !== 'undefined' && navigator.geolocation) {
+    if (typeof window !== 'undefined') {
+      // Configure geolocator options
+      geolocator.config({
+        language: 'en',
+        google: {
+          version: '3',
+          key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+        }
+      });
+
       const gpsLocation = await new Promise<string>((resolve, reject) => {
         const options = {
           enableHighAccuracy: true,  // Use GPS on mobile devices
-          timeout: 8000,            // 8 second timeout
-          maximumAge: 300000        // 5 minutes cache
+          timeout: 10000,            // 10 second timeout
+          maximumAge: 300000,        // 5 minutes cache
+          desiredAccuracy: 10,       // Desired accuracy in meters
+          fallbackToIP: false        // We'll handle IP fallback separately
         };
 
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude, accuracy } = position.coords;
-            const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)} (GPS ±${Math.round(accuracy)}m)`;
+        geolocator.locate(options, (err, location) => {
+          if (err) {
+            console.warn('Geolocator failed:', err.message);
+            reject(err);
+            return;
+          }
+
+          if (location && location.coords) {
+            const { latitude, longitude, accuracy } = location.coords;
+            let locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)} (Geolocator ±${Math.round(accuracy || 0)}m)`;
+            
+            // Add address info if available
+            if (location.address) {
+              const addr = location.address;
+              const addressParts = [];
+              if (addr.city) addressParts.push(addr.city);
+              if (addr.state) addressParts.push(addr.state);
+              if (addr.country) addressParts.push(addr.country);
+              
+              if (addressParts.length > 0) {
+                locationString = `${addressParts.join(', ')} (${latitude.toFixed(6)}, ${longitude.toFixed(6)}, ±${Math.round(accuracy || 0)}m)`;
+              }
+            }
+            
             resolve(locationString);
-          },
-          (error) => {
-            console.warn('GPS geolocation failed:', error.message);
-            reject(error);
-          },
-          options
-        );
+          } else {
+            reject(new Error('No location data received'));
+          }
+        });
       });
       
       return gpsLocation;
     }
   } catch (gpsError) {
-    console.log('GPS failed, trying IP location...', gpsError instanceof Error ? gpsError.message : String(gpsError));
+    console.log('Geolocator failed, trying IP location...', gpsError instanceof Error ? gpsError.message : String(gpsError));
   }
 
   // Method 2: Try IP-based geolocation (fallback)
@@ -179,13 +208,43 @@ export const createLogWithDeviceAndLocation = async (logData: Omit<LogCreate, 'd
 export const createLogWithDeviceAndQuickLocation = async (logData: Omit<LogCreate, 'device' | 'address'>): Promise<LogCreate> => {
   const device = detectDevice();
   
-  // Skip GPS, use faster methods only
+  // Skip Geolocator GPS, use faster methods only
   let address: string;
   try {
-    const ipLocation = await getIPLocation();
+    // Try geolocator IP-based location first (faster than GPS)
+    geolocator.config({
+      language: 'en',
+      google: { 
+        version: '3', 
+        key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+      }
+    });
+    
+    const ipLocation = await new Promise<string>((resolve) => {
+      geolocator.locateByIP((err, location) => {
+        if (err || !location) {
+          resolve('Geolocator IP failed');
+          return;
+        }
+        
+        const city = location.city || 'Unknown';
+        const region = location.region?.name || location.state || 'Unknown';
+        const country = location.country?.name || 'Unknown';
+        const coords = location.coords ? `${location.coords.latitude.toFixed(4)}, ${location.coords.longitude.toFixed(4)}` : 'N/A';
+        
+        resolve(`${city}, ${region}, ${country} (Geolocator IP: ${coords})`);
+      });
+    });
+    
     address = ipLocation.includes('failed') ? getTimezoneLocation() : ipLocation;
   } catch (error) {
-    address = getTimezoneLocation();
+    // Fallback to our custom IP method
+    try {
+      const fallbackIP = await getIPLocation();
+      address = fallbackIP.includes('failed') ? getTimezoneLocation() : fallbackIP;
+    } catch {
+      address = getTimezoneLocation();
+    }
     console.log('Quick location detection fallback:', error instanceof Error ? error.message : String(error));
   }
   

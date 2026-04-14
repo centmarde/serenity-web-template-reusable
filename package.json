@@ -24,6 +24,7 @@
     "easymde": "^2.20.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.34.2",
+    "geolocator": "^2.1.5",
     "groq-sdk": "^0.37.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.574.0",

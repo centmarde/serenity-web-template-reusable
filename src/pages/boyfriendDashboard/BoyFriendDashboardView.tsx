@@ -6,8 +6,10 @@ import { useSettingsStore } from '../../stores/settings';
 import { useThemeStore } from '../../stores/theme';
 import { useAuthActions, useAuthLoading, useUser } from '../../stores/authData';
 import useLogsStore from '../../stores/logsData';
-import { Heart, ArrowLeft, LogOut, Search, Calendar, Filter, ChevronUp, ChevronDown, Info, Smartphone, MapPin } from 'lucide-react';
+import type { Log } from '../../stores/logsData';
+import { Heart, ArrowLeft, LogOut, Search, Calendar, Filter, ChevronUp, ChevronDown, Info, Smartphone, MapPin, Trash2 } from 'lucide-react';
 import { formatDateTimeDetailed } from './utils/helpers';
+import LogsDeleteConfirmationDialog from './dialogs/LogsDeleteConfirmationDialog';
 
 
 interface BoyFriendDashboardViewProps {
@@ -28,6 +30,7 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
   const { 
     logs, 
     fetchLogs, 
+    deleteLog,
     isLoading: logsLoading, 
     error: logsError,
     getTodaysLogs,
@@ -42,6 +45,11 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
   const [sortBy, setSortBy] = useState<'created_at'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [logToDelete, setLogToDelete] = useState<Log | null>(null);
+  const [isDeletingLog, setIsDeletingLog] = useState(false);
   
   const themeColor = getCurrentThemeColor();
   
@@ -115,6 +123,35 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
       newExpanded.add(logId);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const handleDeleteLog = (log: Log) => {
+    setLogToDelete(log);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteLog = async () => {
+    if (!logToDelete?.id) return;
+    
+    setIsDeletingLog(true);
+    try {
+      const success = await deleteLog(logToDelete.id);
+      if (success) {
+        setDeleteDialogOpen(false);
+        setLogToDelete(null);
+        // Refresh the logs to reflect the deletion
+        await fetchLogs();
+      }
+    } catch (error) {
+      console.error('Failed to delete log:', error);
+    } finally {
+      setIsDeletingLog(false);
+    }
+  };
+
+  const cancelDeleteLog = () => {
+    setDeleteDialogOpen(false);
+    setLogToDelete(null);
   };
 
   const handleBackToHome = () => {
@@ -284,6 +321,7 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
                       <th className="text-center p-3 font-medium" style={{ color: themeColor }}>Miss Letter</th>
                       <th className="text-center p-3 font-medium hidden lg:table-cell" style={{ color: themeColor }}>Device</th>
                       <th className="text-center p-3 font-medium hidden xl:table-cell" style={{ color: themeColor }}>Location</th>
+                      <th className="text-center p-3 font-medium" style={{ color: themeColor }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -364,12 +402,24 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
                               <span className="text-gray-400 text-xs">Unknown</span>
                             )}
                           </td>
+                          <td className="p-3 text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteLog(log)}
+                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              title="Delete this log entry"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </td>
+                         
                         </tr>
                         
                         {/* Mobile expansion row */}
                         {expandedRows.has(log.id!) && (log.device || log.address) && (
                           <tr className="lg:hidden border-b" style={{ borderColor: `${themeColor}10` }}>
-                            <td colSpan={3} style={{ backgroundColor: `${themeColor}05` }}>
+                            <td colSpan={4} style={{ backgroundColor: `${themeColor}05` }}>
                               <div className="p-4 space-y-3">
                                 {log.device && (
                                   <div className="flex items-start gap-3">
@@ -497,6 +547,15 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
           </p>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <LogsDeleteConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={cancelDeleteLog}
+        onConfirm={confirmDeleteLog}
+        log={logToDelete}
+        isLoading={isDeletingLog}
+      />
     </div>
   );
 };
