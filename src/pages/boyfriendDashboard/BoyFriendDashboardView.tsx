@@ -10,6 +10,7 @@ import type { Log } from '../../stores/logsData';
 import { Heart, ArrowLeft, LogOut, Search, Calendar, Filter, ChevronUp, ChevronDown, Info, Smartphone, MapPin, Trash2 } from 'lucide-react';
 import { formatDateTimeDetailed } from './utils/helpers';
 import LogsDeleteConfirmationDialog from './dialogs/LogsDeleteConfirmationDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 interface BoyFriendDashboardViewProps {
@@ -303,9 +304,10 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b" style={{ borderColor: `${themeColor}20` }}>
+                <TooltipProvider>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b" style={{ borderColor: `${themeColor}20` }}>
                       <th className="text-left p-3 font-medium" style={{ color: themeColor }}>
                         <button
                           onClick={() => handleSort('created_at')}
@@ -386,18 +388,28 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
                               <span className="text-gray-400 text-xs">Unknown</span>
                             )}
                           </td>
-                          <td className="p-3 text-xs hidden xl:table-cell" title={log.address || 'Location unavailable'}>
+                          <td className="p-3 text-xs hidden xl:table-cell">
                             {log.address ? (
-                              <span className="inline-block max-w-40 truncate text-gray-700">
-                                {log.address.includes('GPS') && '🛰️'}
-                                {log.address.includes('IP-based') && '🌐'}
-                                {log.address.includes('Timezone') && '🕐'}
-                                {log.address.includes('Platform') && '🖥️'}
-                                {log.address.includes('denied') && '🚫'}
-                                {log.address.includes('unavailable') && '❌'}
-                                {log.address.includes('timeout') && '⏱️'}
-                                {' '}{log.address.split('(')[0].trim()}
-                              </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-block max-w-40 truncate text-gray-700 cursor-help">
+                                    {log.address.includes('GPS') && '🛰️'}
+                                    {log.address.includes('IP-based') && '🌐'}
+                                    {log.address.includes('Timezone') && '🕐'}
+                                    {log.address.includes('Platform') && '🖥️'}
+                                    {log.address.includes('denied') && '🚫'}
+                                    {log.address.includes('unavailable') && '❌'}
+                                    {log.address.includes('timeout') && '⏱️'}
+                                    {' '}{log.address.split('(')[0].trim()}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <div className="text-xs">
+                                    <div className="font-medium mb-1">Full Location Details:</div>
+                                    <div className="whitespace-normal break-words">{log.address}</div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
                             ) : (
                               <span className="text-gray-400 text-xs">Unknown</span>
                             )}
@@ -447,8 +459,7 @@ const BoyFriendDashboardView: React.FC<BoyFriendDashboardViewProps> = ({ onNavig
                     ))}
                   </tbody>
                 </table>
-
-                {/* Summary Stats */}
+                </TooltipProvider>
                 <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
                   <div className="text-center p-3 rounded-lg" style={{ backgroundColor: `${themeColor}10` }}>
                     <div className="text-2xl font-bold" style={{ color: themeColor }}>{logs.length}</div>

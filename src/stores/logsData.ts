@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import * as geolocator from 'geolocator';
 
+// Default location for more accurate parsing (user's expected location)
+const DEFAULT_LOCATION = {
+  city: 'Butuan City',
+  region: 'Caraga',
+  country: 'Philippines',
+  latitude: 8.9470,
+  longitude: 125.5406,
+  timezone: 'Asia/Manila'
+};
+
 // Device detection utility
 export const detectDevice = (): string => {
   if (typeof window === 'undefined') return 'Server';
@@ -68,13 +78,14 @@ const getIPLocation = async (): Promise<string> => {
     const data = await response.json();
     
     if (data.latitude && data.longitude) {
-      const city = data.city || 'Unknown';
-      const region = data.region || 'Unknown';
-      const country = data.country_name || 'Unknown';
+      const city = data.city || DEFAULT_LOCATION.city;
+      const region = data.region || DEFAULT_LOCATION.region;
+      const country = data.country_name || DEFAULT_LOCATION.country;
       return `${city}, ${region}, ${country} (IP-based: ${data.latitude}, ${data.longitude})`;
     }
     
-    return 'IP location unavailable';
+    // Fallback to default location
+    return `${DEFAULT_LOCATION.city}, ${DEFAULT_LOCATION.region}, ${DEFAULT_LOCATION.country} (IP location unavailable, using default)`;
   } catch (error) {
     console.warn('IP geolocation failed:', error);
     return 'IP location failed';
@@ -87,13 +98,19 @@ const getTimezoneLocation = (): string => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const locale = navigator.language || 'en-US';
     
+    // Check if timezone matches expected region (Philippines)
+    if (timezone === DEFAULT_LOCATION.timezone || timezone.includes('Manila') || timezone.includes('Asia')) {
+      return `${DEFAULT_LOCATION.city}, ${DEFAULT_LOCATION.region}, ${DEFAULT_LOCATION.country} (Timezone: ${timezone})`;
+    }
+    
     // Get approximate region from timezone
-    const timezoneCity = timezone.split('/').pop()?.replace(/_/g, ' ') || 'Unknown';
+    const timezoneCity = timezone.split('/').pop()?.replace(/_/g, ' ') || DEFAULT_LOCATION.city;
     
     return `${timezoneCity} (Timezone: ${timezone}, Locale: ${locale})`;
   } catch (error) {
     console.warn('Timezone detection failed:', error instanceof Error ? error.message : String(error));
-    return 'Timezone detection failed';
+    // Fallback to default location
+    return `${DEFAULT_LOCATION.city}, ${DEFAULT_LOCATION.region}, ${DEFAULT_LOCATION.country} (Timezone detection failed, using default)`;
   }
 };
 
@@ -136,12 +153,19 @@ export const detectLocation = async (): Promise<string> => {
               const addr = location.address;
               const addressParts = [];
               if (addr.city) addressParts.push(addr.city);
-              if (addr.state) addressParts.push(addr.state);
+              
+              if (addr.state || addr.region) addressParts.push(addr.state || addr.region?.name);
+              else addressParts.push(DEFAULT_LOCATION.region);
+              
               if (addr.country) addressParts.push(addr.country);
+              else addressParts.push(DEFAULT_LOCATION.country);
               
               if (addressParts.length > 0) {
                 locationString = `${addressParts.join(', ')} (${latitude.toFixed(6)}, ${longitude.toFixed(6)}, ±${Math.round(accuracy || 0)}m)`;
               }
+            } else {
+              // No address from GPS, use coordinates with default country context
+              locationString = `${DEFAULT_LOCATION.country} - GPS Location (${latitude.toFixed(6)}, ${longitude.toFixed(6)}, ±${Math.round(accuracy || 0)}m)`;
             }
             
             resolve(locationString);
@@ -177,16 +201,15 @@ export const detectLocation = async (): Promise<string> => {
     console.log('Timezone detection failed:', timezoneError instanceof Error ? timezoneError.message : String(timezoneError));
   }
 
-  // Method 4: Final fallback - basic browser info
+  // Method 4: Final fallback - use default location
   if (typeof window !== 'undefined') {
-   /*  const userAgent = navigator.userAgent.toLowerCase(); */
     const language = navigator.language || 'Unknown';
     const platform = navigator.platform || 'Unknown';
     
-    return `Platform: ${platform}, Language: ${language} (Location services unavailable)`;
+    return `${DEFAULT_LOCATION.city}, ${DEFAULT_LOCATION.region}, ${DEFAULT_LOCATION.country} (Platform: ${platform}, Language: ${language} - Location services unavailable)`;
   }
 
-  return 'Location detection unavailable';
+  return `${DEFAULT_LOCATION.city}, ${DEFAULT_LOCATION.region}, ${DEFAULT_LOCATION.country} (Location detection unavailable, using default)`;
 };
 
 // Auto-detect device and location for log creation
@@ -227,9 +250,9 @@ export const createLogWithDeviceAndQuickLocation = async (logData: Omit<LogCreat
           return;
         }
         
-        const city = location.city || 'Unknown';
-        const region = location.region?.name || location.state || 'Unknown';
-        const country = location.country?.name || 'Unknown';
+        const city = location.city || DEFAULT_LOCATION.city;
+        const region = location.region?.name || location.state || DEFAULT_LOCATION.region;
+        const country = location.country?.name || DEFAULT_LOCATION.country;
         const coords = location.coords ? `${location.coords.latitude.toFixed(4)}, ${location.coords.longitude.toFixed(4)}` : 'N/A';
         
         resolve(`${city}, ${region}, ${country} (Geolocator IP: ${coords})`);
