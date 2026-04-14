@@ -12,6 +12,7 @@ import PlayListView from "../pages/Playlist/PlayListView";
 import MemoriesView from "../pages/memories/MemoriesView";
 import EvilThoughtsView from "../pages/evilThoughts/EvilThoughtsView";
 import TarotCardsView from "../pages/tarotCards/TarotCardsView";
+import TarotReadingView from "../pages/tarotCards/TarotReadingView";
 import { useThemeStore } from "../stores/theme";
 
 // Coming soon component
@@ -75,7 +76,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ currentPath, onNavigate }
       case 'EvilThoughtsView':
         return <EvilThoughtsView />;
       case 'TarotCardsView':
-        return <TarotCardsView />;
+        return <TarotCardsView onNavigate={onNavigate} />;
+      case 'TarotReadingView':
+        return <TarotReadingView onNavigate={onNavigate} />;
       case 'ComingSoon':
         return <ComingSoonView routeName={route.name} />;
       default:

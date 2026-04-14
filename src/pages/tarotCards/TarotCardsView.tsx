@@ -16,7 +16,11 @@ interface ComponentData {
   appName: string;
 }
 
-const TarotCardsView: React.FC = () => {
+interface TarotCardsViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
   const { getCallsign, getGfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization, getSafeThemeColor } = useThemeStore();
   const isMobile = useIsMobile();
@@ -24,8 +28,13 @@ const TarotCardsView: React.FC = () => {
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCards, setSelectedCards] = useState<TarotCard[]>([]);
-  const [showReading, setShowReading] = useState(false);
   const [animationPhase, setAnimationPhase] = useState<AnimationPhase>('loading');
+
+  // Handle selected cards changes (no automatic store saving)
+  const handleSetSelectedCards = (cards: TarotCard[]) => {
+    setSelectedCards(cards);
+    // Store saving now happens only when "Reveal Reading" is clicked
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -104,9 +113,8 @@ const TarotCardsView: React.FC = () => {
                 themeColor={data.themeColor}
                 animationPhase={animationPhase}
                 selectedCards={selectedCards}
-                onRevealReading={() => setShowReading(true)}
-                showReading={showReading}
                 isMobile={isMobile}
+                onNavigate={onNavigate || (() => {})}
               />
             </div>
           )}
@@ -128,15 +136,18 @@ const TarotCardsView: React.FC = () => {
                 themeColor={data.themeColor} 
                 isMobile={isMobile}
                 selectedCards={selectedCards}
-                setSelectedCards={setSelectedCards}
+                setSelectedCards={handleSetSelectedCards}
                 setAnimationPhase={setAnimationPhase}
-                setShowReading={setShowReading}
               />
             </div>
           ) : (
             <TarotCardsWidget 
               themeColor={data.themeColor} 
               isMobile={isMobile}
+              onNavigate={onNavigate}
+              selectedCards={selectedCards}
+              setSelectedCards={handleSetSelectedCards}
+              setAnimationPhase={setAnimationPhase}
             />
           )}
         </div>

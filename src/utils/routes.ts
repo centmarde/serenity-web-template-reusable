@@ -144,6 +144,15 @@ export const routes: Route[] = [
     showInNav: true,
     requiresAuth: true,
   },
+  {
+    path: '/tarot-cards/continue',
+    name: 'Tarot Reading',
+    component: 'TarotReadingView',
+    icon: 'Target',
+    isPublic: true,
+    showInNav: false,
+    requiresAuth: true,
+  },
 ];
 
 export const getRouteByPath = (path: string): Route | undefined => {

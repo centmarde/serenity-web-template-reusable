@@ -4,7 +4,6 @@ import type { TarotCardsWidgetProps } from "../types";
 import { useAnimationSequence } from "../hooks/useAnimationSequence";
 import { TarotHeader } from "./TarotHeader";
 import { TarotCardComponent } from "./TarotCardComponent";
-import { TarotReading } from "./TarotReading";
 
 /**
  * Main tarot cards widget component
@@ -27,13 +26,12 @@ function shuffleArray<T>(array: T[]): T[] {
 const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({ 
   themeColor, 
   isMobile,
+  onNavigate,
   selectedCards: externalSelectedCards,
   setSelectedCards: externalSetSelectedCards,
-  setAnimationPhase: externalSetAnimationPhase,
-  setShowReading: externalSetShowReading
+  setAnimationPhase: externalSetAnimationPhase
 }) => {
   const [internalSelectedCards, setInternalSelectedCards] = useState<TarotCard[]>([]);
-  const [internalShowReading, setInternalShowReading] = useState(false);
   const [animatingCard, setAnimatingCard] = useState<string | null>(null);
   
   // Create shuffled cards array once on component mount
@@ -58,8 +56,6 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
   // Use external state for mobile, internal state for desktop
   const selectedCards = isMobile && externalSelectedCards !== undefined ? externalSelectedCards : internalSelectedCards;
   const setSelectedCards = isMobile && externalSetSelectedCards ? externalSetSelectedCards : setInternalSelectedCards;
-  const showReading = isMobile && externalSetShowReading ? false : internalShowReading; // Mobile reading handled externally
-  const setShowReading = isMobile && externalSetShowReading ? externalSetShowReading : setInternalShowReading;
 
   // Sync animation phase to external state for mobile
   useEffect(() => {
@@ -71,28 +67,26 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
   const handleCardClick = (card: TarotCard) => {
     if (animationPhase !== 'selecting') return;
 
-    if (selectedCards.length >= 6 && !selectedCards.find(c => c.name === card.name)) {
+    // Check if card is already selected - if so, do nothing (no deselect to avoid cheating)
+    if (selectedCards.find(c => c.name === card.name)) {
+      return;
+    }
+
+    // Only allow selection if less than 6 cards selected
+    if (selectedCards.length >= 6) {
       return;
     }
 
     setAnimatingCard(card.name);
     setTimeout(() => setAnimatingCard(null), 600);
 
-    const isSelected = selectedCards.find(c => c.name === card.name);
-    if (isSelected) {
-      setSelectedCards(selectedCards.filter(c => c.name !== card.name));
-    } else {
-      setSelectedCards([...selectedCards, card]);
-    }
+    // Only add to selection (no deselect)
+    setSelectedCards([...selectedCards, card]);
   };
 
 
 
-  const revealReading = () => {
-    if (selectedCards.length === 6) {
-      setShowReading(true);
-    }
-  };
+  // Reveal reading functionality now handled by navigation to /tarot-cards/continue
 
   if (isLoading) {
     return (
@@ -113,9 +107,8 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
           themeColor={themeColor}
           animationPhase={animationPhase}
           selectedCards={selectedCards}
-          onRevealReading={revealReading}
-          showReading={showReading}
           isMobile={isMobile}
+          onNavigate={onNavigate || (() => {})}
         />
       )}
 
@@ -158,12 +151,7 @@ const TarotCardsWidget: React.FC<TarotCardsWidgetProps> = ({
 
 
 
-      {/* Tarot Reading Display */}
-      <TarotReading
-        selectedCards={selectedCards}
-        themeColor={themeColor}
-        showReading={showReading}
-      />
+      {/* Tarot Reading now handled in separate route */}
     </div>
   );
 };

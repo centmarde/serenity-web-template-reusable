@@ -7,11 +7,11 @@ export type AnimationPhase = 'loading' | 'revealing' | 'compressing' | 'flipping
 export interface TarotCardsWidgetProps {
   themeColor: string;
   isMobile: boolean;
+  onNavigate?: (path: string) => void;
   // Optional props for mobile view when TarotHeader is rendered externally
   selectedCards?: TarotCard[];
   setSelectedCards?: (cards: TarotCard[]) => void;
   setAnimationPhase?: (phase: AnimationPhase) => void;
-  setShowReading?: (show: boolean) => void;
 }
 
 // Component props interfaces
@@ -19,9 +19,8 @@ export interface TarotHeaderProps {
   themeColor: string;
   animationPhase: AnimationPhase;
   selectedCards: TarotCard[];
-  onRevealReading: () => void;
-  showReading: boolean;
   isMobile: boolean;
+  onNavigate: (path: string) => void;
 }
 
 export interface TarotCardProps {

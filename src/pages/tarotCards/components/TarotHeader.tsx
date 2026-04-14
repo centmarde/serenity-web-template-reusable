@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Eye } from "lucide-react";
+import { useTarotSelectionStore } from "../../../stores/tarotSelectionData";
 import type { TarotHeaderProps } from "../types";
 
 /**
@@ -11,10 +12,17 @@ export const TarotHeader: React.FC<TarotHeaderProps> = ({
   themeColor,
   animationPhase,
   selectedCards,
-  onRevealReading,
-  showReading,
-  isMobile
+  isMobile,
+  onNavigate
 }) => {
+  const { setSelectedCardsForReading } = useTarotSelectionStore();
+
+  const handleRevealReading = () => {
+    // Clear any existing cache and save current selection for reading
+    setSelectedCardsForReading(selectedCards);
+    // Navigate to reading view
+    onNavigate('/tarot-cards/continue');
+  };
   const getHeaderText = () => {
     switch (animationPhase) {
       case 'revealing': return 'Revealing the Mystical Deck...';
@@ -73,9 +81,9 @@ export const TarotHeader: React.FC<TarotHeaderProps> = ({
             {selectedCards.length}/6 cards selected
           </div>
           <div className={`flex items-center justify-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
-            {selectedCards.length === 6 && !showReading && (
+            {selectedCards.length === 6 && (
               <Button
-                onClick={onRevealReading}
+                onClick={handleRevealReading}
                 size={isMobile ? "sm" : "sm"}
                 className="gap-1 animate-pulse"
                 style={{ backgroundColor: themeColor, borderColor: themeColor }}
