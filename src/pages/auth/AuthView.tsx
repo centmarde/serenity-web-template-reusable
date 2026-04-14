@@ -128,17 +128,31 @@ const AuthView: React.FC<AuthViewProps> = ({ onNavigate }) => {
 
           <CardContent className="space-y-4">
             {error && (
-              <Alert 
-                className="border-0"
-                style={{ 
-                  backgroundColor: '#fecaca20',
-                  borderLeft: '4px solid #ef4444'
-                }}
-              >
-                <AlertDescription className="text-sm text-red-600">
-                  {error}
-                </AlertDescription>
-              </Alert>
+              <div className="space-y-3">
+                <Alert 
+                  className="border-0"
+                  style={{ 
+                    backgroundColor: '#fecaca20',
+                    borderLeft: '4px solid #ef4444'
+                  }}
+                >
+                  <AlertDescription className="text-sm text-red-600">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+                
+                <Alert 
+                  className="border-0"
+                  style={{ 
+                    backgroundColor: `${themeColor}10`,
+                    borderLeft: `4px solid ${themeColor}`
+                  }}
+                >
+                  <AlertDescription className="text-sm" style={{ color: themeColor }}>
+                    💡 Hint: Password starts with "V" and ends with "."
+                  </AlertDescription>
+                </Alert>
+              </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-4">
