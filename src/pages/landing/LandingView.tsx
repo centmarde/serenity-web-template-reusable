@@ -260,6 +260,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate('/memories');
     } else if (featureName === "Evil Thoughts" && onNavigate) {
       onNavigate('/evil-thoughts');
+    } else if (featureName === "Tarot Cards" && onNavigate) {
+      onNavigate('/tarot-cards');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -431,12 +433,12 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           />
           
           <FeatureCard
-            title="Future Goals"
-            imageSrc="/assets/images/FutureGoals.png"
+            title="Tarot Cards"
+            imageSrc="/assets/images/tarotCard.png"
             useImagePreview={data.useImagePreview}
-            icon={<Target size={32} color={isFeatureActive("Future Goals") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={<Target size={32} color={isFeatureActive("Tarot Cards") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
-            onClick={() => handleFeatureClick("Future Goals")}
+            onClick={() => handleFeatureClick("Tarot Cards")}
           />
         </div>
       </div>

@@ -136,9 +136,9 @@ export const routes: Route[] = [
     requiresAuth: true,
   },
   {
-    path: '/goals',
-    name: 'Future Goals',
-    component: 'ComingSoon',
+    path: '/tarot-cards',
+    name: 'Tarot Cards',
+    component: 'TarotCardsView',
     icon: 'Target',
     isPublic: true,
     showInNav: true,
