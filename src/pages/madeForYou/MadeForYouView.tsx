@@ -133,7 +133,7 @@ const MadeForYouView: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 w-full px-4 sm:px-6 lg:px-8">
         {/* Flower Cards Grid */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
           {/* Lyrics Art Flower */}
           <FlowerCard
             flowerImage="/flowers/rose.png"
@@ -144,6 +144,13 @@ const MadeForYouView: React.FC = () => {
           <FlowerCard
             flowerImage="/flowers/rose1.png"
             route="/girlfriend/madeforyou/ascii-art"
+          />
+
+          {/* Animated Garden Flower */}
+          <FlowerCard
+            flowerImage="/flowers/tulips.png"
+            route="/girlfriend/madeforyou/flower-garden"
+            onNavigate={onNavigate}
           />
         </div>
 

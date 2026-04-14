@@ -22,12 +22,14 @@ import { useThemeStore } from '../../../stores/theme';
 import { useMemoriesStore, type Memory } from '../../../stores/memoriesData';
 import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
 import { useMemoryImagesStore } from '../../../stores/memoriesImagesData';
+import { useIsMobile } from '../../../hooks/use-mobile';
 
 export const MemoriesWidget: React.FC = () => {
   const { getCurrentThemeColor } = useThemeStore();
   const memoriesStore = useMemoriesStore();
   const milestonesStore = useMemoryMilestonesStore();
   const imagesStore = useMemoryImagesStore();
+  const isMobile = useIsMobile();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -249,7 +251,7 @@ export const MemoriesWidget: React.FC = () => {
                         className="flex items-center gap-2 text-sm"
                       >
                         <div 
-                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: themeColor }}
                         />
                         <span 

@@ -10,15 +10,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight, Flower2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface AsciiDialogProps {
+interface FlowersDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
+const FlowersDialog: React.FC<FlowersDialogProps> = ({ isOpen, onClose }) => {
   const { getCallsign} = useSettingsStore();
   const { getCurrentThemeColor } = useThemeStore();
   const isMobile = useIsMobile();
@@ -30,39 +30,39 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
 
   const narratorMessages = [
     {
-      text: `Hey my beautiful ${getCallsign() || "baby"}! 💕`,
+      text: `Look at this beautiful flower garden I created for you, ${getCallsign() || "my love"}! 🌻`,
       delay: 0,
-      image: "/assets/blee.gif"
+      image: "/flowers/rose.png"
     },
     {
-      text: `I spent countless hours learning ASCII art conversion algorithms just for you! ✨`,
+      text: `I spent days learning CSS animations and 3D transforms just to make these flowers bloom perfectly! ✨`,
       delay: 2000,
-      image: "/assets/explain.gif"
+      image: "/assets/dudu-cute.gif"
     },
     {
-      text: "I researched different character sets, experimented with resolution settings, and fine-tuned every parameter...",
+      text: "Each petal was carefully animated with different timing and rotation angles to create the most natural blooming effect...",
       delay: 4000,
-      image: "/assets/ascii/set1.jpg"
+      image: "/flowers/tulips.png"
     },
     {
-      text: "All to transform your precious memories into this unique digital art form! Each character represents my love and dedication 💖",
+      text: "The vines grow first, then the leaves appear, and finally the beautiful flowers bloom - just like real nature! 🌿",
       delay: 6000,
-      image: "/assets/ascii/set2.jpg"
+      image: "/assets/peach-goma.gif"
     },
     {
-      text: "I even made it responsive so it looks perfect whether you're on your phone or computer!",
+      text: "I even made sure the animation timing was perfect - vines at 2 seconds, leaves during growth, and flowers at 7 seconds!",
       delay: 8000,
-      image: "/assets/ascii/set3.jpg"
+      image: "/flowers/rose1.png"
     },
     {
-      text: "The animated effects? I coded those late into the night, thinking of your smile when you'd see them ✨",
+      text: "The floating hearts and sparkling effects? I coded those thinking of all the love I have for you 💖",
       delay: 10000,
-      image: "/assets/ascii/set4.jpg"
+      image: "/assets/celeb.gif"
     },
     {
-      text: `Every line of code was written with you in mind, ${getCallsign() || "beautiful"}. This is my love letter in pixels and characters! 💝`,
+      text: `Every bloom represents how my love for you grows stronger each day, ${getCallsign() || "beautiful"}. This garden is eternal, just like my feelings! 🌺`,
       delay: 12000,
-      image: "/assets/ascii/set5.jpg"
+      image: "/assets/blee.gif"
     }
   ];
 
@@ -108,15 +108,14 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent 
-        className="p-0 overflow-hidden border-0 z-50 animate-in zoom-in-95 duration-300"
+        className="p-0 overflow-hidden max-w-[95vw] sm:max-w-125"
+        showCloseButton={false}
         style={{
           background: '#ffffff',
           border: `3px solid ${themeColor}`,
           borderRadius: isMobile ? '16px' : '20px',
-          maxWidth: isMobile ? 'min(350px, 95vw)' : 'min(500px, 90vw)',
           maxHeight: isMobile ? '85vh' : '90vh',
-          margin: isMobile ? 'min(8px, 2vw)' : 'min(16px, 4vw)',
-          boxShadow: `0 20px 40px rgba(0,0,0,0.3), 0 0 0 100vmax rgba(0,0,0,0.4)`
+          boxShadow: `0 20px 40px rgba(0,0,0,0.3)`
         }}
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -138,9 +137,9 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                 gap: isMobile ? '8px' : '12px'
               }}
             >
-              <Sparkles size={isMobile ? 16 : 20} />
-              {isMobile ? "Made With Love" : "Made With Love For You"}
-              <Sparkles size={isMobile ? 16 : 20} />
+              <Flower2 size={isMobile ? 16 : 20} />
+              {isMobile ? "Blooming Garden" : "Blooming Garden of Love"}
+              <Flower2 size={isMobile ? 16 : 20} />
             </DialogTitle>
             
             <Badge 
@@ -153,7 +152,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
               }}
             >
               <Heart size={14} className="mr-1" />
-              Crafted with Hours of Love
+              Animated with Pure Love
             </Badge>
           </div>
         </DialogHeader>
@@ -181,8 +180,8 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                   }}
                 >
                   <img
-                    src="/assets/explain.gif"
-                    alt="Your boyfriend explaining his creation"
+                    src="/assets/dudu-cute.gif"
+                    alt="Your boyfriend showing his flower creation"
                     className="w-16 h-16 rounded-full object-cover"
                     style={{
                       filter: `sepia(1) hue-rotate(${themeColor === '#F2A6A6' ? '320deg' : '0deg'}) saturate(1.2)`,
@@ -370,7 +369,7 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
                 className="hover:opacity-90 flex items-center gap-2"
               >
                 <Heart size={isMobile ? 14 : 16} />
-                {isMobile ? "Love it! 💕" : "Aww, I love it! 💕"}
+                {isMobile ? "Love it! 🌺" : "Aww, I love it! 🌺"}
               </Button>
             </div>
           </div>
@@ -437,4 +436,4 @@ const AsciiDialog: React.FC<AsciiDialogProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default AsciiDialog;
+export default FlowersDialog;
