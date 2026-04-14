@@ -22,14 +22,14 @@ import { useThemeStore } from '../../../stores/theme';
 import { useMemoriesStore, type Memory } from '../../../stores/memoriesData';
 import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
 import { useMemoryImagesStore } from '../../../stores/memoriesImagesData';
-import { useIsMobile } from '../../../hooks/use-mobile';
+
 
 export const MemoriesWidget: React.FC = () => {
   const { getCurrentThemeColor } = useThemeStore();
   const memoriesStore = useMemoriesStore();
   const milestonesStore = useMemoryMilestonesStore();
   const imagesStore = useMemoryImagesStore();
-  const isMobile = useIsMobile();
+  
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

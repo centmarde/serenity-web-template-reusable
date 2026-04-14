@@ -72,7 +72,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ currentPath, onNavigate }
       case 'MemoriesView':
         return <MemoriesView />;
       case 'EvilThoughtsView':
-        return <EvilThoughtsView onNavigate={onNavigate} />;
+        return <EvilThoughtsView />;
       case 'ComingSoon':
         return <ComingSoonView routeName={route.name} />;
       default:
