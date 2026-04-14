@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, Edit2, Trash2, Wifi } from "lucide-react";
+import { useIsMobile } from "../../../hooks/use-mobile";
 import { useSettingsStore } from "../../../stores/settings";
 import { useThoughtsStore, useRealtimeStatus, type Thought } from "../../../stores/thoughtsData";
 import AddThoughtsDialog from "../dialogs/AddThoughtsDialog";
@@ -26,6 +27,7 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
   const { getThemeColor } = useSettingsStore();
   const { initializeThoughts, getGfThoughts, getBfThoughts, unsubscribe, isInitialized, refreshThoughts } = useThoughtsStore();
   const { isRealtimeActive } = useRealtimeStatus();
+  const isMobile = useIsMobile();
   const themeColor = getThemeColor();
 
   // Dialog states
@@ -198,6 +200,42 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
         className="absolute z-20 group"
         style={{ ...position }}
       >
+        {/* Mobile buttons - positioned above bubble */}
+        {isMobile && (
+          <div className="absolute top-[-16px] right-2 flex space-x-1 z-10">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-4 w-4 p-0 hover:bg-blue-50 rounded-full shadow-sm"
+              style={{
+               
+                backdropFilter: 'blur(4px)'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditThought(thought);
+              }}
+            >
+              <Edit2 size={8} className="text-blue-500" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-4 w-4 p-0 hover:bg-red-50 rounded-full shadow-sm"
+              style={{
+              
+                backdropFilter: 'blur(4px)'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteThought(thought);
+              }}
+            >
+              <Trash2 size={8} className="text-red-500" />
+            </Button>
+          </div>
+        )}
+        
         <Button
           variant="ghost"
           className="h-auto p-3 text-center whitespace-normal transform hover:scale-105 transition-all duration-200 shadow-lg relative"
@@ -215,8 +253,9 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
           }}
           onClick={(e) => e.preventDefault()}
         >
-          {/* Action buttons - show on hover - positioned outside text flow */}
-          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1 z-10">
+          {/* Desktop action buttons - show on hover inside bubble */}
+          {!isMobile && (
+            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1 z-10">
             <Button
               size="sm"
               variant="ghost"
@@ -247,7 +286,8 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
             >
               <Trash2 size={8} className="text-red-500" />
             </Button>
-          </div>
+            </div>
+          )}
 
           <div className="space-y-1 w-full">
             <p

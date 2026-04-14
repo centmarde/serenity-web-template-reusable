@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
+import { useIsMobile } from "../../hooks/use-mobile";
 import EvilThoughtsWidget from "./components/EvilThoughtsWidget";
 
 interface ComponentData {
@@ -14,6 +15,7 @@ interface ComponentData {
 const EvilThoughtsView: React.FC = () => {
   const { getCallsign, getGfName, getBfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization, getSafeThemeColor } = useThemeStore();
+  const isMobile = useIsMobile();
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,13 +73,13 @@ const EvilThoughtsView: React.FC = () => {
 
   return (
     <div
-      className="h-screen flex flex-col relative overflow-hidden"
+      className={`${isMobile ? 'min-h-screen' : 'h-screen'} flex flex-col relative ${isMobile ? 'overflow-auto' : 'overflow-hidden'}`}
       style={{
         background: `linear-gradient(135deg, ${data.themeColor}20, ${data.themeColor}40, #ffffff)`,
       }}
     >
       {/* Header */}
-      <div className="w-full max-w-7xl mx-auto mb-6 text-center relative z-10 px-4 mt-5">
+      <div className={`w-full max-w-7xl mx-auto ${isMobile ? 'mb-4' : 'mb-6'} text-center relative z-10 px-4 ${isMobile ? 'mt-3' : 'mt-5'}`}>
         <h1 
           className="font-bold mb-3"
           style={{
@@ -123,11 +125,11 @@ const EvilThoughtsView: React.FC = () => {
       </div>
 
       {/* Main Content - Two Column Layout */}
-      <div className="flex-1 w-full max-w-7xl mx-auto relative z-10 px-4">
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 h-full">
+      <div className={`flex-1 w-full max-w-7xl mx-auto relative z-10 px-4 ${isMobile ? 'pb-4' : ''}`}>
+        <div className={`grid ${isMobile ? 'gap-4' : 'gap-6'} grid-cols-1 lg:grid-cols-2 ${isMobile ? 'auto-rows-max' : 'h-full'}`}>
           {/* Girlfriend Column */}
-          <div className="flex flex-col h-full">
-            <div className="text-center mb-4">
+          <div className={`flex flex-col ${isMobile ? 'mb-4' : 'h-full'}`}>
+            <div className={`text-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
               <h2 
                 className="font-semibold"
                 style={{
@@ -155,8 +157,8 @@ const EvilThoughtsView: React.FC = () => {
           </div>
 
           {/* Boyfriend Column */}
-          <div className="flex flex-col h-full">
-            <div className="text-center mb-4">
+          <div className={`flex flex-col ${isMobile ? 'mb-4' : 'h-full'}`}>
+            <div className={`text-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
               <h2 
                 className="font-semibold"
                 style={{

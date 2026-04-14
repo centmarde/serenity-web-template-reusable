@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Smile } from "lucide-react";
+import { useIsMobile } from "../../../hooks/use-mobile";
 import { useThoughtsStore } from "../../../stores/thoughtsData";
 import { useSettingsStore } from "../../../stores/settings";
 import EmojiPicker from "../components/EmojiPicker";
@@ -28,6 +29,7 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isMobile = useIsMobile();
   const { createThought } = useThoughtsStore();
   const { getThemeColor } = useSettingsStore();
   const themeColor = getThemeColor();
@@ -88,7 +90,12 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent 
+        className={`${isMobile ? 'max-w-[90vw]' : 'max-w-md'}`}
+        style={isMobile && showEmojiPicker ? { 
+          transform: 'translateY(-20vh)',
+          transition: 'transform 0.2s ease-out' 
+        } : {}}>
         <DialogHeader>
           <DialogTitle 
             className="text-xl font-bold"
@@ -101,7 +108,7 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className={`space-y-4 ${isMobile ? 'py-2' : 'py-4'}`}>
           <div className="space-y-2">
             <Label htmlFor="thought-content" className="text-sm font-medium">
               {isGf ? "Her" : "His"} Secret Thought
@@ -151,7 +158,14 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
               {showEmojiPicker && (
                 <div 
                   className="absolute top-0 z-50"
-                  style={{
+                  style={isMobile ? {
+                    right: '0',
+                    left: 'auto',
+                    top: '100%',
+                    marginTop: '8px',
+                    minWidth: '280px',
+                    maxWidth: '90vw'
+                  } : {
                     left: '100%',
                     marginLeft: '8px',
                     minWidth: '300px'
@@ -167,9 +181,19 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
                     
                     {/* Arrow pointer */}
                     <div
-                      className="absolute top-2"
-                      style={{
+                      className="absolute"
+                      style={isMobile ? {
+                        top: '-8px',
+                        right: '16px',
+                        width: 0,
+                        height: 0,
+                        borderLeft: '8px solid transparent',
+                        borderRight: '8px solid transparent',
+                        borderBottom: '8px solid white',
+                        filter: 'drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1))'
+                      } : {
                         left: '-8px',
+                        top: '16px',
                         width: 0,
                         height: 0,
                         borderTop: '8px solid transparent',
@@ -184,7 +208,7 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className={`flex justify-end space-x-2 ${isMobile ? 'pt-2' : 'pt-4'}`}>
             <Button
               variant="outline"
               onClick={handleClose}

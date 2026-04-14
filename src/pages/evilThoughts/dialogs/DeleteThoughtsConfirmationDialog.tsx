@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "../../../hooks/use-mobile";
 import { useThoughtsStore, type Thought } from "../../../stores/thoughtsData";
 
 
@@ -20,6 +21,7 @@ const DeleteThoughtsConfirmationDialog: React.FC<DeleteThoughtsConfirmationDialo
   onSuccess
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const isMobile = useIsMobile();
   const { deleteThought } = useThoughtsStore();
 
   const handleDelete = async () => {
@@ -50,7 +52,7 @@ const DeleteThoughtsConfirmationDialog: React.FC<DeleteThoughtsConfirmationDialo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'max-w-md'}`}>
         <DialogHeader>
           <DialogTitle 
             className="text-xl font-bold text-red-600"
@@ -62,7 +64,7 @@ const DeleteThoughtsConfirmationDialog: React.FC<DeleteThoughtsConfirmationDialo
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className={`space-y-4 ${isMobile ? 'py-2' : 'py-4'}`}>
           <div className="bg-gray-50 p-3 rounded-lg border">
             <p className="text-sm text-gray-700 italic">
               "{truncatedContent}"
@@ -77,7 +79,7 @@ const DeleteThoughtsConfirmationDialog: React.FC<DeleteThoughtsConfirmationDialo
             ⚠️ This action cannot be undone!
           </p>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className={`flex justify-end space-x-2 ${isMobile ? 'pt-2' : 'pt-4'}`}>
             <Button
               variant="outline"
               onClick={onClose}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff } from "lucide-react";
+import { useIsMobile } from "../../../hooks/use-mobile";
 import { useSettingsStore } from "../../../stores/settings";
 
 interface PasswordDialogProps {
@@ -26,6 +27,7 @@ const PasswordDialog: React.FC<PasswordDialogProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const isMobile = useIsMobile();
 
   const themeColor = getThemeColor();
 
@@ -65,7 +67,7 @@ const PasswordDialog: React.FC<PasswordDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'max-w-md'}`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock 
@@ -127,7 +129,7 @@ const PasswordDialog: React.FC<PasswordDialogProps> = ({
               </p>
             )}
             
-            <div className="flex gap-3 justify-end pt-2">
+            <div className={`flex gap-3 justify-end ${isMobile ? 'pt-1' : 'pt-2'}`}>
               <Button
                 type="button"
                 variant="outline"

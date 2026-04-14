@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useIsMobile } from "../../../hooks/use-mobile";
 import { useThoughtsStore, type Thought } from "../../../stores/thoughtsData";
 import { useSettingsStore } from "../../../stores/settings";
 
@@ -23,6 +24,7 @@ const UpdateThoughtsDialog: React.FC<UpdateThoughtsDialogProps> = ({
 }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isMobile = useIsMobile();
   const { updateThought } = useThoughtsStore();
   const { getThemeColor } = useSettingsStore();
   const themeColor = getThemeColor();
@@ -62,7 +64,7 @@ const UpdateThoughtsDialog: React.FC<UpdateThoughtsDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'max-w-md'}`}>
         <DialogHeader>
           <DialogTitle 
             className="text-xl font-bold"
@@ -75,7 +77,7 @@ const UpdateThoughtsDialog: React.FC<UpdateThoughtsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className={`space-y-4 ${isMobile ? 'py-2' : 'py-4'}`}>
           <div className="space-y-2">
             <Label htmlFor="edit-thought-content" className="text-sm font-medium">
               {thought.is_gf ? "Her" : "His"} Secret Thought
@@ -95,7 +97,7 @@ const UpdateThoughtsDialog: React.FC<UpdateThoughtsDialogProps> = ({
             />
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className={`flex justify-end space-x-2 ${isMobile ? 'pt-2' : 'pt-4'}`}>
             <Button
               variant="outline"
               onClick={handleClose}
