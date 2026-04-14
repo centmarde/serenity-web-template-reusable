@@ -8,6 +8,7 @@ import { useThoughtsStore, useRealtimeStatus, type Thought } from "../../../stor
 import AddThoughtsDialog from "../dialogs/AddThoughtsDialog";
 import UpdateThoughtsDialog from "../dialogs/UpdateThoughtsDialog";
 import DeleteThoughtsConfirmationDialog from "../dialogs/DeleteThoughtsConfirmationDialog";
+import PasswordDialog from "../dialogs/PasswordDialog";
 
 interface EvilThoughtsWidgetProps {
   personType: 'girlfriend' | 'boyfriend';
@@ -31,7 +32,10 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [selectedThought, setSelectedThought] = useState<Thought | null>(null);
+  const [pendingAction, setPendingAction] = useState<'add' | 'edit' | 'delete' | null>(null);
+  const [pendingThought, setPendingThought] = useState<Thought | null>(null);
   useEffect(() => {
     const initializeWithRealtime = async () => {
       try {
@@ -85,13 +89,61 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
   };
 
   const handleEditThought = (thought: Thought) => {
-    setSelectedThought(thought);
-    setShowUpdateDialog(true);
+    // Check if this is the boyfriend side and password protection is needed
+    if (!isGf) {
+      // Show password dialog first for boyfriend side
+      setPendingAction('edit');
+      setPendingThought(thought);
+      setShowPasswordDialog(true);
+    } else {
+      // Direct access for girlfriend side
+      setSelectedThought(thought);
+      setShowUpdateDialog(true);
+    }
   };
 
   const handleDeleteThought = (thought: Thought) => {
-    setSelectedThought(thought);
-    setShowDeleteDialog(true);
+    // Check if this is the boyfriend side and password protection is needed
+    if (!isGf) {
+      // Show password dialog first for boyfriend side
+      setPendingAction('delete');
+      setPendingThought(thought);
+      setShowPasswordDialog(true);
+    } else {
+      // Direct access for girlfriend side
+      setSelectedThought(thought);
+      setShowDeleteDialog(true);
+    }
+  };
+
+  const handleAddThought = () => {
+    // Check if this is the boyfriend side and password protection is needed
+    if (!isGf) {
+      // Show password dialog first for boyfriend side
+      setPendingAction('add');
+      setPendingThought(null);
+      setShowPasswordDialog(true);
+    } else {
+      // Direct access for girlfriend side
+      setShowAddDialog(true);
+    }
+  };
+
+  const handlePasswordSuccess = () => {
+    // Password verified, now execute the pending action
+    if (pendingAction === 'add') {
+      setShowAddDialog(true);
+    } else if (pendingAction === 'edit' && pendingThought) {
+      setSelectedThought(pendingThought);
+      setShowUpdateDialog(true);
+    } else if (pendingAction === 'delete' && pendingThought) {
+      setSelectedThought(pendingThought);
+      setShowDeleteDialog(true);
+    }
+    
+    // Clear pending states
+    setPendingAction(null);
+    setPendingThought(null);
   };
 
   const renderEmptyThoughtButton = (index: number) => {
@@ -104,7 +156,7 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
       >
         <Button
           variant="ghost"
-          onClick={() => setShowAddDialog(true)}
+          onClick={handleAddThought}
           className="h-auto p-4 text-center transform hover:scale-105 transition-all duration-200 shadow-lg border-2 border-dashed"
           style={{
             backgroundColor: `${themeColor}10`,
@@ -148,7 +200,7 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
       >
         <Button
           variant="ghost"
-          className="h-auto p-3 text-left whitespace-normal transform hover:scale-105 transition-all duration-200 shadow-lg relative"
+          className="h-auto p-3 text-center whitespace-normal transform hover:scale-105 transition-all duration-200 shadow-lg relative"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(12px)',
@@ -163,45 +215,53 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
           }}
           onClick={(e) => e.preventDefault()}
         >
-          {/* Action buttons - show on hover */}
-          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1">
+          {/* Action buttons - show on hover - positioned outside text flow */}
+          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1 z-10">
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0 hover:bg-blue-100"
+              className="h-4 w-4 p-0 hover:bg-blue-50 rounded-full shadow-sm"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(4px)'
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleEditThought(thought);
               }}
             >
-              <Edit2 size={12} className="text-blue-600" />
+              <Edit2 size={8} className="text-blue-500" />
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0 hover:bg-red-100"
+              className="h-4 w-4 p-0 hover:bg-red-50 rounded-full shadow-sm"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(4px)'
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleDeleteThought(thought);
               }}
             >
-              <Trash2 size={12} className="text-red-600" />
+              <Trash2 size={8} className="text-red-500" />
             </Button>
           </div>
 
-          <div className="space-y-1 w-full pr-8">
+          <div className="space-y-1 w-full">
             <p
               className="text-gray-700 leading-snug mb-2"
               style={{
                 fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)',
                 lineHeight: '1.3',
                 wordWrap: 'break-word',
-                textAlign: 'left'
+                textAlign: 'center'
               }}
             >
               {thought.content}
             </p>
-            <div className="flex items-center justify-end mt-2">
+            <div className="flex items-center justify-center mt-2">
               <span
                 className="text-gray-400"
                 style={{
@@ -409,6 +469,27 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
           console.log('🔄 Refetching thoughts after delete...');
           refreshThoughts();
         }}
+      />
+
+      {/* Password Dialog for Boyfriend Side */}
+      <PasswordDialog
+        isOpen={showPasswordDialog}
+        onClose={() => {
+          setShowPasswordDialog(false);
+          setPendingAction(null);
+          setPendingThought(null);
+        }}
+        onSuccess={handlePasswordSuccess}
+        title="Boyfriend Access Required 😋"
+        description={
+          pendingAction === 'add' 
+            ? `Enter password to add thoughts to ${personName}'s side`
+            : pendingAction === 'edit'
+            ? `Enter password to edit ${personName}'s thought`
+            : pendingAction === 'delete'
+            ? `Enter password to delete ${personName}'s thought`
+            : `Enter password to access ${personName}'s thoughts`
+        }
       />
     </Card>
   );

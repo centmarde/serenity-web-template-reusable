@@ -22,6 +22,7 @@ export interface Settings {
   appName: string;
   coupleOfficialDate: string;
   startingGreetings: string;
+  bfThoughtsPassword: string;
   traits: string[];
   songTitle: string;
   songArtist: string;
@@ -47,6 +48,7 @@ interface SettingsStore {
   getAppName: () => string;
   getCoupleOfficialDate: () => string;
   getStartingGreetings: () => string;
+  getBfThoughtsPassword: () => string;
   getTraits: () => string[];
   getRandomTrait: () => string;
   getSongTitle: () => string;
@@ -136,6 +138,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       
       if (fetchedSettings.startingGreetings === undefined) {
         throw new Error('Starting greetings not found in settings.json');
+      }
+      
+      if (fetchedSettings.bfThoughtsPassword === undefined) {
+        throw new Error('bfThoughtsPassword not found in settings.json');
       }
       
       if (!fetchedSettings.traits || !Array.isArray(fetchedSettings.traits) || fetchedSettings.traits.length === 0) {
@@ -243,6 +249,14 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       throw new Error('Settings not loaded. Call loadSettings() first.');
     }
     return settings.startingGreetings;
+  },
+
+  getBfThoughtsPassword: () => {
+    const { settings } = get();
+    if (!settings || settings.bfThoughtsPassword === undefined) {
+      throw new Error('Settings not loaded. Call loadSettings() first.');
+    }
+    return settings.bfThoughtsPassword;
   },
 
   getTraits: () => {

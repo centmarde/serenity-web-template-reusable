@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Smile } from "lucide-react";
 import { useThoughtsStore } from "../../../stores/thoughtsData";
 import { useSettingsStore } from "../../../stores/settings";
+import EmojiPicker from "../components/EmojiPicker";
 
 interface AddThoughtsDialogProps {
   isOpen: boolean;
@@ -23,6 +26,8 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
 }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { createThought } = useThoughtsStore();
   const { getThemeColor } = useSettingsStore();
   const themeColor = getThemeColor();
@@ -52,8 +57,32 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
     }
   };
 
+  const handleEmojiSelect = (emoji: string) => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newContent = content.slice(0, start) + emoji + content.slice(end);
+      setContent(newContent);
+      
+      // Set cursor position after emoji
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+      }, 0);
+    } else {
+      // Fallback: append to end
+      setContent(prev => prev + emoji);
+    }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+  };
+
   const handleClose = () => {
     setContent("");
+    setShowEmojiPicker(false);
     onClose();
   };
 
@@ -77,19 +106,82 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
             <Label htmlFor="thought-content" className="text-sm font-medium">
               {isGf ? "Her" : "His"} Secret Thought
             </Label>
-            <Textarea
-              id="thought-content"
-              placeholder={isGf 
-                ? "What's she really thinking... 😈" 
-                : "What's he really thinking... 🤔"
-              }
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[100px] resize-none"
-              style={{
-                borderColor: `${themeColor}40`
-              }}
-            />
+            <div className="relative">
+              <Textarea
+                ref={textareaRef}
+                id="thought-content"
+                placeholder={isGf 
+                  ? "What's she really thinking... 😈" 
+                  : "What's he really thinking... 🤔"
+                }
+                value={content}
+                onChange={handleTextareaChange}
+                className="min-h-[100px] resize-none pr-12"
+                style={{
+                  borderColor: `${themeColor}40`
+                }}
+              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2 h-8 w-8 p-0 hover:bg-opacity-20 transition-all duration-200 z-10"
+                      style={{
+                        backgroundColor: showEmojiPicker ? `${themeColor}20` : 'transparent',
+                        color: themeColor
+                      }}
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <Smile size={16} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" sideOffset={8}>
+                    <div className="text-sm font-medium flex items-center gap-1">
+                      <span>{showEmojiPicker ? 'Hide' : 'Add'} emojis</span>
+                      <span className="text-xs opacity-70">😊💭✨</span>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              {/* Floating EmojiPicker */}
+              {showEmojiPicker && (
+                <div 
+                  className="absolute top-0 z-50"
+                  style={{
+                    left: '100%',
+                    marginLeft: '8px',
+                    minWidth: '300px'
+                  }}
+                >
+                  <div 
+                    className="relative"
+                    style={{
+                      filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15))',
+                    }}
+                  >
+                    <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+                    
+                    {/* Arrow pointer */}
+                    <div
+                      className="absolute top-2"
+                      style={{
+                        left: '-8px',
+                        width: 0,
+                        height: 0,
+                        borderTop: '8px solid transparent',
+                        borderBottom: '8px solid transparent',
+                        borderRight: '8px solid white',
+                        filter: 'drop-shadow(-2px 0 4px rgba(0, 0, 0, 0.1))'
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

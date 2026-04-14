@@ -143,7 +143,7 @@ const EvilThoughtsView: React.FC = () => {
                   fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)'
                 }}
               >
-                What she\'s really thinking...
+                Her personal thoughts and emotional expressions
               </p>
             </div>
             <EvilThoughtsWidget
@@ -172,7 +172,7 @@ const EvilThoughtsView: React.FC = () => {
                   fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)'
                 }}
               >
-                What he\'s really thinking...
+                His personal thoughts and emotional expressions
               </p>
             </div>
             <EvilThoughtsWidget
