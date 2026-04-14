@@ -258,6 +258,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate('/music');
     } else if (featureName === "Our Memories" && onNavigate) {
       onNavigate('/memories');
+    } else if (featureName === "Evil Thoughts" && onNavigate) {
+      onNavigate('/evil-thoughts');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -420,12 +422,12 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           />
           
           <FeatureCard
-            title="Evil Taughts"
-            imageSrc="/assets/images/EvilTaughts.png"
+            title="Evil Thoughts"
+            imageSrc="/assets/images/EvilThoughts.png"
             useImagePreview={data.useImagePreview}
-            icon={<Zap size={32} color={isFeatureActive("Evil Taughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={<Zap size={32} color={isFeatureActive("Evil Thoughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
-            onClick={() => handleFeatureClick("Evil Taughts")}
+            onClick={() => handleFeatureClick("Evil Thoughts")}
           />
           
           <FeatureCard
