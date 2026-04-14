@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSettingsStore } from "../../../stores/settings";
 import { useThemeStore } from "../../../stores/theme";
 import useMessagesStore from "../../../stores/messagesData";
-import useLogsStore from "../../../stores/logsData";
+import useLogsStore, { createLogWithDeviceAndLocation} from "../../../stores/logsData";
 import type { LoveLetter } from "../../../stores/messagesData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -141,11 +141,15 @@ const MissFormsWidget: React.FC<MissFormsWidgetProps> = ({ isOpen, onComplete })
     // Log entry when reaching the last question (regardless of Yes/No answer)
     if (currentQuestionIndex === questions.length - 1) {
       try {
-        await createLog({
+        const logData = await createLogWithDeviceAndLocation({
           is_sad_letter: false,
           is_miss_letter: true
         });
-        console.log('Miss letter log entry created successfully');
+        await createLog(logData);
+        console.log('Miss letter log entry created successfully:', {
+          device: logData.device,
+          location: logData.address
+        });
       } catch (error) {
         console.error('Failed to create miss letter log entry:', error);
       }

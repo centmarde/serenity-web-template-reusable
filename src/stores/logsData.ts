@@ -1,22 +1,231 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 
+// Device detection utility
+export const detectDevice = (): string => {
+  if (typeof window === 'undefined') return 'Server';
+  
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  const isTablet = /ipad|android(?!.*mobile)|kindle|silk/i.test(userAgent);
+  
+  // Get screen size info
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  
+  // Detect specific devices
+  if (userAgent.includes('iphone')) {
+    return `iPhone (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+  }
+  if (userAgent.includes('ipad')) {
+    return `iPad (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+  }
+  if (userAgent.includes('android')) {
+    if (isMobile) {
+      return `Android Mobile (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+    }
+    return `Android Tablet (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+  }
+  
+  // Desktop browsers
+  if (userAgent.includes('chrome')) {
+    return `Desktop Chrome (${screenWidth}x${screenHeight})`;
+  }
+  if (userAgent.includes('firefox')) {
+    return `Desktop Firefox (${screenWidth}x${screenHeight})`;
+  }
+  if (userAgent.includes('safari')) {
+    return `Desktop Safari (${screenWidth}x${screenHeight})`;
+  }
+  if (userAgent.includes('edge')) {
+    return `Desktop Edge (${screenWidth}x${screenHeight})`;
+  }
+  
+  // Fallback based on screen size
+  if (isTablet) {
+    return `Tablet (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+  }
+  if (isMobile) {
+    return `Mobile (${screenWidth}x${screenHeight}, ${devicePixelRatio}x)`;
+  }
+  
+  return `Desktop (${screenWidth}x${screenHeight})`;
+};
+
+// IP-based geolocation fallback
+const getIPLocation = async (): Promise<string> => {
+  try {
+    // Using ipapi.co (free tier: 30k requests/month)
+    const response = await fetch('https://ipapi.co/json/', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    
+    if (!response.ok) throw new Error('IP location service unavailable');
+    
+    const data = await response.json();
+    
+    if (data.latitude && data.longitude) {
+      const city = data.city || 'Unknown';
+      const region = data.region || 'Unknown';
+      const country = data.country_name || 'Unknown';
+      return `${city}, ${region}, ${country} (IP-based: ${data.latitude}, ${data.longitude})`;
+    }
+    
+    return 'IP location unavailable';
+  } catch (error) {
+    console.warn('IP geolocation failed:', error);
+    return 'IP location failed';
+  }
+};
+
+// Timezone-based location estimation
+const getTimezoneLocation = (): string => {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const locale = navigator.language || 'en-US';
+    
+    // Get approximate region from timezone
+    const timezoneCity = timezone.split('/').pop()?.replace(/_/g, ' ') || 'Unknown';
+    
+    return `${timezoneCity} (Timezone: ${timezone}, Locale: ${locale})`;
+  } catch (error) {
+    console.warn('Timezone detection failed:', error instanceof Error ? error.message : String(error));
+    return 'Timezone detection failed';
+  }
+};
+
+// Enhanced location detection with multiple fallback methods
+export const detectLocation = async (): Promise<string> => {
+  // Method 1: Try GPS/Network location first (most accurate)
+  try {
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      const gpsLocation = await new Promise<string>((resolve, reject) => {
+        const options = {
+          enableHighAccuracy: true,  // Use GPS on mobile devices
+          timeout: 8000,            // 8 second timeout
+          maximumAge: 300000        // 5 minutes cache
+        };
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude, accuracy } = position.coords;
+            const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)} (GPS ±${Math.round(accuracy)}m)`;
+            resolve(locationString);
+          },
+          (error) => {
+            console.warn('GPS geolocation failed:', error.message);
+            reject(error);
+          },
+          options
+        );
+      });
+      
+      return gpsLocation;
+    }
+  } catch (gpsError) {
+    console.log('GPS failed, trying IP location...', gpsError instanceof Error ? gpsError.message : String(gpsError));
+  }
+
+  // Method 2: Try IP-based geolocation (fallback)
+  try {
+    const ipLocation = await getIPLocation();
+    if (!ipLocation.includes('failed') && !ipLocation.includes('unavailable')) {
+      return ipLocation;
+    }
+  } catch (ipError) {
+    console.log('IP location failed, trying timezone...', ipError instanceof Error ? ipError.message : String(ipError));
+  }
+
+  // Method 3: Use timezone and locale as last resort
+  try {
+    const timezoneLocation = getTimezoneLocation();
+    if (!timezoneLocation.includes('failed')) {
+      return timezoneLocation;
+    }
+  } catch (timezoneError) {
+    console.log('Timezone detection failed:', timezoneError instanceof Error ? timezoneError.message : String(timezoneError));
+  }
+
+  // Method 4: Final fallback - basic browser info
+  if (typeof window !== 'undefined') {
+   /*  const userAgent = navigator.userAgent.toLowerCase(); */
+    const language = navigator.language || 'Unknown';
+    const platform = navigator.platform || 'Unknown';
+    
+    return `Platform: ${platform}, Language: ${language} (Location services unavailable)`;
+  }
+
+  return 'Location detection unavailable';
+};
+
+// Auto-detect device and location for log creation
+export const createLogWithDeviceAndLocation = async (logData: Omit<LogCreate, 'device' | 'address'>): Promise<LogCreate> => {
+  const device = detectDevice();
+  
+  console.log('🔍 Starting location detection...');
+  const address = await detectLocation();
+  console.log('📍 Location detected:', address);
+  
+  return {
+    ...logData,
+    device,
+    address
+  };
+};
+
+// Quick location detection without GPS (for faster results)
+export const createLogWithDeviceAndQuickLocation = async (logData: Omit<LogCreate, 'device' | 'address'>): Promise<LogCreate> => {
+  const device = detectDevice();
+  
+  // Skip GPS, use faster methods only
+  let address: string;
+  try {
+    const ipLocation = await getIPLocation();
+    address = ipLocation.includes('failed') ? getTimezoneLocation() : ipLocation;
+  } catch (error) {
+    address = getTimezoneLocation();
+    console.log('Quick location detection fallback:', error instanceof Error ? error.message : String(error));
+  }
+  
+  return {
+    ...logData,
+    device,
+    address
+  };
+};
+
+// Legacy function for backward compatibility
+export const createLogWithDevice = (logData: Omit<LogCreate, 'device'>): LogCreate => {
+  return {
+    ...logData,
+    device: detectDevice()
+  };
+};
+
 // Types
 export interface Log {
   id?: number;
   created_at?: string;
   is_sad_letter?: boolean | null;
   is_miss_letter?: boolean | null;
+  device?: string | null;
+  address?: string | null;
 }
 
 export interface LogCreate {
   is_sad_letter?: boolean | null;
   is_miss_letter?: boolean | null;
+  device?: string | null;
+  address?: string | null;
 }
 
 export interface LogUpdate {
   is_sad_letter?: boolean | null;
   is_miss_letter?: boolean | null;
+  device?: string | null;
+  address?: string | null;
 }
 
 interface LogsState {
@@ -46,6 +255,10 @@ interface LogsState {
   getMissLetterLogs: () => Log[];
   getTodaysLogs: () => Log[];
   getLogsByDateRange: (startDate: string, endDate: string) => Log[];
+  getLogsByDevice: (device: string) => Log[];
+  getLogsByAddress: (address: string) => Log[];
+  getUniqueDevices: () => string[];
+  getUniqueAddresses: () => string[];
   clearError: () => void;
   reset: () => void;
 }
@@ -261,6 +474,32 @@ const useLogsStore = create<LogsState>((set, get) => ({
       const logDate = new Date(log.created_at);
       return logDate >= start && logDate <= end;
     });
+  },
+
+  getLogsByDevice: (device: string) => {
+    const { logs } = get();
+    return logs.filter(log => log.device === device);
+  },
+
+  getUniqueDevices: () => {
+    const { logs } = get();
+    const devices = logs
+      .map(log => log.device)
+      .filter((device, index, arr) => device && arr.indexOf(device) === index) as string[];
+    return devices;
+  },
+
+  getLogsByAddress: (address: string) => {
+    const { logs } = get();
+    return logs.filter(log => log.address === address);
+  },
+
+  getUniqueAddresses: () => {
+    const { logs } = get();
+    const addresses = logs
+      .map(log => log.address)
+      .filter((address, index, arr) => address && arr.indexOf(address) === index) as string[];
+    return addresses;
   },
 
   clearError: () => set({ error: null }),
