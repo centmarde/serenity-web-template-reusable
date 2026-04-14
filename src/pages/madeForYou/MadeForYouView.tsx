@@ -10,7 +10,11 @@ interface ComponentData {
   appName: string;
 }
 
-const MadeForYouView: React.FC = () => {
+interface MadeForYouViewProps {
+  onNavigate?: (path: string) => void;
+}
+
+const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
   const { getCallsign, getGfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization } = useThemeStore();
 
@@ -138,12 +142,14 @@ const MadeForYouView: React.FC = () => {
           <FlowerCard
             flowerImage="/flowers/rose.png"
             route="/girlfriend/madeforyou/lyrics-art"
+            onNavigate={onNavigate}
           />
 
           {/* ASCII Art Flower */}
           <FlowerCard
             flowerImage="/flowers/rose1.png"
             route="/girlfriend/madeforyou/ascii-art"
+            onNavigate={onNavigate}
           />
 
           {/* Animated Garden Flower */}
