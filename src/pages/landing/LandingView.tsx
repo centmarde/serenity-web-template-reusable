@@ -384,7 +384,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* 6 Button Cards Grid - 2 Cols Mobile, 6 Cols Large */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full mb-24">
           <FeatureCard
             title="Love Letters"
             imageSrc="/assets/images/LoveLetters.png"
