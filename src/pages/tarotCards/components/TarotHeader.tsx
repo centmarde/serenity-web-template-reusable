@@ -13,14 +13,20 @@ export const TarotHeader: React.FC<TarotHeaderProps> = ({
   animationPhase,
   selectedCards,
   isMobile,
-  onNavigate
+  onNavigate,
+
 }) => {
-  const { setSelectedCardsForReading } = useTarotSelectionStore();
+  const { setSelectedCardsForReading, getReadingContext } = useTarotSelectionStore();
 
   const handleRevealReading = () => {
+    // Get current reading context from store (set when "Create Reading" was clicked)
+    const isGfReading = getReadingContext();
+    console.log(`🔮 Revealing reading for: ${isGfReading ? 'girlfriend' : 'user'}`);
+    
     // Clear any existing cache and save current selection for reading
     setSelectedCardsForReading(selectedCards);
-    // Navigate to reading view
+    
+    // Navigate to reading view (context is already in store)
     onNavigate('/tarot-cards/continue');
   };
   const getHeaderText = () => {

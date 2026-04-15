@@ -3,16 +3,14 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { useIsMobile } from "../../hooks/use-mobile";
 import { Target } from "lucide-react";
-import TarotCardsWidget from "./components/TarotCardsWidget";
-import { TarotHeader } from "./components/TarotHeader";
-import type { TarotCard } from "../../composables/tarotConstant";
-import type { AnimationPhase } from "./types";
+import { TarotCardsResults } from "./components/TarotCardsResults";
 
 
 interface ComponentData {
   themeColor: string;
   callsign: string;
   gfName: string;
+  bfName: string;
   appName: string;
 }
 
@@ -21,20 +19,12 @@ interface TarotCardsViewProps {
 }
 
 const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
-  const { getCallsign, getGfName, getAppName, loadSettings } = useSettingsStore();
+  const { getCallsign, getGfName, getBfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization, getSafeThemeColor } = useThemeStore();
   const isMobile = useIsMobile();
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCards, setSelectedCards] = useState<TarotCard[]>([]);
-  const [animationPhase, setAnimationPhase] = useState<AnimationPhase>('loading');
-
-  // Handle selected cards changes (no automatic store saving)
-  const handleSetSelectedCards = (cards: TarotCard[]) => {
-    setSelectedCards(cards);
-    // Store saving now happens only when "Reveal Reading" is clicked
-  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -47,16 +37,18 @@ const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
           themeColor: getCurrentThemeColor(),
           callsign: getCallsign(),
           gfName: getGfName(),
-          appName: getAppName(),
+          bfName: getBfName(),
+          appName: getAppName()
         });
       } catch (error) {
         console.error('Failed to initialize TarotCardsView:', error);
         // Provide fallback values
         setData({
           themeColor: getSafeThemeColor(),
-          callsign: 'Love',
+          callsign: 'Darling',
           gfName: 'Beautiful',
-          appName: 'Love Space',
+          bfName: 'Handsome',
+          appName: 'Love Space'
         });
       } finally {
         setIsLoading(false);
@@ -64,7 +56,7 @@ const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
     };
 
     initialize();
-  }, [initializeTheme, waitForInitialization, loadSettings, getCurrentThemeColor, getCallsign, getGfName, getAppName, getSafeThemeColor]);
+  }, [initializeTheme, waitForInitialization, loadSettings, getCurrentThemeColor, getCallsign, getGfName, getBfName, getAppName, getSafeThemeColor]);
 
   if (isLoading || !data) {
     const safeThemeColor = getSafeThemeColor();
@@ -106,50 +98,19 @@ const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Mobile: TarotHeader below main title */}
-          {isMobile && (
-            <div className="px-4">
-              <TarotHeader
-                themeColor={data.themeColor}
-                animationPhase={animationPhase}
-                selectedCards={selectedCards}
-                isMobile={isMobile}
-                onNavigate={onNavigate || (() => {})}
-              />
-            </div>
-          )}
-
-          {/* Tarot Cards Widget - Pass isMobile prop */}
-          {isMobile ? (
-            <div 
-              className="bg-white rounded-lg shadow-lg p-4 mx-auto"
-              style={{
-                maxWidth: '420px',
-                width: '100%',
-                border: `2px solid ${data.themeColor}20`,
-                position: 'relative',
-                zIndex: 1,
-                marginTop: '85vh' // Large gap for mobile headers
-              }}
-            >
-              <TarotCardsWidget 
-                themeColor={data.themeColor} 
-                isMobile={isMobile}
-                selectedCards={selectedCards}
-                setSelectedCards={handleSetSelectedCards}
-                setAnimationPhase={setAnimationPhase}
-              />
-            </div>
-          ) : (
-            <TarotCardsWidget 
-              themeColor={data.themeColor} 
-              isMobile={isMobile}
+          {/* Tarot Cards Results */}
+          <div className={`bg-white rounded-lg shadow-lg ${
+            isMobile ? 'p-4 mx-2' : 'p-8 mx-auto max-w-6xl'
+          }`} style={{
+            border: `2px solid ${data.themeColor}20`
+          }}>
+            <TarotCardsResults 
+              themeColor={data.themeColor}
+              bfName={data.bfName}
+              gfName={data.gfName}
               onNavigate={onNavigate}
-              selectedCards={selectedCards}
-              setSelectedCards={handleSetSelectedCards}
-              setAnimationPhase={setAnimationPhase}
             />
-          )}
+          </div>
         </div>
       </div>
     </div>

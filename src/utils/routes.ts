@@ -145,6 +145,15 @@ export const routes: Route[] = [
     requiresAuth: true,
   },
   {
+    path: '/tarot-cards-widget',
+    name: 'Create Tarot Reading',
+    component: 'TarotCardsWidgetView',
+    icon: 'Plus',
+    isPublic: true,
+    showInNav: false,
+    requiresAuth: true,
+  },
+  {
     path: '/tarot-cards/continue',
     name: 'Tarot Reading',
     component: 'TarotReadingView',

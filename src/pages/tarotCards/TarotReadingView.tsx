@@ -21,7 +21,7 @@ interface TarotReadingViewProps {
 const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
   const { getCallsign, getGfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization, getSafeThemeColor } = useThemeStore();
-  const { getSelectedCards, hasValidSelection, markReadingGenerated } = useTarotSelectionStore();
+  const { getSelectedCards, hasValidSelection, markReadingGenerated, getReadingContext } = useTarotSelectionStore();
   const isMobile = useIsMobile();
 
   const [data, setData] = useState<ComponentData | null>(null);
@@ -43,6 +43,10 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
           appName: getAppName()
         });
 
+        // Reading context is already set in store when "Create Reading" was clicked
+        const isGfReading = getReadingContext();
+        console.log(`🔮 TarotReadingView initialized for: ${isGfReading ? 'girlfriend' : 'user'}`);
+        
         // Get selected cards from the store
         const storeCards = getSelectedCards();
         if (hasValidSelection()) {
@@ -63,7 +67,20 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
       }
     };
     initialize();
-  }, []);
+  }, [
+    getAppName,
+    getCallsign,
+    getCurrentThemeColor,
+    getGfName,
+    getReadingContext,
+    getSafeThemeColor,
+    getSelectedCards,
+    hasValidSelection,
+    initializeTheme,
+    loadSettings,
+    markReadingGenerated,
+    waitForInitialization
+  ]);
 
   if (isLoading || !data) {
     return (

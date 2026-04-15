@@ -1,10 +1,15 @@
 import { create } from 'zustand';
 import type { TarotCard } from '../composables/tarotConstant';
+import type { TarotReadingSession } from '../lib/AiTarotReading';
+import { useTarotCardsDataStore } from './tarotCardsData';
 
 interface TarotSelectionData {
   selectedCards: TarotCard[];
   selectionTimestamp: number | null;
   isReadingGenerated: boolean;
+  aiReadingSession: TarotReadingSession | null;
+  isGfReading: boolean;
+  lastSavedSessionId: string | null; // Track last saved session to prevent duplicates
 }
 
 interface TarotSelectionStore {
@@ -20,6 +25,17 @@ interface TarotSelectionStore {
   hasValidSelection: () => boolean;
   getSelectionAge: () => number | null;
   
+
+  
+  // AI Reading Management
+  setAiReadingSession: (session: TarotReadingSession, isGf?: boolean) => void;
+  getAiReadingSession: () => TarotReadingSession | null;
+  clearAiReading: () => void;
+  hasAiReading: () => boolean;
+  setReadingContext: (isGf: boolean) => void;
+  getReadingContext: () => boolean;
+ 
+  
   // Cache validation
   isSelectionExpired: (maxAgeMinutes?: number) => boolean;
 }
@@ -31,16 +47,25 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
     selectedCards: [],
     selectionTimestamp: null,
     isReadingGenerated: false,
+    aiReadingSession: null,
+    isGfReading: false,
+    lastSavedSessionId: null
   },
   isLoading: false,
 
   setSelectedCards: (cards: TarotCard[]) => {
     if (cards.length === 6) {
+      const currentData = get().selectionData;
+      const selectionTimestamp = Date.now();
+
       set({
         selectionData: {
           selectedCards: cards,
-          selectionTimestamp: Date.now(),
+          selectionTimestamp,
           isReadingGenerated: false,
+          aiReadingSession: null, // Clear previous AI reading when new cards selected
+          isGfReading: currentData.isGfReading,
+          lastSavedSessionId: null // Reset when selecting new cards
         },
         isLoading: false,
       });
@@ -49,8 +74,11 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
       try {
         localStorage.setItem('tarot_selection_cache', JSON.stringify({
           selectedCards: cards,
-          selectionTimestamp: Date.now(),
+          selectionTimestamp,
           isReadingGenerated: false,
+          aiReadingSession: null,
+          isGfReading: currentData.isGfReading,
+          lastSavedSessionId: null
         }));
       } catch (error) {
         console.warn('Failed to cache tarot selection to localStorage:', error);
@@ -59,16 +87,21 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
   },
 
   setSelectedCardsForReading: (cards: TarotCard[]) => {
-    // Clear any existing cache first to ensure fresh reading
-    get().clearSelection();
-    
+    // Preserve current reading context (gf vs user)
+    const currentData = get().selectionData;
+
     // Set the new selection for reading
     if (cards.length === 6) {
+      const selectionTimestamp = Date.now();
+
       set({
         selectionData: {
           selectedCards: cards,
-          selectionTimestamp: Date.now(),
+          selectionTimestamp,
           isReadingGenerated: false,
+          aiReadingSession: null, // Clear previous AI reading when new cards selected
+          isGfReading: currentData.isGfReading,
+          lastSavedSessionId: null
         },
         isLoading: false,
       });
@@ -77,8 +110,11 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
       try {
         localStorage.setItem('tarot_selection_cache', JSON.stringify({
           selectedCards: cards,
-          selectionTimestamp: Date.now(),
+          selectionTimestamp,
           isReadingGenerated: false,
+          aiReadingSession: null,
+          isGfReading: currentData.isGfReading,
+          lastSavedSessionId: null
         }));
       } catch (error) {
         console.warn('Failed to cache tarot selection to localStorage:', error);
@@ -92,6 +128,9 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
         selectedCards: [],
         selectionTimestamp: null,
         isReadingGenerated: false,
+        aiReadingSession: null,
+        isGfReading: false,
+        lastSavedSessionId: null
       },
     });
     
@@ -128,9 +167,16 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
             const maxAge = DEFAULT_CACHE_DURATION_MINUTES * 60 * 1000;
             
             if (cacheAge < maxAge) {
-              // Restore valid cache to state
+              // Restore valid cache to state with proper type safety
               set({
-                selectionData: parsedCache,
+                selectionData: {
+                  selectedCards: parsedCache.selectedCards,
+                  selectionTimestamp: parsedCache.selectionTimestamp,
+                  isReadingGenerated: parsedCache.isReadingGenerated || false,
+                  aiReadingSession: parsedCache.aiReadingSession || null, // Default to null for backward compatibility
+                  isGfReading: parsedCache.isGfReading || false,
+                  lastSavedSessionId: parsedCache.lastSavedSessionId || null
+                },
               });
               return parsedCache.selectedCards;
             } else {
@@ -156,6 +202,127 @@ export const useTarotSelectionStore = create<TarotSelectionStore>((set, get) => 
     const { selectionData } = get();
     if (!selectionData.selectionTimestamp) return null;
     return Date.now() - selectionData.selectionTimestamp;
+  },
+
+
+
+  setAiReadingSession: (session: TarotReadingSession, isGf?: boolean) => {
+    console.log('🔮 Storing AI tarot reading session:', session.sessionId);
+    const currentData = get().selectionData;
+    
+    // Improved duplicate prevention - check session ID and if we already have a complete reading
+    if (currentData.lastSavedSessionId === session.sessionId) {
+      console.log('🔮 Session already processed, skipping duplicate save:', session.sessionId);
+      return;
+    }
+    
+    if (session.isComplete && currentData.aiReadingSession && currentData.aiReadingSession.sessionId === session.sessionId) {
+      console.log('🔮 Complete session already stored, skipping duplicate save:', session.sessionId);
+      return;
+    }
+    
+    // Determine if this is a girlfriend's reading
+    const isGfReading = isGf !== undefined ? isGf : currentData.isGfReading;
+    
+    set(state => ({
+      selectionData: {
+        ...state.selectionData,
+        aiReadingSession: session,
+        isReadingGenerated: true, // Mark reading as generated when AI session is stored
+        isGfReading: isGfReading
+      }
+    }));
+    
+    // Also update localStorage with the new session
+    try {
+      const updatedData = get().selectionData;
+      localStorage.setItem('tarot_selection_cache', JSON.stringify({
+        selectedCards: updatedData.selectedCards,
+        selectionTimestamp: updatedData.selectionTimestamp,
+        isReadingGenerated: true,
+        aiReadingSession: session,
+        isGfReading: isGfReading,
+        lastSavedSessionId: updatedData.lastSavedSessionId
+      }));
+    } catch (error) {
+      console.warn('Failed to cache AI reading session to localStorage:', error);
+    }
+
+    // Automatically save to database when AI reading is complete
+    if (session.isComplete && currentData.lastSavedSessionId !== session.sessionId) {
+      console.log(`🔮 Automatically saving complete AI reading to database (isGf: ${isGfReading})`);
+      
+      // Get tarot cards data store and save the reading
+      const tarotCardsStore = useTarotCardsDataStore.getState();
+      tarotCardsStore.saveFromAiReading(session, isGfReading)
+        .then((savedDeck) => {
+          if (savedDeck) {
+            console.log('🔮 Successfully saved AI reading to database:', savedDeck.id);
+            // Mark this session as saved
+            set(state => ({
+              selectionData: {
+                ...state.selectionData,
+                lastSavedSessionId: session.sessionId
+              }
+            }));
+          } else {
+            console.warn('🔮 Failed to save AI reading to database');
+          }
+        })
+        .catch((error) => {
+          console.error('🔮 Error auto-saving AI reading to database:', error);
+        });
+    }
+  },
+
+  getAiReadingSession: () => {
+    return get().selectionData.aiReadingSession;
+  },
+
+  clearAiReading: () => {
+    console.log('🔮 Clearing AI tarot reading session');
+    set(state => ({
+      selectionData: {
+        ...state.selectionData,
+        aiReadingSession: null,
+        isReadingGenerated: false,
+        lastSavedSessionId: null
+      }
+    }));
+    
+    // Also clear from localStorage
+    try {
+      const currentData = get().selectionData;
+      localStorage.setItem('tarot_selection_cache', JSON.stringify({
+        selectedCards: currentData.selectedCards,
+        selectionTimestamp: currentData.selectionTimestamp,
+        isReadingGenerated: false,
+        aiReadingSession: null,
+        isGfReading: currentData.isGfReading,
+        lastSavedSessionId: null
+      }));
+    } catch (error) {
+      console.warn('Failed to clear AI reading from localStorage:', error);
+    }
+  },
+
+  setReadingContext: (isGf: boolean) => {
+    console.log(`🔮 Setting reading context: ${isGf ? 'girlfriend' : 'user'}`);
+    set(state => ({
+      selectionData: {
+        ...state.selectionData,
+        isGfReading: isGf
+      }
+    }));
+  },
+
+  getReadingContext: () => {
+    return get().selectionData.isGfReading;
+  },
+
+  hasAiReading: () => {
+    const session = get().selectionData.aiReadingSession;
+    return session !== null && session.isComplete;
   },
 
   isSelectionExpired: (maxAgeMinutes: number = DEFAULT_CACHE_DURATION_MINUTES) => {
