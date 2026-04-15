@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "../../../hooks/use-mobile";
 import { useTarotCardsDataStore, useTarotCardsHelpers, type TarotCardsDeck } from "../../../stores/tarotCardsData";
 import { useTarotSelectionStore } from "../../../stores/tarotSelectionData";
+import { tarotCards } from "../../../composables/tarotConstant";
+import { getImagePath } from "../utils";
 import { Heart, User, Calendar, Eye, Plus } from "lucide-react";
 
 interface TarotCardsResultsProps {
@@ -24,6 +26,13 @@ const CARD_TITLES = [
   "The likely outcome"
 ];
 
+const normalizeCardName = (name: string) => name.trim().toLowerCase();
+
+const TAROT_IMAGE_BY_CARD_NAME = tarotCards.reduce<Record<string, string>>((acc, card) => {
+  acc[normalizeCardName(card.name)] = card.image;
+  return acc;
+}, {});
+
 export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   themeColor,
   bfName,
@@ -32,7 +41,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const { getMyDecks, getGfDecks, isLoading, error } = useTarotCardsDataStore();
-  const { getCardsFromDeck, formatDeckForDisplay, isCompleteReading, getCardDescription } = useTarotCardsHelpers();
+  const { formatDeckForDisplay, isCompleteReading, getCardDescription } = useTarotCardsHelpers();
   const { setReadingContext, clearAiReading } = useTarotSelectionStore();
   
   
@@ -85,7 +94,8 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   }, []); // Empty dependency array - run only on mount
 
   const renderDeckCard = (deck: TarotCardsDeck, isGf: boolean) => {
-    const cards = getCardsFromDeck(deck);
+    // Keep exact spread positions (do NOT filter nulls), so titles align with 1..6
+    const cards = [deck.card1, deck.card2, deck.card3, deck.card4, deck.card5, deck.card6];
     const displayInfo = formatDeckForDisplay(deck);
 
     return (
@@ -95,63 +105,86 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         style={{ borderColor: themeColor }}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div
+            className={`flex ${
+              isMobile
+                ? 'flex-col items-center text-center gap-2'
+                : 'flex-row items-center justify-between'
+            }`}
+          >
             <CardTitle 
-              className={`flex items-center gap-2 ${isMobile ? 'text-sm' : 'text-lg'}`}
+              className={`flex items-center gap-2 ${
+                isMobile ? 'text-sm justify-center w-full' : 'text-lg'
+              }`}
               style={{ color: themeColor }}
             >
               {isGf ? <Heart size={isMobile ? 16 : 20} /> : <User size={isMobile ? 16 : 20} />}
               {isGf ? `${gfName}'s Reading` : `${bfName}'s Reading`}
             </CardTitle>
-            <Badge variant="secondary" className="text-xs">
-              <Calendar size={12} className="mr-1" />
-              {displayInfo.date}
-            </Badge>
-            {displayInfo.endDate && (
-              <Badge variant="secondary" className="text-xs ml-2">
-                Expires: {displayInfo.endDate}
+
+            <div
+              className={`flex items-center gap-2 ${
+                isMobile ? 'justify-center w-full' : 'justify-end'
+              }`}
+            >
+              <Badge variant="secondary" className="text-xs">
+                <Calendar size={12} className="mr-1" />
+                {displayInfo.date}
               </Badge>
-            )}
+              {displayInfo.endDate && (
+                <Badge variant="secondary" className="text-xs">
+                  Expires: {displayInfo.endDate}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
         
         <CardContent>
-          {/* Cards Grid - Responsive Layout */}
-          <div className={`grid gap-3 mb-4 ${
-            isMobile 
-              ? 'grid-cols-1' 
-              : 'grid-cols-2'
-          }`}>
-            {cards.slice(0, 6).map((card, index) => {
-              // Handle null cards gracefully
-              if (!card) {
-                return (
-                  <div key={index} className="border rounded-lg p-3 bg-gray-100 opacity-50">
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-gray-400">
-                        {CARD_TITLES[index]}
-                      </h4>
-                      <div className="text-xs text-gray-400">
-                        No card selected
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              
+          {/* Cards Row - single horizontal row */}
+          <div className="flex gap-3 mb-4 overflow-x-auto pb-2">
+            {cards.map((card, index) => {
+              const cardName = card?.name ? String(card.name) : '';
+              const imagePath = cardName
+                ? TAROT_IMAGE_BY_CARD_NAME[normalizeCardName(cardName)]
+                : undefined;
+
+              const imageSrc = imagePath ? getImagePath(imagePath) : '/assets/images/tarotCard.png';
+
               return (
-                <div key={index} className="border rounded-lg p-3 bg-gray-50">
+                <div
+                  key={`${deck.id}-${index}`}
+                  className="flex-none border rounded-lg p-3 bg-gray-50"
+                  style={{
+                    width: isMobile ? 'min(260px, 75vw)' : '240px',
+                    borderColor: `${themeColor}40`,
+                  }}
+                >
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <h4 className="font-semibold text-sm" style={{ color: themeColor }}>
                         {CARD_TITLES[index]}
                       </h4>
-                      <Badge variant="outline" className="text-xs">
-                        {card.name || 'Unknown Card'}
+                      <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        {cardName || 'Unknown'}
                       </Badge>
                     </div>
+
+                    <div className="w-full rounded bg-white border overflow-hidden">
+                      <img
+                        src={imageSrc}
+                        alt={cardName || `Card ${index + 1}`}
+                        className="w-full object-cover"
+                        style={{ height: isMobile ? '160px' : '400px' }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/assets/images/tarotCard.png';
+                        }}
+                      />
+                    </div>
+
                     <div className="text-xs text-gray-600 line-clamp-3">
-                      {getCardDescription(card) || 'No description available'}
+                      {card ? (getCardDescription(card) || 'No description available') : 'No card selected'}
                     </div>
                   </div>
                 </div>
@@ -270,9 +303,11 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         
         {myDecks.length > 0 ? (
           <div className={`grid gap-6 ${
-            isMobile 
-              ? 'grid-cols-1' 
-              : 'grid-cols-1 lg:grid-cols-2'
+            isMobile
+              ? 'grid-cols-1'
+              : myDecks.length > 1
+                ? 'grid-cols-1 lg:grid-cols-2'
+                : 'grid-cols-1'
           }`}>
             {myDecks.map(deck => renderDeckCard(deck, false))}
           </div>
@@ -295,9 +330,11 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         
         {gfDecks.length > 0 ? (
           <div className={`grid gap-6 ${
-            isMobile 
-              ? 'grid-cols-1' 
-              : 'grid-cols-1 lg:grid-cols-2'
+            isMobile
+              ? 'grid-cols-1'
+              : gfDecks.length > 1
+                ? 'grid-cols-1 lg:grid-cols-2'
+                : 'grid-cols-1'
           }`}>
             {gfDecks.map(deck => renderDeckCard(deck, true))}
           </div>

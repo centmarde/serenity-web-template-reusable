@@ -70,9 +70,9 @@ const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen">
       {/* Container Fluid - Full width with responsive padding */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* Main Container - Responsive max width */}
-        <div className={`mx-auto space-y-8 ${isMobile ? 'max-w-none' : 'max-w-6xl'}`}>
+      <div className="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 py-8">
+        {/* Main Container - Use more width on large screens */}
+        <div className={`mx-auto space-y-8 ${isMobile ? 'max-w-none' : 'max-w-screen-2xl'}`}>
           {/* Header Section */}
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-3 mb-6">
@@ -99,8 +99,8 @@ const TarotCardsView: React.FC<TarotCardsViewProps> = ({ onNavigate }) => {
           </div>
 
           {/* Tarot Cards Results */}
-          <div className={`bg-white rounded-lg shadow-lg ${
-            isMobile ? 'p-4 mx-2' : 'p-8 mx-auto max-w-6xl'
+          <div className={`bg-white rounded-lg shadow-lg w-full ${
+            isMobile ? 'p-4 mx-2' : 'p-8'
           }`} style={{
             border: `2px solid ${data.themeColor}20`
           }}>
