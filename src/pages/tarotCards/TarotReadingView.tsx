@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { useTarotSelectionStore } from "../../stores/tarotSelectionData";
+import { useIsMobile } from "../../hooks/use-mobile";
 import { TarotReading } from "./components/TarotReading";
-import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TarotCard } from "../../composables/tarotConstant";
 
@@ -22,6 +22,7 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
   const { getCallsign, getGfName, getAppName, loadSettings } = useSettingsStore();
   const { initializeTheme, getCurrentThemeColor, waitForInitialization, getSafeThemeColor } = useThemeStore();
   const { getSelectedCards, hasValidSelection, markReadingGenerated } = useTarotSelectionStore();
+  const isMobile = useIsMobile();
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,29 +78,13 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
 
   return (
     <div 
-      className="min-h-screen p-4 transition-colors duration-500"
+      className={`min-h-screen transition-colors duration-500 ${isMobile ? 'px-2 py-2' : 'px-16 py-4'}`}
       style={{
         background: `linear-gradient(135deg, ${data.themeColor}08, ${data.themeColor}15, #ffffff)`,
       }}
     >
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Custom Header for Reading View */}
-        <div className="text-center py-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles size={32} className="animate-pulse" style={{ color: data.themeColor }} />
-            <h1 
-              className="text-3xl font-bold"
-              style={{ color: data.themeColor }}
-            >
-              Your Mystical Reading
-            </h1>
-            <Sparkles size={32} className="animate-pulse" style={{ color: data.themeColor }} />
-          </div>
-          <p className="text-lg text-gray-600 mb-6">
-            Discover what the cards reveal about your path, {data.callsign}
-          </p>
-         
-        </div>
+      <div className={`w-full ${isMobile ? 'space-y-2' : 'space-y-4'}`}>
+       
         
         <TarotReading
           selectedCards={selectedCards}
@@ -108,13 +93,13 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
         />
 
         {selectedCards.length !== 6 && (
-          <div className="text-center py-8">
-            <p className="text-gray-600 text-lg">
+          <div className="text-center py-4">
+            <p className="text-gray-600 text-base">
               No reading available. Please select 6 cards from the tarot deck first.
             </p>
             <Button 
               onClick={() => onNavigate ? onNavigate('/tarot-cards') : (window.location.href = '/tarot-cards')}
-              className="inline-block mt-4 px-6 py-2 rounded-lg font-medium hover:scale-105 transition-all duration-200"
+              className="inline-block mt-3 px-6 py-2 rounded-lg font-medium hover:scale-105 transition-all duration-200"
               style={{ 
                 backgroundColor: data.themeColor,
                 color: "white"
