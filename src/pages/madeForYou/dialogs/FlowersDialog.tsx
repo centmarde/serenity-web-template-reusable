@@ -10,10 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ChevronLeft, ChevronRight, Music, Palette } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight, Flower2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface LyricPosterDialogProps {
+interface FlowersDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -24,8 +24,8 @@ interface NarratorMessage {
   image?: string;
 }
 
-const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }) => {
-  const { getCallsign } = useSettingsStore();
+const FlowersDialog: React.FC<FlowersDialogProps> = ({ isOpen, onClose }) => {
+  const { getCallsign} = useSettingsStore();
   const { getCurrentThemeColor } = useThemeStore();
   const isMobile = useIsMobile();
   
@@ -37,34 +37,38 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
 
   const narratorMessages: NarratorMessage[] = [
     {
-      text: `Hey gorgeous ${getCallsign() || "baby"}! 🎵`,
-      delay: 0,
+      text: `Look at this beautiful flower garden I created for you, ${getCallsign() || "my love"}! 🌻`,
+      delay: 0
+    },
+    {
+      text: `I spent days learning CSS animations and 3D transforms just to make these flowers bloom perfectly! ✨`,
+      delay: 2000,
+      image: "/assets/work/v1.png"
+    },
+    {
+      text: "Each petal was carefully animated with different timing and rotation angles to create the most natural blooming effect...",
+      delay: 4000,
       
     },
     {
-      text: `I spent weeks learning canvas programming and image processing just to create this magical lyrics poster for you! ✨`,
-      delay: 2000,
-     
-    },
-    {
-      text: "I researched color theory, contrast algorithms, and text rendering techniques to make your favorite song lyrics come alive visually...",
-      delay: 4000,
-     
-    },
-    {
-      text: "Every character you see is actually a letter from the song lyrics! I mapped the brightness of each pixel to create this unique art form 💖",
+      text: "The vines grow first, then the leaves appear, and finally the beautiful flowers bloom - just like real nature! 🌿",
       delay: 6000,
-     
+      
     },
     {
-      text: "The colors blend from our theme color in the shadows to pure white in the highlights - representing how your love brightens my world ✨",
+      text: "I even made sure the animation timing was perfect - vines at 2 seconds, leaves during growth, and flowers at 7 seconds!",
       delay: 8000,
+      image: "/assets/work/v2.png"
+    },
+    {
+      text: "The floating hearts and sparkling effects? I coded those thinking of all the love I have for you 💖",
+      delay: 10000,
      
     },
     {
-      text: `Every pixel was crafted with love, ${getCallsign() || "beautiful"}. This is our song, painted in words, just for you! 💝`,
-      delay: 10000,
-      image: "/assets/blee.gif"
+      text: `Every bloom represents how my love for you grows stronger each day, ${getCallsign() || "beautiful"}. This garden is eternal, just like my feelings! 🌺`,
+      delay: 12000,
+      
     }
   ];
 
@@ -123,15 +127,14 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent 
-        className="p-0 overflow-hidden border-0 z-50 animate-in zoom-in-95 duration-300"
+        className="p-0 overflow-hidden max-w-[95vw] sm:max-w-125"
+        showCloseButton={false}
         style={{
           background: '#ffffff',
           border: `3px solid ${themeColor}`,
           borderRadius: isMobile ? '16px' : '20px',
-          maxWidth: isMobile ? 'min(350px, 95vw)' : 'min(500px, 90vw)',
           maxHeight: isMobile ? '85vh' : '90vh',
-          margin: isMobile ? 'min(8px, 2vw)' : 'min(16px, 4vw)',
-          boxShadow: `0 20px 40px rgba(0,0,0,0.3), 0 0 0 100vmax rgba(0,0,0,0.4)`
+          boxShadow: `0 20px 40px rgba(0,0,0,0.3)`
         }}
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -153,9 +156,9 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                 gap: isMobile ? '8px' : '12px'
               }}
             >
-              <Music size={isMobile ? 16 : 20} />
-              {isMobile ? "Lyric Art Magic" : "Musical Lyric Art Creation"}
-              <Palette size={isMobile ? 16 : 20} />
+              <Flower2 size={isMobile ? 16 : 20} />
+              {isMobile ? "Blooming Garden" : "Blooming Garden of Love"}
+              <Flower2 size={isMobile ? 16 : 20} />
             </DialogTitle>
             
             <Badge 
@@ -168,7 +171,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
               }}
             >
               <Heart size={14} className="mr-1" />
-              Coded with Musical Love
+              Animated with Pure Love
             </Badge>
           </div>
         </DialogHeader>
@@ -196,8 +199,8 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                   }}
                 >
                   <img
-                    src="/assets/explain.gif"
-                    alt="Your boyfriend explaining his musical creation"
+                    src="/assets/dudu-cute.gif"
+                    alt="Your boyfriend showing his flower creation"
                     className="w-16 h-16 rounded-full object-cover"
                     style={{
                       filter: `sepia(1) hue-rotate(${themeColor === '#F2A6A6' ? '320deg' : '0deg'}) saturate(1.2)`,
@@ -326,9 +329,9 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
           </div>
 
           {/* Navigation and Action Buttons */}
-          <div className={`${isMobile ? 'flex flex-col space-y-3' : 'grid grid-cols-2 gap-4'}`}>
+          <div className={`flex gap-2 ${isMobile ? 'flex-col space-y-2' : 'justify-between items-center'}`}>
             {/* Navigation Buttons */}
-            <div className={`flex gap-2 ${isMobile ? 'justify-center' : 'justify-start'}`}>
+            <div className={`flex gap-2 ${isMobile ? 'justify-center' : ''}`}>
               <Button
                 variant="outline"
                 onClick={handlePrevious}
@@ -365,7 +368,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
             </div>
 
             {/* Action Buttons */}
-            <div className={`flex gap-2 ${isMobile ? 'justify-center w-full' : 'justify-end'}`}>
+            <div className={`flex gap-2 ${isMobile ? 'justify-center w-full' : ''}`}>
               {currentMessageIndex < narratorMessages.length - 1 && (
                 <Button
                   variant="outline"
@@ -394,7 +397,7 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
                 className="hover:opacity-90 flex items-center gap-2"
               >
                 <Heart size={isMobile ? 14 : 16} />
-                {isMobile ? "So amazing! 🎵" : "This is so amazing! 🎵"}
+                {isMobile ? "Love it! 🌺" : "Aww, I love it! 🌺"}
               </Button>
             </div>
           </div>
@@ -491,4 +494,4 @@ const LyricPosterDialog: React.FC<LyricPosterDialogProps> = ({ isOpen, onClose }
   );
 };
 
-export default LyricPosterDialog;
+export default FlowersDialog;

@@ -1,0 +1,657 @@
+/* Scoped CSS for Flowers component - only applies within .flowers-component */
+.flowers-component {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  perspective: 1000px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  --dark-color: #010113;
+}
+
+.flowers-component *,
+.flowers-component *::after,
+.flowers-component *::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.flowers-component .night {
+  position: fixed;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  filter: blur(0.1vmin);
+  background-image: radial-gradient(
+      ellipse at top,
+      transparent 0%,
+      var(--dark-color)
+    ),
+    radial-gradient(
+      ellipse at bottom,
+      var(--dark-color),
+      rgba(145, 233, 255, 0.2)
+    ),
+    repeating-linear-gradient(
+      220deg,
+      rgb(0, 0, 0) 0px,
+      rgb(0, 0, 0) 19px,
+      transparent 19px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      189deg,
+      rgb(0, 0, 0) 0px,
+      rgb(0, 0, 0) 19px,
+      transparent 19px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      148deg,
+      rgb(0, 0, 0) 0px,
+      rgb(0, 0, 0) 19px,
+      transparent 19px,
+      transparent 22px
+    ),
+    linear-gradient(90deg, rgb(255, 94, 0), rgb(240, 240, 240));
+}
+
+.flowers-component .flowers {
+  position: relative;
+  transform: scale(0.9);
+}
+
+.flowers-component .flower {
+  position: absolute;
+  bottom: 10vmin;
+  transform-origin: bottom center;
+  z-index: 10;
+  --fl-speed: 0.8s;
+}
+
+.flowers-component .flower--1 {
+  -webkit-animation: moving-flower-1 4s linear infinite;
+  animation: moving-flower-1 4s linear infinite;
+}
+.flowers-component .flower--1 .flower__line {
+  height: 70vmin;
+  -webkit-animation-delay: 0.3s;
+  animation-delay: 0.3s;
+}
+.flowers-component .flower--1 .flower__line__leaf--1 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 1.6s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 1.6s backwards;
+  -webkit-animation-delay: 5s;
+  animation-delay: 5s;
+}
+.flowers-component .flower--1 .flower__line__leaf--2 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 1.4s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 1.4s backwards;
+  -webkit-animation-delay: 5.5s;
+  animation-delay: 5.5s;
+}
+.flowers-component .flower--1 .flower__line__leaf--3 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 1.2s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 1.2s backwards;
+  -webkit-animation-delay: 6s;
+  animation-delay: 6s;
+}
+.flowers-component .flower--1 .flower__line__leaf--4 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 1s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 1s backwards;
+  -webkit-animation-delay: 6.5s;
+  animation-delay: 6.5s;
+}
+.flowers-component .flower--1 .flower__line__leaf--5 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 1.8s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 1.8s backwards;
+  -webkit-animation-delay: 7s;
+  animation-delay: 7s;
+}
+.flowers-component .flower--1 .flower__line__leaf--6 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 2s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 2s backwards;
+  -webkit-animation-delay: 7.5s;
+  animation-delay: 7.5s;
+}
+.flowers-component .flower--2 {
+  left: 50%;
+  transform: rotate(20deg);
+  -webkit-animation: moving-flower-2 4s linear infinite;
+  animation: moving-flower-2 4s linear infinite;
+}
+.flowers-component .flower--2 .flower__line {
+  height: 60vmin;
+  -webkit-animation-delay: 0.6s;
+  animation-delay: 0.6s;
+}
+.flowers-component .flower--2 .flower__line__leaf--1 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 1.9s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 1.9s backwards;
+  -webkit-animation-delay: 5.2s;
+  animation-delay: 5.2s;
+}
+.flowers-component .flower--2 .flower__line__leaf--2 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 1.7s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 1.7s backwards;
+  -webkit-animation-delay: 5.7s;
+  animation-delay: 5.7s;
+}
+.flowers-component .flower--2 .flower__line__leaf--3 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 1.5s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 1.5s backwards;
+  -webkit-animation-delay: 6.2s;
+  animation-delay: 6.2s;
+}
+.flowers-component .flower--2 .flower__line__leaf--4 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 1.3s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 1.3s backwards;
+  -webkit-animation-delay: 6.7s;
+  animation-delay: 6.7s;
+}
+.flowers-component .flower--3 {
+  left: 50%;
+  transform: rotate(-15deg);
+  -webkit-animation: moving-flower-3 4s linear infinite;
+  animation: moving-flower-3 4s linear infinite;
+}
+.flowers-component .flower--3 .flower__line {
+  -webkit-animation-delay: 0.9s;
+  animation-delay: 0.9s;
+}
+.flowers-component .flower--3 .flower__line__leaf--1 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 2.5s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 2.5s backwards;
+  -webkit-animation-delay: 5.4s;
+  animation-delay: 5.4s;
+}
+.flowers-component .flower--3 .flower__line__leaf--2 {
+  -webkit-animation: blooming-leaf-right var(--fl-speed) 2.3s backwards;
+  animation: blooming-leaf-right var(--fl-speed) 2.3s backwards;
+  -webkit-animation-delay: 5.9s;
+  animation-delay: 5.9s;
+}
+.flowers-component .flower--3 .flower__line__leaf--3 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 2.1s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 2.1s backwards;
+  -webkit-animation-delay: 6.4s;
+  animation-delay: 6.4s;
+}
+.flowers-component .flower--3 .flower__line__leaf--4 {
+  -webkit-animation: blooming-leaf-left var(--fl-speed) 1.9s backwards;
+  animation: blooming-leaf-left var(--fl-speed) 1.9s backwards;
+  -webkit-animation-delay: 6.9s;
+  animation-delay: 6.9s;
+}
+.flowers-component .flower__leafs {
+  position: relative;
+  -webkit-animation: blooming-flower 2s backwards;
+  animation: blooming-flower 2s backwards;
+}
+.flowers-component .flower__leafs--1 {
+  -webkit-animation-delay: 7s;
+  animation-delay: 7s;
+}
+.flowers-component .flower__leafs--2 {
+  -webkit-animation-delay: 7.5s;
+  animation-delay: 7.5s;
+}
+.flowers-component .flower__leafs--3 {
+  -webkit-animation-delay: 8s;
+  animation-delay: 8s;
+}
+.flowers-component .flower__leafs::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
+  width: 8vmin;
+  height: 8vmin;
+  background-color: #e7b201;
+  filter: blur(10vmin);
+}
+.flowers-component .flower__leaf {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 8vmin;
+  height: 11vmin;
+  border-radius: 51% 49% 47% 53%/44% 45% 55% 69%;
+  background-color: #e6f331;
+  background-image: linear-gradient(to top, #e6f331, #e6f331);
+  transform-origin: bottom center;
+  opacity: 0.9;
+  box-shadow: inset 0 0 2vmin rgba(255, 255, 255, 0.5);
+}
+.flowers-component .flower__leaf--1 {
+  transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg);
+}
+.flowers-component .flower__leaf--2 {
+  transform: translate(-50%, -4%) rotateX(40deg);
+}
+.flowers-component .flower__leaf--3 {
+  transform: translate(-90%, 0%) rotateY(45deg) rotateX(50deg);
+}
+.flowers-component .flower__leaf--4 {
+  width: 8vmin;
+  height: 8vmin;
+  transform-origin: bottom left;
+  border-radius: 4vmin 10vmin 4vmin 4vmin;
+  transform: translate(0%, 18%) rotateX(70deg) rotate(-43deg);
+  background-image: linear-gradient(to top, #e6f331, #e6f331);
+  z-index: 1;
+  opacity: 0.8;
+}
+.flowers-component .flower__white-circle {
+  position: absolute;
+  left: -3.5vmin;
+  top: -3vmin;
+  width: 9vmin;
+  height: 4vmin;
+  border-radius: 50%;
+  background-color: #fff;
+}
+.flowers-component .flower__white-circle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.03) 0px,
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.03) 0px,
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    repeating-linear-gradient(
+      67.5deg,
+      rgba(0, 0, 0, 0.03) 0px,
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(90deg, #ffe65c, #ffc048);
+}
+.flowers-component .flower__line {
+  height: 55vmin;
+  width: 1.5vmin;
+  background-image: linear-gradient(
+    to left,
+    rgb(0, 0, 0, 0.2),
+    transparent,
+    rgb(0, 0, 0, 0.2)
+  ),
+  linear-gradient(to top, transparent 10%, #14850c, #0e5c07);
+  background-size: 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  border-radius: 2px;
+  -webkit-animation: growing-grass 8s 2s backwards;
+  animation: growing-grass 8s 2s backwards;
+}
+.flowers-component .flower__line__leaf {
+  --w: 7vmin;
+  --h: calc(var(--w) + 2vmin);
+  position: absolute;
+  top: 20%;
+  left: 90%;
+  width: var(--w);
+  height: var(--h);
+  border-top-right-radius: var(--h);
+  border-bottom-left-radius: var(--h);
+  background-image: linear-gradient(to top, rgba(12, 94, 32, 0.4), #028137);
+}
+.flowers-component .flower__line__leaf--1 {
+  transform: rotate(70deg) rotateY(30deg);
+}
+.flowers-component .flower__line__leaf--2 {
+  top: 45%;
+  transform: rotate(70deg) rotateY(30deg);
+}
+.flowers-component .flower__line__leaf--3,
+.flowers-component .flower__line__leaf--4,
+.flowers-component .flower__line__leaf--6 {
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: var(--h);
+  border-bottom-right-radius: var(--h);
+  left: -460%;
+  top: 12%;
+  transform: rotate(-70deg) rotateY(30deg);
+}
+.flowers-component .flower__line__leaf--4 {
+  top: 40%;
+}
+.flowers-component .flower__line__leaf--5 {
+  top: 0;
+  transform-origin: left;
+  transform: rotate(70deg) rotateY(30deg) scale(0.6);
+  -webkit-animation-delay: 3.5s !important;
+  animation-delay: 3.5s !important;
+}
+.flowers-component .flower__line__leaf--6 {
+  top: -2%;
+  left: -450%;
+  transform-origin: right;
+  transform: rotate(-70deg) rotateY(30deg) scale(0.6);
+  -webkit-animation-delay: 2.5s !important;
+  animation-delay: 2.5s !important;
+}
+.flowers-component .flower__light {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 1vmin;
+  height: 1vmin;
+  background-color: rgb(255, 251, 0);
+  border-radius: 50%;
+  filter: blur(0.4vmin);
+  -webkit-animation: light-ans 4s linear infinite backwards;
+  animation: light-ans 4s linear infinite backwards;
+}
+.flowers-component .flower__light--1 {
+  left: -2vmin;
+  -webkit-animation-delay: 1s;
+  animation-delay: 1s;
+}
+.flowers-component .flower__light--2 {
+  left: 3vmin;
+  -webkit-animation-delay: 0.8s;
+  animation-delay: 0.8s;
+}
+.flowers-component .flower__light--3 {
+  left: -6vmin;
+  -webkit-animation-delay: 0.6s;
+  animation-delay: 0.6s;
+}
+.flowers-component .flower__light--4 {
+  left: 6vmin;
+  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
+}
+.flowers-component .flower__light--5 {
+  left: -1vmin;
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+.flowers-component .flower__light--6 {
+  left: -4vmin;
+  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
+}
+.flowers-component .flower__light--7 {
+  left: 3vmin;
+  -webkit-animation-delay: 0.6s;
+  animation-delay: 0.6s;
+}
+.flowers-component .flower__light--8 {
+  left: -6vmin;
+  -webkit-animation-delay: 0.8s;
+  animation-delay: 0.8s;
+}
+
+.flowers-component .bubbles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.flowers-component .bubble {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  animation: float-up 10s infinite linear;
+}
+
+.flowers-component .bubble:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 8s;
+}
+
+.flowers-component .bubble:nth-child(2) {
+  left: 20%;
+  animation-delay: 2s;
+  animation-duration: 12s;
+}
+
+.flowers-component .bubble:nth-child(3) {
+  left: 30%;
+  animation-delay: 4s;
+  animation-duration: 10s;
+}
+
+.flowers-component .bubble:nth-child(4) {
+  left: 40%;
+  animation-delay: 6s;
+  animation-duration: 14s;
+}
+
+.flowers-component .bubble:nth-child(5) {
+  left: 50%;
+  animation-delay: 8s;
+  animation-duration: 9s;
+}
+
+.flowers-component .bubble:nth-child(6) {
+  left: 60%;
+  animation-delay: 3s;
+  animation-duration: 11s;
+}
+
+.flowers-component .bubble:nth-child(7) {
+  left: 70%;
+  animation-delay: 5s;
+  animation-duration: 13s;
+}
+
+.flowers-component .bubble:nth-child(8) {
+  left: 80%;
+  animation-delay: 7s;
+  animation-duration: 15s;
+}
+
+.flowers-component .bubble:nth-child(9) {
+  left: 90%;
+  animation-delay: 1s;
+  animation-duration: 16s;
+}
+
+.flowers-component .heart {
+  width: 100%;
+  height: 100%;
+  fill: rgba(255, 20, 147, 0.8);
+}
+
+/* Keyframe animations - these don't need to be scoped as keyframes are global anyway */
+@keyframes float-up {
+  0% {
+    bottom: -20px;
+    opacity: 0;
+    transform: scale(0.8) rotate(0deg);
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    bottom: 100vh;
+    opacity: 0;
+    transform: scale(1.2) rotate(360deg);
+  }
+}
+
+@-webkit-keyframes moving-flower-1 {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes moving-flower-1 {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@-webkit-keyframes moving-flower-2 {
+  0%, 100% {
+    transform: rotate(18deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+@keyframes moving-flower-2 {
+  0%, 100% {
+    transform: rotate(18deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+
+@-webkit-keyframes moving-flower-3 {
+  0%, 100% {
+    transform: rotate(-17deg);
+  }
+  50% {
+    transform: rotate(-13deg);
+  }
+}
+@keyframes moving-flower-3 {
+  0%, 100% {
+    transform: rotate(-17deg);
+  }
+  50% {
+    transform: rotate(-13deg);
+  }
+}
+
+@-webkit-keyframes blooming-leaf-right {
+  0% {
+    transform-origin: left;
+    transform: rotate(70deg) rotateY(30deg) scale(0);
+  }
+}
+@keyframes blooming-leaf-right {
+  0% {
+    transform-origin: left;
+    transform: rotate(70deg) rotateY(30deg) scale(0);
+  }
+}
+
+@-webkit-keyframes blooming-leaf-left {
+  0% {
+    transform-origin: right;
+    transform: rotate(-70deg) rotateY(30deg) scale(0);
+  }
+}
+@keyframes blooming-leaf-left {
+  0% {
+    transform-origin: right;
+    transform: rotate(-70deg) rotateY(30deg) scale(0);
+  }
+}
+
+@-webkit-keyframes blooming-flower {
+  0% {
+    transform: scale(0);
+  }
+}
+@keyframes blooming-flower {
+  0% {
+    transform: scale(0);
+  }
+}
+
+@-webkit-keyframes growing-grass {
+  0% {
+    transform: scale(0, 0);
+  }
+}
+@keyframes growing-grass {
+  0% {
+    transform: scale(0, 0);
+  }
+}
+
+@-webkit-keyframes light-ans {
+  0% {
+    transform: translateY(0vmin);
+    opacity: 0;
+  }
+  25% {
+    transform: translateY(-5vmin);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-8vmin);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-12vmin);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-16vmin);
+    opacity: 0;
+  }
+}
+@keyframes light-ans {
+  0% {
+    transform: translateY(0vmin);
+    opacity: 0;
+  }
+  25% {
+    transform: translateY(-5vmin);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-8vmin);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-12vmin);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-16vmin);
+    opacity: 0;
+  }
+}
+
+/* Pause all animations when dialog is open */
+.flowers-component.animation-paused *,
+.flowers-component.animation-paused *::before,
+.flowers-component.animation-paused *::after {
+  -webkit-animation-play-state: paused !important;
+  animation-play-state: paused !important;
+}

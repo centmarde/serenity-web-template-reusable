@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Gift } from "lucide-react";
 import FlowerCard from "./components/FlowerCard";
-
-interface MadeForYouViewProps {
-  onNavigate?: (path: string) => void;
-}
 
 interface ComponentData {
   themeColor: string;
   callsign: string;
   gfName: string;
   appName: string;
+}
+
+interface MadeForYouViewProps {
+  onNavigate?: (path: string) => void;
 }
 
 const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
@@ -77,65 +74,9 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      
-    >
-      {/* Header */}
-      <div
-        className="sticky top-0 z-10 w-full px-4 py-3 flex items-center gap-3"
-        style={{
-         
-          backdropFilter: "blur(12px)",
-          borderBottom: `2px solid ${data.themeColor}30`,
-        }}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onNavigate?.("/")}
-          style={{ color: data.themeColor }}
-          className="hover:bg-transparent"
-        >
-          <ArrowLeft size={20} />
-        </Button>
-
-        <div className="flex items-center gap-2 flex-1">
-          <Gift size={22} color={data.themeColor} />
-          <h1
-            className="font-bold"
-            style={{
-              color: data.themeColor,
-              fontSize: "clamp(1rem, 3.5vw, 1.4rem)",
-            }}
-          >
-            Made for You
-          </h1>
-          <Badge
-            variant="secondary"
-            style={{
-              backgroundColor: `${data.themeColor}20`,
-              color: data.themeColor,
-              border: `1px solid ${data.themeColor}50`,
-              fontSize: "clamp(0.6rem, 1.5vw, 0.75rem)",
-            }}
-          >
-            Special
-          </Badge>
-        </div>
-
-        <Heart
-          size={20}
-          fill={data.themeColor}
-          color={data.themeColor}
-          className="animate-pulse"
-        />
-      </div>
-
+    <div className="min-h-screen flex flex-col">
       {/* Hero Header Section */}
-      <div
-        className="w-full flex flex-col items-center justify-center gap-4 px-6 py-12 text-center"
-      >
+      <div className="w-full flex flex-col items-center justify-center gap-4 px-6 py-12 text-center">
         {/* Floating gifs */}
         <div className="flex items-center justify-center gap-6 flex-wrap">
           <img
@@ -167,7 +108,7 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
             }}
           >
             A Bouquet of Love for you,{" "}
-            <span >{data.gfName}</span>
+            <span>{data.gfName}</span>
           </h2>
           <p
             className="opacity-80 leading-relaxed"
@@ -181,8 +122,6 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
           </p>
         </div>
 
-       
-
         {/* Coming soon note */}
         <p
           className="mt-4 italic opacity-60"
@@ -191,16 +130,14 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
             color: `${data.themeColor}99`,
           }}
         >
-          More flowers blooming soon — new bouquets are on the way 
+          More flowers blooming soon — new bouquets are on the way
         </p>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 w-full px-4 sm:px-6 lg:px-8">
-    
-
         {/* Flower Cards Grid */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
           {/* Lyrics Art Flower */}
           <FlowerCard
             flowerImage="/flowers/rose.png"
@@ -212,6 +149,13 @@ const MadeForYouView: React.FC<MadeForYouViewProps> = ({ onNavigate }) => {
           <FlowerCard
             flowerImage="/flowers/rose1.png"
             route="/girlfriend/madeforyou/ascii-art"
+            onNavigate={onNavigate}
+          />
+
+          {/* Animated Garden Flower */}
+          <FlowerCard
+            flowerImage="/flowers/tulips.png"
+            route="/girlfriend/madeforyou/flower-garden"
             onNavigate={onNavigate}
           />
         </div>

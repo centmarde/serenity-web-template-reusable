@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSettingsStore } from "../../../stores/settings";
 import { useThemeStore } from "../../../stores/theme";
 import useMessagesStore from "../../../stores/messagesData";
+import useLogsStore, { createLogWithDeviceAndLocation } from "../../../stores/logsData";
 import type { LoveLetter } from "../../../stores/messagesData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
     fetchLetters, 
     getLettersByCategory
   } = useMessagesStore();
+  const { createLog } = useLogsStore();
   
   const isMobile = useIsMobile();
   
@@ -127,13 +129,30 @@ const SadFormsWidget: React.FC<SadFormsWidgetProps> = ({ isOpen, onComplete }) =
     fetchRandomSadLetter
   ]);
 
-  const handleAnswer = (answer: boolean) => {
+  const handleAnswer = async (answer: boolean) => {
     const updatedQuestions = questions.map((q, index) => 
       index === currentQuestionIndex 
         ? { ...q, answered: true, answer }
         : q
     );
     setQuestions(updatedQuestions);
+
+    // Log entry when reaching the last question (regardless of Yes/No answer)
+    if (currentQuestionIndex === questions.length - 1) {
+      try {
+        const logData = await createLogWithDeviceAndLocation({
+          is_sad_letter: true,
+          is_miss_letter: false
+        });
+        await createLog(logData);
+        console.log('Sad letter log entry created successfully:', {
+          device: logData.device,
+          location: logData.address
+        });
+      } catch (error) {
+        console.error('Failed to create sad letter log entry:', error);
+      }
+    }
 
     // Move to next question or complete
     if (currentQuestionIndex < questions.length - 1) {

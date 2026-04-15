@@ -5,6 +5,7 @@ import useMessagesStore from "../../../../stores/messagesData";
 import type { LoveLetter } from "../../../../stores/messagesData";
 import type { Question } from "../composables/aiMissForms";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIsMobile } from "../../../../hooks/use-mobile";
 
 import { Button } from "@/components/ui/button";
 import { Heart, Calendar, User, Wand2 } from "lucide-react";
@@ -34,6 +35,8 @@ const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({
   aiEnhancedData, 
   isGeneratingResponse = false 
 }) => {
+  const isMobile = useIsMobile();
+  
   const {
     getCallsign,
     getBfName,
@@ -260,7 +263,7 @@ const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({
                 {/* Letter Title */}
                 <div className="text-center mb-6">
                   <h2 
-                    className="text-xl font-bold mb-2"
+                    className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold mb-2`}
                     style={{ color: data.themeColor }}
                   >
                    {aiEnhancedData.baseLetter?.title || "Untitled Letter"}
@@ -268,12 +271,24 @@ const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({
                 </div>
 
                 {/* Love Letter Greeting */}
-                <div className="romantic-greeting" style={{ color: data.themeColor }}>
+                <div 
+                  className={`romantic-greeting ${isMobile ? 'text-sm' : 'text-base'}`} 
+                  style={{ color: data.themeColor }}
+                >
                   My Dearest {data.gfName || "Love"},
                 </div>
                 
                 {/* Enhanced Message Content */}
-                <div className="romantic-content text-gray-800">
+                <div 
+                  className="romantic-content text-gray-800"
+                 style={{ 
+                    fontSize: isMobile ? '0.85rem' : 'clamp(1.125rem, 2.5vw, 1.25rem)', 
+                    lineHeight: isMobile ? '1.4' : '1.6',
+                    fontFamily: isMobile ? 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : undefined,
+                    padding: 0,
+                    margin: 0
+                  }}
+                >
                   {aiEnhancedData.enhancedMessage.content}
                 </div>
                 
@@ -287,7 +302,10 @@ const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({
                   </div>
                   
                   {/* Love Letter Closing */}
-                  <div className="romantic-signature" style={{ color: data.themeColor }}>
+                  <div 
+                    className={`romantic-signature ${isMobile ? 'text-sm' : 'text-base'}`} 
+                    style={{ color: data.themeColor }}
+                  >
                     <div className="mb-2">With all my love,</div>
                     <div className="font-semibold">
                       Your Babi {data.bfName || "❤️"}
@@ -297,13 +315,19 @@ const MissLettersWidget: React.FC<MissLettersWidgetProps> = ({
               </div>
             ) : (
               <div className="romantic-letter">
-                <div className="romantic-greeting" style={{ color: data.themeColor }}>
+                <div 
+                  className={`romantic-greeting ${isMobile ? 'text-sm' : 'text-base'}`} 
+                  style={{ color: data.themeColor }}
+                >
                   My Dearest {data.gfName || "Love"},
                 </div>
-                <p className="romantic-content text-gray-700 italic text-center">
+                <p className={`romantic-content text-gray-700 italic text-center ${isMobile ? 'text-xs' : 'text-sm'}`}>
                   "✨ Your personalized message has been added to the collection below! ✨"
                 </p>
-                <div className="romantic-signature" style={{ color: data.themeColor }}>
+                <div 
+                  className={`romantic-signature ${isMobile ? 'text-sm' : 'text-base'}`} 
+                  style={{ color: data.themeColor }}
+                >
                   <div className="mb-2">With all my love,</div>
                   <div className="font-semibold">
                     Your Babi {data.bfName || "❤️"}

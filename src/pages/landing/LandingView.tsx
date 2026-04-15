@@ -258,6 +258,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate('/music');
     } else if (featureName === "Our Memories" && onNavigate) {
       onNavigate('/memories');
+    } else if (featureName === "Evil Thoughts" && onNavigate) {
+      onNavigate('/evil-thoughts');
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -381,8 +383,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* 6 Button Cards Grid - 1 Row, 6 Columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+        {/* 6 Button Cards Grid - 2 Cols Mobile, 6 Cols Large */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full mb-24">
           <FeatureCard
             title="Love Letters"
             imageSrc="/assets/images/LoveLetters.png"
@@ -420,12 +422,12 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           />
           
           <FeatureCard
-            title="Evil Taughts"
-            imageSrc="/assets/images/EvilTaughts.png"
+            title="Evil Thoughts"
+            imageSrc="/assets/images/EvilThoughts.png"
             useImagePreview={data.useImagePreview}
-            icon={<Zap size={32} color={isFeatureActive("Evil Taughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={<Zap size={32} color={isFeatureActive("Evil Thoughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
-            onClick={() => handleFeatureClick("Evil Taughts")}
+            onClick={() => handleFeatureClick("Evil Thoughts")}
           />
           
           <FeatureCard
