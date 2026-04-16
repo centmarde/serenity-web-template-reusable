@@ -216,7 +216,7 @@ const SadCategoryView: React.FC = () => {
                   style={{ borderColor: data.themeColor }}
                 ></div>
                 <p className="text-gray-600 mb-2">
-                  🤖 Analyzing your responses...
+                  Reviewing your responses...
                 </p>
                 <p className="text-sm text-gray-500">
                   Creating a personalized message with {aiResponseData?.tone || 'loving'} tone
@@ -238,14 +238,14 @@ const SadCategoryView: React.FC = () => {
             {!showFormsDialog && !hasCompletedForms && !isGeneratingAIResponse && (
               <div className="text-center py-12 px-4 max-w-4xl mx-auto">
                 <p className="text-gray-600 mb-4">
-                  You can restart the AI questionnaire anytime to get personalized recommendations.
+                  You can restart the questionnaire anytime to get personalized recommendations.
                 </p>
                 <button
                   onClick={() => setShowFormsDialog(true)}
                   className="px-6 py-3 rounded-lg text-white font-semibold hover:opacity-90 transition-all duration-300"
                   style={{ backgroundColor: data.themeColor }}
                 >
-                  Start AI Assessment
+                  Start Questionnaire
                 </button>
               </div>
             )}

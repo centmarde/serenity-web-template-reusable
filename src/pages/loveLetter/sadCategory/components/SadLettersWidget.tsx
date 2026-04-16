@@ -233,7 +233,7 @@ const SadLettersWidget: React.FC<SadLettersWidgetProps> = ({
                 />
               </div>
               <h3 className="text-lg font-semibold mb-2" style={{ color: data.themeColor }}>
-                🤖 Creating Your Personalized Message...
+                Creating Your Personalized Message...
               </h3>
               <p className="text-gray-600 text-sm mb-2">
                 Analyzing your responses and generating a tailored comfort message just for you

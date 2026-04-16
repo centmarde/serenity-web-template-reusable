@@ -283,7 +283,7 @@ export const createActiveCardStyles = (themeColor: string) => {
  * Determine if a feature is active (has a route) or inactive (under development)
  */
 export const isFeatureActive = (featureName: string): boolean => {
-  const activeFeatures = ["Love Letters", "Made for You", "Our Music Playlist", "Our Memories", "Evil Thoughts"];
+  const activeFeatures = ["Love Letters", "Made for You", "Our Music Playlist", "Our Memories", "Evil Thoughts", "Tarot Cards"];
   return activeFeatures.includes(featureName);
 };
 

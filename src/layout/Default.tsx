@@ -11,6 +11,9 @@ import MadeForYouView from "../pages/madeForYou/MadeForYouView";
 import PlayListView from "../pages/Playlist/PlayListView";
 import MemoriesView from "../pages/memories/MemoriesView";
 import EvilThoughtsView from "../pages/evilThoughts/EvilThoughtsView";
+import TarotCardsView from "../pages/tarotCards/TarotCardsView";
+import TarotCardsWidgetView from "../pages/tarotCards/TarotCardsWidgetView";
+import TarotReadingView from "../pages/tarotCards/TarotReadingView";
 import { useThemeStore } from "../stores/theme";
 
 // Coming soon component
@@ -73,6 +76,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ currentPath, onNavigate }
         return <MemoriesView />;
       case 'EvilThoughtsView':
         return <EvilThoughtsView />;
+      case 'TarotCardsView':
+        return <TarotCardsView onNavigate={onNavigate} />;
+      case 'TarotCardsWidgetView':
+        // Reading context is now managed by the store, not URL parameters
+        return <TarotCardsWidgetView onNavigate={onNavigate} />;
+      case 'TarotReadingView':
+        // Reading context is now managed by the store, not URL parameters
+        return <TarotReadingView onNavigate={onNavigate} />;
       case 'ComingSoon':
         return <ComingSoonView routeName={route.name} />;
       default:
