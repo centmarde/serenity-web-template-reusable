@@ -4,6 +4,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { useIsMobile } from "../../../hooks/use-mobile";
 import { useTarotSelectionStore } from "../../../stores/tarotSelectionData";
 import { aiTarotReadingService } from "../../../lib/AiTarotReading";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import type { TarotReadingProps } from "../types";
 import { getImagePath } from "../utils";
 
@@ -112,6 +113,13 @@ export const TarotReading: React.FC<TarotReadingProps> = ({
       className="w-full mt-4 animate-in fade-in duration-700"
       style={{ borderColor: themeColor }}
     >
+      <LoadingOverlay
+        isOpen={isGenerating}
+        themeColor={themeColor}
+        title="Generating your reading…"
+        description="Interpreting the cards"
+      />
+
       <CardHeader>
         <CardTitle 
           className={`text-center flex items-center justify-center font-bold ${
@@ -122,7 +130,7 @@ export const TarotReading: React.FC<TarotReadingProps> = ({
           style={{ color: themeColor }}
         >
           <Sparkles size={isMobile ? 24 : 32} className="animate-pulse" />
-          Your Personalized AI Reading
+          Your Personalized Reading
           <Sparkles size={isMobile ? 24 : 32} className="animate-pulse" />
         </CardTitle>
         
@@ -191,7 +199,6 @@ export const TarotReading: React.FC<TarotReadingProps> = ({
                     style={{ color: themeColor }}
                   >
                     {card.name}
-                    <span className="ml-2 text-xs opacity-60">✨ AI Personalized</span>
                   </h5>
                   
                   {/* AI Reading or Loading */}

@@ -4,6 +4,7 @@ import { useThemeStore } from "../../stores/theme";
 import { useTarotSelectionStore } from "../../stores/tarotSelectionData";
 import { useIsMobile } from "../../hooks/use-mobile";
 import { TarotReading } from "./components/TarotReading";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import { Button } from "@/components/ui/button";
 import type { TarotCard } from "../../composables/tarotConstant";
 
@@ -84,12 +85,12 @@ const TarotReadingView: React.FC<TarotReadingViewProps> = ({ onNavigate }) => {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Preparing your mystical reading...</p>
-        </div>
-      </div>
+      <LoadingOverlay
+        isOpen={true}
+        themeColor={getSafeThemeColor()}
+        title="Preparing your mystical reading…"
+        description="Just a moment"
+      />
     );
   }
 

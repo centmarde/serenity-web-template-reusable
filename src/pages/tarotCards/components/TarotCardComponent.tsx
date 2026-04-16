@@ -43,7 +43,7 @@ export const TarotCardComponent: React.FC<TarotCardProps> = ({
           rotate(${compressionRotation}deg)
           ${animationPhase === 'compressing' ? 'scale(0.85) rotateY(10deg)' : ''}
           ${isAnimating ? (isMobileLayout ? 'scale(1.1)' : 'translateY(-20px) scale(1.1)') : ''}
-          ${isSelected ? (isMobileLayout ? 'scale(1.15)' : 'translateY(-30px) scale(1.1)') : ''}
+          ${isSelected ? (isMobileLayout ? 'translateY(-55px) scale(1.15)' : 'translateY(-90px) scale(1.12)') : ''}
         `,
         transformOrigin: 'center center',
         zIndex: isSelected ? 1000 : isAnimating ? 999 : 100 + index,

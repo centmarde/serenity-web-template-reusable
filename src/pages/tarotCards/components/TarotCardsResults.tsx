@@ -2,12 +2,15 @@ import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import { useIsMobile } from "../../../hooks/use-mobile";
-import { useTarotCardsDataStore, useTarotCardsHelpers, type TarotCardsDeck } from "../../../stores/tarotCardsData";
+import { useTarotCardsDataStore, useTarotCardsHelpers, type TarotCardData, type TarotCardsDeck } from "../../../stores/tarotCardsData";
 import { useTarotSelectionStore } from "../../../stores/tarotSelectionData";
 import { tarotCards } from "../../../composables/tarotConstant";
+import CardViewer from "../dialogs/CardViewer";
+import PasswordDialog from "../../evilThoughts/dialogs/PasswordDialog";
 import { getImagePath } from "../utils";
-import { Heart, User, Calendar, Eye, Plus } from "lucide-react";
+import { Heart, User, Calendar, Plus } from "lucide-react";
 
 interface TarotCardsResultsProps {
   themeColor: string;
@@ -40,7 +43,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   onNavigate
 }) => {
   const isMobile = useIsMobile();
-  const { getMyDecks, getGfDecks, isLoading, error } = useTarotCardsDataStore();
+  const { getMyDecks, getGfDecks, deleteDeck, isLoading, error } = useTarotCardsDataStore();
   const { formatDeckForDisplay, isCompleteReading, getCardDescription } = useTarotCardsHelpers();
   const { setReadingContext, clearAiReading } = useTarotSelectionStore();
   
@@ -51,6 +54,85 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   const [loadingDecks, setLoadingDecks] = React.useState(true);
   const [hasUserDecksInDB, setHasUserDecksInDB] = React.useState(false);
   const [hasGfDecksInDB, setHasGfDecksInDB] = React.useState(false);
+
+  const [latestUserDeck, setLatestUserDeck] = React.useState<TarotCardsDeck | null>(null);
+  const [latestGfDeck, setLatestGfDeck] = React.useState<TarotCardsDeck | null>(null);
+
+  const [cardViewer, setCardViewer] = React.useState<{
+    card: TarotCardData;
+    spreadTitle: string;
+    imageSrc: string;
+  } | null>(null);
+
+  const [bfPasswordOpen, setBfPasswordOpen] = React.useState(false);
+  const [isActionBusy, setIsActionBusy] = React.useState(false);
+
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+  const parseDateSafe = (value: string | null | undefined): Date | null => {
+    if (!value) return null;
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  const utcDayMs = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+
+  const shouldAllowNewReading = (deck: TarotCardsDeck | null): boolean => {
+    if (!deck) return false;
+
+    const created = parseDateSafe(deck.created_at);
+    const end = parseDateSafe(deck.end_date);
+
+    // If end date is missing/invalid, allow creating a fresh reading
+    if (!created || !end) return true;
+
+    const createdDay = utcDayMs(created);
+    const endDay = utcDayMs(end);
+    const nowDay = utcDayMs(new Date());
+
+    // Same day OR end_date before created_at => invalid
+    if (endDay <= createdDay) return true;
+
+    const diffDays = Math.floor((endDay - createdDay) / MS_PER_DAY);
+
+    // More than 30 days between created_at and end_date => invalid
+    if (diffDays > 30) return true;
+
+    // Expired (today is after end_date)
+    if (nowDay > endDay) return true;
+
+    return false;
+  };
+
+  const handleCreateReading = async (isGf: boolean) => {
+    if (!onNavigate) return;
+
+    setIsActionBusy(true);
+    console.log(`🔮 Starting new reading (context: ${isGf ? 'girlfriend' : 'user'})`);
+
+    try {
+      // Set context + clear previous AI session first
+      setReadingContext(isGf);
+      clearAiReading();
+
+      const deckToDelete = isGf ? latestGfDeck : latestUserDeck;
+
+      if (shouldAllowNewReading(deckToDelete) && deckToDelete) {
+        console.log(`🔮 Deleting existing deck before creating new reading: ${deckToDelete.id}`);
+        const ok = await deleteDeck(deckToDelete.id);
+        if (!ok) {
+          console.error('🔮 Failed to delete existing deck; aborting create flow to avoid duplicates');
+          setIsActionBusy(false);
+          return;
+        }
+      }
+
+      onNavigate('/tarot-cards-widget');
+    } catch (e) {
+      console.error('🔮 Failed to start create reading flow:', e);
+      setIsActionBusy(false);
+    }
+  };
 
   // Load filtered decks on mount
   useEffect(() => {
@@ -69,6 +151,10 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
           // Track if we have any decks in database
           setHasUserDecksInDB(userDecks.length > 0);
           setHasGfDecksInDB(girlfriendDecks.length > 0);
+
+          // Track latest decks (sorted desc by created_at)
+          setLatestUserDeck(userDecks[0] ?? null);
+          setLatestGfDeck(girlfriendDecks[0] ?? null);
           
           // Filter only complete readings
           setMyDecks(userDecks.filter(isCompleteReading));
@@ -141,8 +227,14 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         </CardHeader>
         
         <CardContent>
-          {/* Cards Row - single horizontal row */}
-          <div className="flex gap-3 mb-4 overflow-x-auto pb-2">
+          {/* Cards Row */}
+          <div
+            className={
+              isMobile
+                ? "grid grid-cols-1 gap-3 mb-4"
+                : "flex gap-3 mb-4 overflow-x-auto pb-2"
+            }
+          >
             {cards.map((card, index) => {
               const cardName = card?.name ? String(card.name) : '';
               const imagePath = cardName
@@ -152,11 +244,27 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
               const imageSrc = imagePath ? getImagePath(imagePath) : '/assets/images/tarotCard.png';
 
               return (
-                <div
+                <button
                   key={`${deck.id}-${index}`}
-                  className="flex-none border rounded-lg p-3 bg-gray-50"
+                  type="button"
+                  disabled={!card}
+                  onClick={() => {
+                    if (!card) return;
+                    setCardViewer({
+                      card,
+                      spreadTitle: CARD_TITLES[index] ?? `Card ${index + 1}`,
+                      imageSrc,
+                    });
+                  }}
+                  className={`border rounded-lg p-3 bg-gray-50 text-left transition-colors ${
+                    isMobile ? 'w-full' : 'flex-none'
+                  } ${
+                    card
+                      ? 'cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+                      : 'cursor-default opacity-60'
+                  }`}
                   style={{
-                    width: isMobile ? 'min(260px, 75vw)' : '240px',
+                    width: isMobile ? '100%' : '240px',
                     borderColor: `${themeColor}40`,
                   }}
                 >
@@ -175,7 +283,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                         src={imageSrc}
                         alt={cardName || `Card ${index + 1}`}
                         className="w-full object-cover"
-                        style={{ height: isMobile ? '160px' : '400px' }}
+                        style={{ height: isMobile ? '300px' : '400px' }}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = '/assets/images/tarotCard.png';
@@ -187,25 +295,12 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                       {card ? (getCardDescription(card) || 'No description available') : 'No card selected'}
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
 
-          {/* View Full Reading Button */}
-          <Button
-            onClick={() => {
-              if (onNavigate) {
-                onNavigate('/tarot-reading');
-              }
-            }}
-            className="w-full mt-2"
-            variant="outline"
-            style={{ borderColor: themeColor, color: themeColor }}
-          >
-            <Eye size={16} className="mr-2" />
-            View Full Reading
-          </Button>
+      
         </CardContent>
       </Card>
     );
@@ -215,7 +310,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
     const hasAnyDecksInDB = isGf ? hasGfDecksInDB : hasUserDecksInDB;
     const emptyMessage = hasAnyDecksInDB 
       ? `${isGf ? gfName : bfName} has readings, but none are complete yet`
-      : `No ${isGf ? `${gfName}'s` : `${bfName}'s`} readings found in database`;
+      : `No ${isGf ? `${gfName}'s` : `${bfName}'s`} readings found`;
     
     return (
       <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
@@ -237,25 +332,13 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         )}
         
         <Button
-          onClick={() => {
-            if (onNavigate) {
-              // Set reading context immediately in store
-              console.log(`🔮 Setting reading context: ${isGf ? 'girlfriend' : 'user'}`);
-              setReadingContext(isGf);
-              
-              // Clear any previous AI reading to ensure fresh start
-              clearAiReading();
-              
-              // Navigate to widget (context is now in store)
-              onNavigate('/tarot-cards-widget');
-            }
-          }}
+          onClick={() => (isGf ? void handleCreateReading(true) : setBfPasswordOpen(true))}
           variant="outline"
           size="sm"
           style={{ borderColor: themeColor, color: themeColor }}
         >
           <Plus size={14} className="mr-1" />
-          Create {isGf ? `${gfName}'s` : 'My'} Reading
+          Create {isGf ? `${gfName}'s` : `${bfName}'s`} Reading
         </Button>
       </div>
     );
@@ -263,12 +346,12 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 
   if (isLoading || loadingDecks) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div 
-          className="animate-spin rounded-full h-12 w-12 border-b-2"
-          style={{ borderColor: themeColor }}
-        />
-      </div>
+      <LoadingOverlay
+        isOpen={true}
+        themeColor={themeColor}
+        title="Loading your tarot readings…"
+        description="Please wait"
+      />
     );
   }
 
@@ -289,17 +372,93 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 
   return (
     <div className="space-y-8">
+      <LoadingOverlay
+        isOpen={isActionBusy}
+        themeColor={themeColor}
+        title="Creating your new reading…"
+        description="Preparing the deck"
+      />
+
+      <CardViewer
+        isOpen={cardViewer !== null}
+        onOpenChange={(open) => {
+          if (!open) setCardViewer(null);
+        }}
+        themeColor={themeColor}
+        card={cardViewer?.card ?? null}
+        spreadTitle={cardViewer?.spreadTitle}
+        imageSrc={cardViewer?.imageSrc}
+      />
+
+      <PasswordDialog
+        isOpen={bfPasswordOpen}
+        onClose={() => setBfPasswordOpen(false)}
+        onSuccess={() => {
+          void handleCreateReading(false);
+        }}
+        title="Boyfriend Reading"
+        description={`Enter password to create a reading for ${bfName}.`}
+      />
+
       {/* My Readings Section */}
       <section>
-        <h2 
-          className={`font-bold mb-4 flex items-center gap-2 ${
-            isMobile ? 'text-lg' : 'text-xl'
-          }`}
-          style={{ color: themeColor }}
+        <div
+          className={
+            isMobile
+              ? "flex flex-col items-center gap-2 mb-4"
+              : "flex items-center justify-between mb-4"
+          }
         >
-          <User size={isMobile ? 20 : 24} />
-          {bfName}'s Readings ({myDecks.length})
-        </h2>
+          <div
+            className={
+              isMobile
+                ? "w-full flex flex-col items-center gap-1"
+                : "flex flex-col"
+            }
+          >
+            <h2 
+              className={`font-bold flex items-center gap-2 ${
+                isMobile ? 'text-lg' : 'text-xl'
+              }`}
+              style={{ color: themeColor }}
+            >
+              <User size={isMobile ? 20 : 24} />
+              {bfName}'s Readings ({myDecks.length})
+            </h2>
+
+            {shouldAllowNewReading(latestUserDeck) ? (
+              <p
+                className={`text-xs sm:text-sm font-medium ${
+                  isMobile ? "text-center" : ""
+                }`}
+                style={{ color: `${themeColor}B3` }}
+              >
+                Your new reading is ready — tap the button to create it.
+              </p>
+            ) : null}
+          </div>
+
+          {shouldAllowNewReading(latestUserDeck) ? (
+            <Button
+              onClick={() => setBfPasswordOpen(true)}
+              variant="default"
+              size="sm"
+              className={`font-semibold shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] hover:opacity-95 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                isMobile ? "w-full" : ""
+              }`}
+              style={{ backgroundColor: themeColor, color: "white" }}
+            >
+              <span className="relative mr-2 inline-flex items-center justify-center">
+                <span
+                  className="absolute inline-flex h-5 w-5 rounded-full bg-white/30 animate-ping"
+                  aria-hidden="true"
+                />
+                <Plus size={14} className="relative animate-pulse" />
+              </span>
+              Create My Reading
+            </Button>
+          ) : null}
+        </div>
         
         {myDecks.length > 0 ? (
           <div className={`grid gap-6 ${
@@ -318,15 +477,63 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 
       {/* Girlfriend's Readings Section */}
       <section>
-        <h2 
-          className={`font-bold mb-4 flex items-center gap-2 ${
-            isMobile ? 'text-lg' : 'text-xl'
-          }`}
-          style={{ color: themeColor }}
+        <div
+          className={
+            isMobile
+              ? "flex flex-col items-center gap-2 mb-4"
+              : "flex items-center justify-between mb-4"
+          }
         >
-          <Heart size={isMobile ? 20 : 24} />
-          {gfName}'s Readings ({gfDecks.length})
-        </h2>
+          <div
+            className={
+              isMobile
+                ? "w-full flex flex-col items-center gap-1"
+                : "flex flex-col"
+            }
+          >
+            <h2 
+              className={`font-bold flex items-center gap-2 ${
+                isMobile ? 'text-lg' : 'text-xl'
+              }`}
+              style={{ color: themeColor }}
+            >
+              <Heart size={isMobile ? 20 : 24} />
+              {gfName}'s Readings ({gfDecks.length})
+            </h2>
+
+            {shouldAllowNewReading(latestGfDeck) ? (
+              <p
+                className={`text-xs sm:text-sm font-medium ${
+                  isMobile ? "text-center" : ""
+                }`}
+                style={{ color: `${themeColor}B3` }}
+              >
+                Your new reading is ready — tap the button to create it.
+              </p>
+            ) : null}
+          </div>
+
+          {shouldAllowNewReading(latestGfDeck) ? (
+            <Button
+              onClick={() => handleCreateReading(true)}
+              variant="default"
+              size="sm"
+              className={`font-semibold shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] hover:opacity-95 focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                isMobile ? "w-full" : ""
+              }`}
+              style={{ backgroundColor: themeColor, color: "white" }}
+            >
+              <span className="relative mr-2 inline-flex items-center justify-center">
+                <span
+                  className="absolute inline-flex h-5 w-5 rounded-full bg-white/30 animate-ping"
+                  aria-hidden="true"
+                />
+                <Plus size={14} className="relative animate-pulse" />
+              </span>
+              Create {gfName}'s new Reading
+            </Button>
+          ) : null}
+        </div>
         
         {gfDecks.length > 0 ? (
           <div className={`grid gap-6 ${
