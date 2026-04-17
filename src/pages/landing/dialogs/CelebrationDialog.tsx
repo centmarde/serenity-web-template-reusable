@@ -32,9 +32,6 @@ interface CelebrationData {
 const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChange }) => {
   const isMobile = useIsMobile();
   const {
-    getCallsign,
-    getGfName,
-    getCoupleOfficialDate,
     loadSettings,
     waitForCallsign,
     waitForGfName,
@@ -152,6 +149,8 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
   };
 
   useEffect(() => {
+    let didCancel = false;
+
     const initializeData = async () => {
       try {
         // Initialize theme first
@@ -169,53 +168,51 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
 
         const celebration = calculateCelebration(coupleOfficialDate);
 
-        // If it's a celebration, generate AI personal message
-        let aiPersonalMessage = undefined;
-        if (celebration.isCelebration && celebration.celebrationType) {
-          aiPersonalMessage = await generatePersonalMessage(
-            celebration.celebrationType,
-            celebration.monthsCompleted,
-            celebration.yearsCompleted,
-            callsign,
-            gfName
-          );
+        // If today is NOT a monthsary/anniversary, don't show this dialog at all.
+        if (!celebration.isCelebration || !celebration.celebrationType) {
+          if (!didCancel) {
+            onOpenChange(false);
+          }
+          return;
         }
 
-        setDisplayData({
+        // If it's a celebration, generate AI personal message
+        let aiPersonalMessage = undefined;
+        aiPersonalMessage = await generatePersonalMessage(
+          celebration.celebrationType,
+          celebration.monthsCompleted,
+          celebration.yearsCompleted,
           callsign,
-          gfName,
-          themeColor,
-          celebration,
-          aiPersonalMessage
-        });
+          gfName
+        );
+
+        if (!didCancel) {
+          setDisplayData({
+            callsign,
+            gfName,
+            themeColor,
+            celebration,
+            aiPersonalMessage
+          });
+        }
       } catch (error) {
         console.error('Failed to initialize celebration dialog data:', error);
-        // Provide fallback data
-        const fallbackCallsign = getCallsign() || 'darling';
-        const fallbackGfName = getGfName() || 'Love';
-        const fallbackThemeColor = getCurrentThemeColor() || '#F2A6A6';
-        const fallbackDate = getCoupleOfficialDate() || '2025-01-01';
-        const fallbackCelebration = calculateCelebration(fallbackDate);
-        
-        // Generate fallback AI personal message if it's a celebration
-        let fallbackAiPersonalMessage = undefined;
-        if (fallbackCelebration.isCelebration && fallbackCelebration.celebrationType) {
-          fallbackAiPersonalMessage = `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together has been a beautiful adventure, and I can't wait for all the memories we'll create in the future. You bring so much joy, love, and happiness into my life, ${fallbackCallsign}. I love you more than words can express! 💖`;
+        // On error, safest behavior is: don't show the dialog.
+        if (!didCancel) {
+          onOpenChange(false);
         }
-        
-        setDisplayData({
-          callsign: fallbackCallsign,
-          gfName: fallbackGfName,
-          themeColor: fallbackThemeColor,
-          celebration: fallbackCelebration,
-          aiPersonalMessage: fallbackAiPersonalMessage
-        });
       }
     };
 
     if (open) {
+      setDisplayData(null);
       initializeData();
     }
+
+    return () => {
+      // Prevent setting state after unmount/close.
+      didCancel = true;
+    };
   }, [
     open,
     initializeTheme,
@@ -225,22 +222,26 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
     waitForGfName,
     waitForCoupleOfficialDate,
     getCurrentThemeColor,
-    getCallsign,
-    getGfName,
-    getCoupleOfficialDate
+    onOpenChange
   ]);
 
   const handleClose = () => {
     onOpenChange(false);
   };
 
-  // Don't render if no data is loaded yet
-  if (!displayData) {
+  // Don't render if no data is loaded yet (or if it's not actually a celebration)
+  if (!displayData || !displayData.celebration.isCelebration || !displayData.celebration.celebrationType) {
     return null;
   }
 
   const { callsign, themeColor, celebration, aiPersonalMessage } = displayData;
-  const { celebrationType, monthsCompleted, yearsCompleted } = celebration;
+  const { monthsCompleted, yearsCompleted } = celebration;
+  const celebrationType = celebration.celebrationType;
+
+  // Extra narrowing for TypeScript: we only render for monthsary/anniversary.
+  if (!celebrationType) {
+    return null;
+  }
 
   // Static messages for main content
   const celebrationMessages = {
@@ -257,20 +258,11 @@ const CelebrationDialog: React.FC<CelebrationDialogProps> = ({ open, onOpenChang
       description: `Today we celebrate ${yearsCompleted} incredible year${yearsCompleted === 1 ? '' : 's'} together! From our first day to this moment, every memory we've created has been precious. Here's to many more years of love, growth, and happiness together! 💖`,
       badge: `${yearsCompleted} Year${yearsCompleted === 1 ? '' : 's'} Strong`,
       gif: '/assets/blee.gif'
-    },
-    general: {
-      title: `Welcome Back, ${callsign}! 💖`,
-      subtitle: `Every day with you is worth celebrating`,
-      description: `Thank you for being the most amazing partner. Every day with you is a celebration! Every moment we share together brings so much joy, love, and happiness to my life. I'm grateful for every second we spend together! 💕`,
-      badge: `Made with Love`,
-      gif: '/assets/dudu-cute.gif'
     }
   };
 
-  // Choose appropriate message based on celebration status
-  const currentMessage = celebration.isCelebration 
-    ? (celebrationType ? celebrationMessages[celebrationType] : celebrationMessages.general)
-    : celebrationMessages.general;
+  // Choose appropriate message based on celebration type (monthsary/anniversary only)
+  const currentMessage = celebrationMessages[celebrationType];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
