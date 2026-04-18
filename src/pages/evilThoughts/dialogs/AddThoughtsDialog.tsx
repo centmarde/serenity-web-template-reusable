@@ -39,9 +39,11 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
 
     setIsSubmitting(true);
     try {
+      const endDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
       const newThought = await createThought({
         content: content.trim(),
-        is_gf: isGf
+        is_gf: isGf,
+        end_date: endDate
       });
       
       if (newThought) {
@@ -123,7 +125,7 @@ const AddThoughtsDialog: React.FC<AddThoughtsDialogProps> = ({
                 }
                 value={content}
                 onChange={handleTextareaChange}
-                className="min-h-[100px] resize-none pr-12"
+                className="min-h-25 resize-none pr-12"
                 style={{
                   borderColor: `${themeColor}40`
                 }}

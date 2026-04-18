@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -25,10 +25,12 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
   isGf
 }) => {
   const { getThemeColor } = useSettingsStore();
-  const { initializeThoughts, getGfThoughts, getBfThoughts, unsubscribe, isInitialized, refreshThoughts } = useThoughtsStore();
+  const { initializeThoughts, getGfThoughts, getBfThoughts, deleteThought, unsubscribe, isInitialized, refreshThoughts } = useThoughtsStore();
   const { isRealtimeActive } = useRealtimeStatus();
   const isMobile = useIsMobile();
   const themeColor = getThemeColor();
+
+  const hasPurgedExpiredRef = useRef(false);
 
   // Dialog states
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -68,6 +70,32 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
     const date = new Date(created_at);
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
+
+    // Future timestamps (e.g., expiration end_date)
+    if (diffInMs < 0) {
+      const futureInMs = Math.abs(diffInMs);
+      const futureInMinutes = Math.floor(futureInMs / (1000 * 60));
+      const futureInHours = Math.floor(futureInMs / (1000 * 60 * 60));
+      const futureInDays = Math.floor(futureInMs / (1000 * 60 * 60 * 24));
+
+      if (futureInMinutes < 1) return 'in a moment';
+      if (futureInMinutes < 60) return `in ${futureInMinutes}m`;
+      if (futureInHours === 1) return 'in 1h';
+      if (futureInHours < 24) return `in ${futureInHours}h`;
+      if (futureInDays === 1) return 'in 1d';
+      if (futureInDays < 7) return `in ${futureInDays}d`;
+
+      const futureInWeeks = Math.floor(futureInDays / 7);
+      if (futureInWeeks === 1) return 'in 1w';
+      if (futureInWeeks < 4) return `in ${futureInWeeks}w`;
+
+      const futureInMonths = Math.floor(futureInDays / 30);
+      if (futureInMonths === 1) return 'in 1mo';
+      if (futureInMonths < 12) return `in ${futureInMonths}mo`;
+
+      return new Date(created_at).toLocaleDateString();
+    }
+
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
@@ -89,6 +117,41 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
     
     return new Date(created_at).toLocaleDateString();
   };
+
+  const isThoughtExpired = (thought: Thought) => {
+    const now = Date.now();
+
+    if (thought.end_date) {
+      const end = new Date(thought.end_date).getTime();
+      if (!Number.isNaN(end)) {
+        return now > end;
+      }
+    }
+
+    const created = new Date(thought.created_at).getTime();
+    if (Number.isNaN(created)) return false;
+    return now - created > 3 * 24 * 60 * 60 * 1000;
+  };
+
+  useEffect(() => {
+    const purgeExpired = async () => {
+      if (!isInitialized || hasPurgedExpiredRef.current) return;
+
+      hasPurgedExpiredRef.current = true;
+      const thoughtsToCheck = isGf ? getGfThoughts() : getBfThoughts();
+      const expired = thoughtsToCheck.filter(isThoughtExpired);
+      if (expired.length === 0) return;
+
+      try {
+        await Promise.all(expired.map((t) => deleteThought(t.id)));
+        await refreshThoughts();
+      } catch (error) {
+        console.error('Failed to purge expired thoughts:', error);
+      }
+    };
+
+    purgeExpired();
+  }, [isInitialized, isGf, getGfThoughts, getBfThoughts, deleteThought, refreshThoughts]);
 
   const handleEditThought = (thought: Thought) => {
     // Check if this is the boyfriend side and password protection is needed
