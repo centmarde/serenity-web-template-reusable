@@ -5,6 +5,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 export interface Thought {
   id: number;
   created_at: string;
+  end_date: string | null;
   content: string | null;
   is_gf: boolean | null;
 }
@@ -12,11 +13,13 @@ export interface Thought {
 export interface CreateThoughtInput {
   content: string;
   is_gf: boolean;
+  end_date?: string | null;
 }
 
 export interface UpdateThoughtInput {
   content?: string;
   is_gf?: boolean;
+  end_date?: string | null;
 }
 
 interface ThoughtsStore {
@@ -110,7 +113,8 @@ export const useThoughtsStore = create<ThoughtsStore>((set, get) => ({
         .from('thoughts')
         .insert([{
           content: input.content,
-          is_gf: input.is_gf
+          is_gf: input.is_gf,
+          end_date: input.end_date ?? null
         }])
         .select()
         .single();
