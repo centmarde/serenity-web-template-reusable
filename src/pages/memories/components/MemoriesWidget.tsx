@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Timeline } from '@/components/ui/timeline';
-import { Heart, Calendar, MapPin, Gift, Star, Camera, Edit3, Trash2 } from 'lucide-react';
+import { Heart, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Carousel, 
@@ -70,22 +70,6 @@ export const MemoriesWidget: React.FC = () => {
     initializeData();
   }, [memoriesStore, milestonesStore, imagesStore]);
 
-  // Helper function to get milestone icon
-  const getMilestoneIcon = (milestoneText: string | null): React.ReactNode => {
-    if (!milestoneText) return <Heart className="w-6 h-6" style={{ color: themeColor }} />;
-    
-    const milestone = milestoneText.toLowerCase();
-    if (milestone.includes('date')) return <Heart className="w-6 h-6" style={{ color: themeColor }} />;
-    if (milestone.includes('anniversary')) return <Calendar className="w-6 h-6" style={{ color: themeColor }} />;
-    if (milestone.includes('trip') || milestone.includes('getaway')) return <MapPin className="w-6 h-6" style={{ color: themeColor }} />;
-    if (milestone.includes('birthday') || milestone.includes('surprise')) return <Gift className="w-6 h-6" style={{ color: themeColor }} />;
-    if (milestone.includes('concert') || milestone.includes('night')) return <Star className="w-6 h-6" style={{ color: themeColor }} />;
-    if (milestone.includes('holiday') || milestone.includes('photo')) return <Camera className="w-6 h-6" style={{ color: themeColor }} />;
-    
-    // Default icon
-    return <Heart className="w-6 h-6" style={{ color: themeColor }} />;
-  };
-
   // Format date for display
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'No date';
@@ -140,7 +124,7 @@ export const MemoriesWidget: React.FC = () => {
     return (
       <div className="w-full flex items-center justify-center py-20">
         <div className="text-center space-y-4">
-          <p className="text-red-500 text-lg">Failed to load memories</p>
+          <p className="text-red-500 text-base sm:text-lg">Failed to load memories</p>
           <p className="text-neutral-600 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -159,10 +143,10 @@ export const MemoriesWidget: React.FC = () => {
       <div className="w-full flex items-center justify-center py-20">
         <div className="text-center space-y-4">
           <Heart className="w-16 h-16 mx-auto text-neutral-400" />
-          <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
+          <h3 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-200">
             No Memories Yet
           </h3>
-          <p className="text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400">
             Start creating beautiful memories together!
           </p>
         </div>
@@ -176,8 +160,6 @@ export const MemoriesWidget: React.FC = () => {
     const milestones = milestonesStore.milestones.filter(m => 
       m.memories_id === memory.id
     );
-    
-    const primaryMilestone = milestones[0] || null;
 
     // Find related images using the new schema
     const images = imagesStore.images.filter(img => 
@@ -188,21 +170,12 @@ export const MemoriesWidget: React.FC = () => {
       title: formatDate(memory.date),
       content: (
         <div className="bg-white dark:bg-neutral-800 p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700">
-          <div className="flex items-start gap-4">
-            <div 
-              className="p-3 rounded-lg flex-shrink-0"
-              style={{
-                backgroundColor: `${themeColor}15`,
-                border: `1px solid ${themeColor}30`,
-              }}
-            >
-              {getMilestoneIcon(primaryMilestone?.milestone || null)}
-            </div>
+          <div className="flex items-start">
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex-1 min-w-0">
                   <h3 
-                    className="text-xl font-semibold text-neutral-800 dark:text-neutral-200 leading-tight"
+                    className="text-base sm:text-xl font-semibold text-neutral-800 dark:text-neutral-200 leading-tight"
                     style={{
                       wordBreak: 'break-word',
                       display: '-webkit-box',
@@ -236,7 +209,7 @@ export const MemoriesWidget: React.FC = () => {
                 </div>
               </div>
               {memory.description && (
-                <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
                   {memory.description}
                 </p>
               )}
@@ -248,7 +221,7 @@ export const MemoriesWidget: React.FC = () => {
                     {milestones.map((milestone, index) => (
                       <li 
                         key={index}
-                        className="flex items-center gap-2 text-sm"
+                        className="flex items-center gap-2 text-xs sm:text-sm"
                       >
                         <div 
                           className="w-2 h-2 rounded-full shrink-0"
@@ -284,7 +257,7 @@ export const MemoriesWidget: React.FC = () => {
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh]">
                         <DialogHeader>
-                          <DialogTitle>{memory.title || 'Memory Image'}</DialogTitle>
+                          <DialogTitle className="text-base sm:text-lg">{memory.title || 'Memory Image'}</DialogTitle>
                         </DialogHeader>
                         <div className="flex justify-center">
                           <img
@@ -317,7 +290,7 @@ export const MemoriesWidget: React.FC = () => {
                               </DialogTrigger>
                               <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh]">
                                 <DialogHeader>
-                                  <DialogTitle>{memory.title || 'Memory Image'} ({index + 1} of {images.length})</DialogTitle>
+                                  <DialogTitle className="text-base sm:text-lg">{memory.title || 'Memory Image'} ({index + 1} of {images.length})</DialogTitle>
                                 </DialogHeader>
                                 <div className="flex justify-center">
                                   <img
