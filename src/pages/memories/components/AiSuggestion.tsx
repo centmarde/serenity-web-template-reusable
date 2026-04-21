@@ -246,7 +246,7 @@ export const AiSuggestion: React.FC<AiSuggestionProps> = ({
         createPortal(
           <div 
             ref={suggestionsPanelRef}
-            className="fixed z-50 pointer-events-auto w-96 animate-in fade-in-0 zoom-in-95 duration-200"
+            className="fixed z-[10001] pointer-events-auto w-96 animate-in fade-in-0 zoom-in-95 duration-200"
             style={{
               top: buttonPosition.top,
               left: buttonPosition.left,
