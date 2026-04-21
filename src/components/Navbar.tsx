@@ -12,8 +12,8 @@ import {
   Gamepad2, 
   Target,
   Heart,
-  Sun,
-  Moon,
+ /*  Sun,
+  Moon, */
   Zap
 } from "lucide-react";
 
@@ -24,7 +24,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
   const { getAppName, loadSettings } = useSettingsStore();
-  const { getCurrentThemeColor, initializeTheme, waitForInitialization, toggleDarkMode, isDark } = useThemeStore();
+  const { getCurrentThemeColor, initializeTheme, waitForInitialization,/*  toggleDarkMode, isDark */ } = useThemeStore();
   
   const [appName, setAppName] = useState<string>("");
   const [themeColor, setThemeColor] = useState<string>("#F2A6A6");
@@ -79,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
       }}
     >
       <nav className="container mx-auto px-4 py-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
           {/* Logo Section */}
           <div className="flex items-center gap-2">
             <img
@@ -99,7 +99,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             </h1>
             
             {/* Theme Toggle Button */}
-            <Button
+      {/*       <Button
               variant="ghost"
               size="sm"
               onClick={toggleDarkMode}
@@ -112,7 +112,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isDark ? <Sun size={14} /> : <Moon size={14} />}
-            </Button>
+            </Button> */}
           </div>
 
           {/* Navigation Tabs - Desktop */}
@@ -157,7 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
           </div>
 
           {/* Mobile Navigation - Compact Icons */}
-          <div className="flex lg:hidden items-center gap-1 overflow-x-auto max-w-[60vw]">
+          <div className="flex lg:hidden flex-1 items-center justify-end gap-1 flex-wrap max-w-full">
             {navRoutes.map((route) => {
               const IconComponent = getIconComponent(route.icon || 'Heart');
               const isActive = currentPath === route.path;
