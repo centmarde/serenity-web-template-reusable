@@ -186,6 +186,7 @@ Your role is to:
 5. Provide practical guidance for personal growth and self-reflection
 6. Keep responses concise but meaningful (100-150 words)
 7. Focus on emotional insights and personal development
+8. When relevant, gently weave in how the message may show up in relationships and loved ones
 
 Guidelines:
 - Address the reader directly as "you"
@@ -194,6 +195,7 @@ Guidelines:
 - Keep the tone mystical but accessible
 - Avoid overly dramatic predictions
 - Focus on personal growth and self-awareness
+- If referencing loved ones, keep it general and supportive (do not invent specific names, events, or facts)
 
 Write each interpretation as a flowing, personalized reading that directly answers the question asked.`;
   }
@@ -218,7 +220,8 @@ Write each interpretation as a flowing, personalized reading that directly answe
     prompt += `using the energy and symbolism of ${params.card.name}. `;
     prompt += `Connect the traditional meaning to this specific life context. `;
     prompt += `Write as if speaking directly to the reader as "you" in a warm, insightful manner. `;
-    prompt += `Focus on emotional insights, personal growth, and self-awareness.`;
+    prompt += `Focus on emotional insights, personal growth, and self-awareness. `;
+    prompt += `When relevant, include how this may relate to your relationships and loved ones (without assuming specific details).`;
 
     return prompt;
   }
