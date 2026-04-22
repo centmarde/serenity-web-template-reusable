@@ -22,8 +22,38 @@ export interface UpdateThoughtInput {
   end_date?: string | null;
 }
 
+const recomputeActiveCounts = (thoughts: Thought[]) => {
+  const now = Date.now();
+
+  const isThoughtExpired = (created_at: string, end_date: string | null) => {
+    if (end_date) {
+      const end = new Date(end_date).getTime();
+      if (!Number.isNaN(end)) return now > end;
+    }
+
+    const created = new Date(created_at).getTime();
+    if (Number.isNaN(created)) return false;
+    return now - created > 3 * 24 * 60 * 60 * 1000;
+  };
+
+  let bfCount = 0;
+  let gfCount = 0;
+
+  for (const thought of thoughts) {
+    if (!thought.created_at) continue;
+    if (isThoughtExpired(thought.created_at, thought.end_date)) continue;
+
+    if (thought.is_gf === true) gfCount += 1;
+    if (thought.is_gf === false) bfCount += 1;
+  }
+
+  return { bfCount, gfCount };
+};
+
 interface ThoughtsStore {
   thoughts: Thought[];
+  activeBfThoughtCount: number;
+  activeGfThoughtCount: number;
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean;
@@ -48,6 +78,8 @@ interface ThoughtsStore {
 
 export const useThoughtsStore = create<ThoughtsStore>((set, get) => ({
   thoughts: [],
+  activeBfThoughtCount: 0,
+  activeGfThoughtCount: 0,
   isLoading: false,
   error: null,
   isInitialized: false,
@@ -72,8 +104,13 @@ export const useThoughtsStore = create<ThoughtsStore>((set, get) => ({
         throw new Error(`Failed to fetch thoughts: ${error.message}`);
       }
 
+      const nextThoughts = (data || []) as Thought[];
+      const counts = recomputeActiveCounts(nextThoughts);
+
       set({ 
-        thoughts: data || [], 
+        thoughts: nextThoughts,
+        activeBfThoughtCount: counts.bfCount,
+        activeGfThoughtCount: counts.gfCount,
         isInitialized: true, 
         isLoading: false,
         error: null
@@ -146,9 +183,16 @@ export const useThoughtsStore = create<ThoughtsStore>((set, get) => ({
         throw new Error(`Failed to fetch thoughts: ${error.message}`);
       }
 
-      const thoughts = data || [];
-      set({ thoughts, isLoading: false, error: null });
-      return thoughts;
+      const nextThoughts = (data || []) as Thought[];
+      const counts = recomputeActiveCounts(nextThoughts);
+      set({
+        thoughts: nextThoughts,
+        activeBfThoughtCount: counts.bfCount,
+        activeGfThoughtCount: counts.gfCount,
+        isLoading: false,
+        error: null,
+      });
+      return nextThoughts;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch thoughts';
@@ -230,7 +274,7 @@ export const useThoughtsStore = create<ThoughtsStore>((set, get) => ({
   },
 
   clearThoughts: () => {
-    set({ thoughts: [], error: null });
+    set({ thoughts: [], activeBfThoughtCount: 0, activeGfThoughtCount: 0, error: null });
   },
 
   // Subscription cleanup

@@ -23,6 +23,7 @@ import CounterDialog from "./dialogs/CounterDialog";
 import OpsDialog from "./dialogs/OpsDialog";
 import ChatBot from "./components/ChatBot";
 import MemoryGlassOverlay from "../../components/MemoryGlassOverlay";
+import EvilThoughtsBadge from "../../components/EvilThoughtsBadge";
 
 interface ComponentData {
   themeColor: string;
@@ -47,10 +48,11 @@ interface FeatureCardProps {
   imageSrc?: string;
   useImagePreview: boolean;
   themeColor: string;
+  badge?: React.ReactNode;
   onClick: () => void;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useImagePreview, themeColor, onClick }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useImagePreview, themeColor, badge, onClick }) => {
   const isActive = isFeatureActive(title);
   const cardStyles = isActive ? createActiveCardStyles(themeColor) : createInactiveCardStyles(themeColor);
   const buttonBgColor = isActive ? `${themeColor}10` : `${cardStyles.color}10`;
@@ -104,6 +106,11 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useIma
               </div>
             )}
           </div>
+          {badge && (
+            <div className="absolute -top-2 -right-2">
+              {badge}
+            </div>
+          )}
         </div>
         
         {/* Minimal text below */}
@@ -429,6 +436,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
             useImagePreview={data.useImagePreview}
             icon={<Zap size={32} color={isFeatureActive("Evil Thoughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
             themeColor={data.themeColor}
+            badge={<EvilThoughtsBadge />}
             onClick={() => handleFeatureClick("Evil Thoughts")}
           />
           
