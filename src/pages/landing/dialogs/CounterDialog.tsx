@@ -218,7 +218,7 @@ const CounterDialog: React.FC<CounterDialogProps> = ({ open, onOpenChange }) => 
             <CardContent className="p-0">
              
               <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                you survived {stats.totalDays.toLocaleString()} days with me 😆
+                I survived {stats.totalDays.toLocaleString()} days with you 😆
               </p>
             </CardContent>
           </Card>
