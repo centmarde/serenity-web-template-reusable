@@ -4,6 +4,7 @@ import { useThemeStore } from "../../stores/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import NullaWidget from "./components/NullaWidget";
+import NullaChatBox from "./components/NullaChatBox";
 
 interface ComponentData {
   themeColor: string;
@@ -99,25 +100,11 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
       >
         <CardContent className="p-6 text-center space-y-4">
           <NullaWidget themeColor={data.themeColor} />
+          <NullaChatBox themeColor={data.themeColor} />
 
-          <h1
-            className="font-bold text-gray-800"
-            style={{
-              fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
-            }}
-          >
-            Nulla Prototype
-          </h1>
+     
 
-          <p
-            className="text-gray-600"
-            style={{
-              fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
-            }}
-          >
-            Hi {data.callsign}! This is a starter space for the Nulla feature
-            inside {data.appName}.
-          </p>
+       
 
           <div className="pt-2">
             <Button
