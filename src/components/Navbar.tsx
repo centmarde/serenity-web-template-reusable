@@ -4,6 +4,7 @@ import { useThemeStore } from "../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EvilThoughtsBadge from "./EvilThoughtsBadge";
+import OpsDialog from "../pages/landing/dialogs/OpsDialog";
 import {
   Drawer,
   DrawerClose,
@@ -12,19 +13,20 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { getNavRoutes } from "../utils/routes";
-import { 
-  Mail, 
-  Camera, 
-  Music, 
-  Gift, 
-  Gamepad2, 
+import { isFeatureActive } from "../utils/helpers";
+import {
+  Mail,
+  Camera,
+  Music,
+  Gift,
+  Gamepad2,
   Target,
   Heart,
- /*  Sun,
+  /*  Sun,
   Moon, */
   Zap,
   Menu,
-  X
+  X,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -39,6 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
   const initializeTheme = useThemeStore((s) => s.initializeTheme);
   const themeColor = useThemeStore((s) => s.currentThemeColor) ?? "#F2A6A6";
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
+  const [showOpsDialog, setShowOpsDialog] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string>("");
 
   useEffect(() => {
     const initialize = async () => {
@@ -62,19 +66,35 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
 
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
-      case 'Heart': return Heart;
-      case 'Mail': return Mail;
-      case 'Camera': return Camera;
-      case 'Music': return Music;
-      case 'Gift': return Gift;
-      case 'Gamepad2': return Gamepad2;
-      case 'Target': return Target;
-      case 'Zap': return Zap;
-      default: return Heart;
+      case "Heart":
+        return Heart;
+      case "Mail":
+        return Mail;
+      case "Camera":
+        return Camera;
+      case "Music":
+        return Music;
+      case "Gift":
+        return Gift;
+      case "Gamepad2":
+        return Gamepad2;
+      case "Target":
+        return Target;
+      case "Zap":
+        return Zap;
+      default:
+        return Heart;
     }
   };
 
-  const handleNavClick = (path: string) => {
+  const handleNavClick = (path: string, name: string) => {
+    if (name !== "Home" && !isFeatureActive(name)) {
+      setSelectedFeature(name);
+      setShowOpsDialog(true);
+      setIsMobileNavOpen(false);
+      return;
+    }
+
     if (onNavigate) {
       onNavigate(path);
     }
@@ -83,7 +103,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
   };
 
   return (
-    <Card 
+    <Card
       className="w-full shadow-sm sticky top-0 z-[9999] border-0 rounded-none"
       style={{
         backgroundColor: "rgba(255, 255, 255, 0.98)",
@@ -92,7 +112,11 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
       }}
     >
       <nav className="container mx-auto px-4 py-2">
-        <Drawer open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen} direction="right">
+        <Drawer
+          open={isMobileNavOpen}
+          onOpenChange={setIsMobileNavOpen}
+          direction="right"
+        >
           <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2">
             {/* Logo Section */}
             <div className="flex items-center gap-2">
@@ -102,18 +126,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                 className="w-8 h-8 rounded-full border"
                 style={{ borderColor: `${themeColor}40` }}
               />
-              <h1 
+              <h1
                 className="text-base font-medium hidden sm:block"
-                style={{ 
+                style={{
                   color: themeColor,
-                  fontSize: "clamp(0.9rem, 2vw, 1rem)"
+                  fontSize: "clamp(0.9rem, 2vw, 1rem)",
                 }}
               >
                 {appName}
               </h1>
-              
+
               {/* Theme Toggle Button */}
-        {/*       <Button
+              {/*       <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleDarkMode}
@@ -132,44 +156,40 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             {/* Navigation Tabs - Desktop */}
             <div className="hidden lg:flex items-center gap-1">
               {navRoutes.map((route) => {
-                const IconComponent = getIconComponent(route.icon || 'Heart');
+                const IconComponent = getIconComponent(route.icon || "Heart");
                 const isActive = currentPath === route.path;
                 const isEvilThoughts = route.path === "/evil-thoughts";
-                
+
                 return (
                   <Button
                     key={route.path}
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => handleNavClick(route.path)}
+                    onClick={() => handleNavClick(route.path, route.name)}
                     className={`flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 h-8 ${
-                      isActive 
-                        ? "shadow-sm" 
-                        : "hover:scale-105"
+                      isActive ? "shadow-sm" : "hover:scale-105"
                     }`}
                     style={{
-                      backgroundColor: isActive 
-                        ? themeColor 
-                        : "transparent",
-                      color: isActive 
-                        ? "white" 
-                        : themeColor,
-                      border: isActive 
-                        ? `1px solid ${themeColor}` 
+                      backgroundColor: isActive ? themeColor : "transparent",
+                      color: isActive ? "white" : themeColor,
+                      border: isActive
+                        ? `1px solid ${themeColor}`
                         : `1px solid ${themeColor}20`,
                     }}
                   >
-                      <span className="relative inline-flex">
-                        <IconComponent size={14} />
-                        {isEvilThoughts && (
-                          <EvilThoughtsBadge className="absolute -top-2 -right-2" />
-                        )}
-                      </span>
-                    <span 
+                    <span className="relative inline-flex">
+                      <IconComponent size={14} />
+                      {isEvilThoughts && (
+                        <EvilThoughtsBadge className="absolute -top-2 -right-2" />
+                      )}
+                    </span>
+                    <span
                       className="text-xs font-medium"
                       style={{ fontSize: "clamp(0.65rem, 1.2vw, 0.75rem)" }}
                     >
-                      {route.path === "/" ? "Home" : route.name.replace("Our ", "").replace("with Me", "")}
+                      {route.path === "/"
+                        ? "Home"
+                        : route.name.replace("Our ", "").replace("with Me", "")}
                     </span>
                   </Button>
                 );
@@ -187,7 +207,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                   color: themeColor,
                   border: `1px solid ${themeColor}20`,
                 }}
-                aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
+                aria-label={
+                  isMobileNavOpen ? "Close navigation" : "Open navigation"
+                }
                 title={isMobileNavOpen ? "Close" : "Menu"}
               >
                 {isMobileNavOpen ? <X size={16} /> : <Menu size={16} />}
@@ -204,10 +226,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                   className="w-8 h-8 rounded-full border"
                   style={{ borderColor: `${themeColor}40` }}
                 />
-                <DrawerTitle
-                  className="truncate"
-                  style={{ color: themeColor }}
-                >
+                <DrawerTitle className="truncate" style={{ color: themeColor }}>
                   {appName || "Menu"}
                 </DrawerTitle>
               </div>
@@ -230,9 +249,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             {/* Mobile Navigation - Drawer List */}
             <div className="px-4 pb-4 flex flex-col gap-2 pt-20">
               {navRoutes.map((route) => {
-                const IconComponent = getIconComponent(route.icon || 'Heart');
+                const IconComponent = getIconComponent(route.icon || "Heart");
                 const isActive = currentPath === route.path;
-                const label = route.path === "/" ? "Home" : route.name.replace("Our ", "").replace("with Me", "");
+                const label =
+                  route.path === "/"
+                    ? "Home"
+                    : route.name.replace("Our ", "").replace("with Me", "");
                 const isEvilThoughts = route.path === "/evil-thoughts";
 
                 return (
@@ -240,19 +262,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                     key={route.path}
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => handleNavClick(route.path)}
+                    onClick={() => handleNavClick(route.path, route.name)}
                     className={`w-full flex items-center justify-start gap-3 px-3 py-2 rounded-md transition-all duration-200 h-11 ${
-                      isActive
-                        ? "shadow-sm"
-                        : "hover:scale-[1.02]"
+                      isActive ? "shadow-sm" : "hover:scale-[1.02]"
                     }`}
                     style={{
-                      backgroundColor: isActive
-                        ? themeColor
-                        : "transparent",
-                      color: isActive
-                        ? "white"
-                        : themeColor,
+                      backgroundColor: isActive ? themeColor : "transparent",
+                      color: isActive ? "white" : themeColor,
                       border: isActive
                         ? `1px solid ${themeColor}`
                         : `1px solid ${themeColor}20`,
@@ -278,6 +294,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
           </DrawerContent>
         </Drawer>
       </nav>
+
+      <OpsDialog
+        open={showOpsDialog}
+        onOpenChange={setShowOpsDialog}
+        featureName={selectedFeature}
+      />
     </Card>
   );
 };
