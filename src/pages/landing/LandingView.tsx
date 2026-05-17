@@ -3,7 +3,16 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Camera, Music, Gift, Mail, Target, Zap } from "lucide-react";
+import {
+  Heart,
+  Camera,
+  Music,
+  Gift,
+  Mail,
+  Target,
+  Zap,
+  Sparkles,
+} from "lucide-react";
 import {
   calculateRelationshipStats,
   calculateAnniversaryCountdown,
@@ -268,7 +277,10 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   };
 
   const handleFeatureClick = (featureName: string) => {
-    if (featureName === "Love Letters" && onNavigate) {
+    if (!isFeatureActive(featureName)) {
+      setSelectedFeature(featureName);
+      setShowOpsDialog(true);
+    } else if (featureName === "Love Letters" && onNavigate) {
       onNavigate("/love-letters");
     } else if (featureName === "Made for You" && onNavigate) {
       onNavigate("/girlfriend/madeforyou");
@@ -280,6 +292,8 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
       onNavigate("/evil-thoughts");
     } else if (featureName === "Tarot Cards" && onNavigate) {
       onNavigate("/tarot-cards");
+    } else if (featureName === "Nulla" && onNavigate) {
+      onNavigate("/nulla");
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -512,6 +526,24 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
             }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Tarot Cards")}
+          />
+
+          <FeatureCard
+            title="Nulla"
+            imageSrc="/assets/nulla/nulla-icon.png"
+            useImagePreview={data.useImagePreview}
+            icon={
+              <Sparkles
+                size={32}
+                color={
+                  isFeatureActive("Nulla")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
+            themeColor={data.themeColor}
+            onClick={() => handleFeatureClick("Nulla")}
           />
         </div>
       </div>

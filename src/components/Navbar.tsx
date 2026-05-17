@@ -4,6 +4,7 @@ import { useThemeStore } from "../stores/theme";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import EvilThoughtsBadge from "./EvilThoughtsBadge";
+import OpsDialog from "../pages/landing/dialogs/OpsDialog";
 import {
   Drawer,
   DrawerClose,
@@ -12,6 +13,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { getNavRoutes } from "../utils/routes";
+import { isFeatureActive } from "../utils/helpers";
 import { 
   Mail, 
   Camera, 
@@ -39,6 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
   const initializeTheme = useThemeStore((s) => s.initializeTheme);
   const themeColor = useThemeStore((s) => s.currentThemeColor) ?? "#F2A6A6";
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
+  const [showOpsDialog, setShowOpsDialog] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string>("");
 
   useEffect(() => {
     const initialize = async () => {
@@ -74,7 +78,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
     }
   };
 
-  const handleNavClick = (path: string) => {
+  const handleNavClick = (path: string, name: string) => {
+    if (name !== "Home" && !isFeatureActive(name)) {
+      setSelectedFeature(name);
+      setShowOpsDialog(true);
+      setIsMobileNavOpen(false);
+      return;
+    }
+
     if (onNavigate) {
       onNavigate(path);
     }
@@ -141,7 +152,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                     key={route.path}
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => handleNavClick(route.path)}
+                    onClick={() => handleNavClick(route.path, route.name)}
                     className={`flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 h-8 ${
                       isActive 
                         ? "shadow-sm" 
@@ -240,7 +251,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                     key={route.path}
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => handleNavClick(route.path)}
+                    onClick={() => handleNavClick(route.path, route.name)}
                     className={`w-full flex items-center justify-start gap-3 px-3 py-2 rounded-md transition-all duration-200 h-11 ${
                       isActive
                         ? "shadow-sm"
@@ -278,6 +289,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
           </DrawerContent>
         </Drawer>
       </nav>
+
+      <OpsDialog
+        open={showOpsDialog}
+        onOpenChange={setShowOpsDialog}
+        featureName={selectedFeature}
+      />
     </Card>
   );
 };
