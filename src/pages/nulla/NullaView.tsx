@@ -3,6 +3,7 @@ import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import NullaWidget from "./components/NullaWidget";
 
 interface ComponentData {
   themeColor: string;
@@ -97,16 +98,7 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
         }}
       >
         <CardContent className="p-6 text-center space-y-4">
-          <div className="flex justify-center">
-            <img
-              src="/assets/nulla/nulla-icon.png"
-              alt="Nulla"
-              style={{
-                width: "min(260px, 70vw)",
-                height: "auto",
-              }}
-            />
-          </div>
+          <NullaWidget themeColor={data.themeColor} />
 
           <h1
             className="font-bold text-gray-800"

@@ -142,17 +142,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           >
             {title}
           </h3>
-          {!isActive && (
-            <p
-              className="text-xs mt-1 opacity-60"
-              style={{
-                color: themeColor,
-                fontSize: "clamp(0.625rem, 1.5vw, 0.7rem)",
-              }}
-            >
-              Coming Soon
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>
