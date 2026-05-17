@@ -4,12 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useIsMobile } from "../../../hooks/use-mobile";
-import { useTarotCardsDataStore, useTarotCardsHelpers, type TarotCardData, type TarotCardsDeck } from "../../../stores/tarotCardsData";
+import {
+  useTarotCardsDataStore,
+  useTarotCardsHelpers,
+  type TarotCardData,
+  type TarotCardsDeck,
+} from "../../../stores/tarotCardsData";
 import { useTarotSelectionStore } from "../../../stores/tarotSelectionData";
 import { tarotCards } from "../../../composables/tarotConstant";
 import CardViewer from "../dialogs/CardViewer";
 import PasswordDialog from "../../evilThoughts/dialogs/PasswordDialog";
 import { getImagePath } from "../utils";
+import { getTimeZoneDayMs, TAROT_TIME_ZONE } from "../utils/helpers";
 import { Heart, User, Calendar, Plus } from "lucide-react";
 
 interface TarotCardsResultsProps {
@@ -23,31 +29,35 @@ interface TarotCardsResultsProps {
 const CARD_TITLES = [
   "How you feel about yourself",
   "What you want most right now",
-  "Your fears", 
+  "Your fears",
   "What is going for you",
   "What is going against you",
-  "The likely outcome"
+  "The likely outcome",
 ];
 
 const normalizeCardName = (name: string) => name.trim().toLowerCase();
 
-const TAROT_IMAGE_BY_CARD_NAME = tarotCards.reduce<Record<string, string>>((acc, card) => {
-  acc[normalizeCardName(card.name)] = card.image;
-  return acc;
-}, {});
+const TAROT_IMAGE_BY_CARD_NAME = tarotCards.reduce<Record<string, string>>(
+  (acc, card) => {
+    acc[normalizeCardName(card.name)] = card.image;
+    return acc;
+  },
+  {},
+);
 
 export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   themeColor,
   bfName,
   gfName,
-  onNavigate
+  onNavigate,
 }) => {
   const isMobile = useIsMobile();
-  const { getMyDecks, getGfDecks, deleteDeck, isLoading, error } = useTarotCardsDataStore();
-  const { formatDeckForDisplay, isCompleteReading, getCardDescription } = useTarotCardsHelpers();
+  const { getMyDecks, getGfDecks, deleteDeck, isLoading, error } =
+    useTarotCardsDataStore();
+  const { formatDeckForDisplay, isCompleteReading, getCardDescription } =
+    useTarotCardsHelpers();
   const { setReadingContext, clearAiReading } = useTarotSelectionStore();
-  
-  
+
   // State for filtered decks
   const [myDecks, setMyDecks] = React.useState<TarotCardsDeck[]>([]);
   const [gfDecks, setGfDecks] = React.useState<TarotCardsDeck[]>([]);
@@ -55,8 +65,11 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   const [hasUserDecksInDB, setHasUserDecksInDB] = React.useState(false);
   const [hasGfDecksInDB, setHasGfDecksInDB] = React.useState(false);
 
-  const [latestUserDeck, setLatestUserDeck] = React.useState<TarotCardsDeck | null>(null);
-  const [latestGfDeck, setLatestGfDeck] = React.useState<TarotCardsDeck | null>(null);
+  const [latestUserDeck, setLatestUserDeck] =
+    React.useState<TarotCardsDeck | null>(null);
+  const [latestGfDeck, setLatestGfDeck] = React.useState<TarotCardsDeck | null>(
+    null,
+  );
 
   const [cardViewer, setCardViewer] = React.useState<{
     card: TarotCardData;
@@ -75,8 +88,6 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
     return Number.isNaN(d.getTime()) ? null : d;
   };
 
-  const utcDayMs = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-
   const shouldAllowNewReading = (deck: TarotCardsDeck | null): boolean => {
     if (!deck) return false;
 
@@ -86,9 +97,9 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
     // If end date is missing/invalid, allow creating a fresh reading
     if (!created || !end) return true;
 
-    const createdDay = utcDayMs(created);
-    const endDay = utcDayMs(end);
-    const nowDay = utcDayMs(new Date());
+    const createdDay = getTimeZoneDayMs(created, TAROT_TIME_ZONE);
+    const endDay = getTimeZoneDayMs(end, TAROT_TIME_ZONE);
+    const nowDay = getTimeZoneDayMs(new Date(), TAROT_TIME_ZONE);
 
     // Same day OR end_date before created_at => invalid
     if (endDay <= createdDay) return true;
@@ -108,7 +119,9 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
     if (!onNavigate) return;
 
     setIsActionBusy(true);
-    console.log(`🔮 Starting new reading (context: ${isGf ? 'girlfriend' : 'user'})`);
+    console.log(
+      `🔮 Starting new reading (context: ${isGf ? "girlfriend" : "user"})`,
+    );
 
     try {
       // Set context + clear previous AI session first
@@ -118,18 +131,22 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
       const deckToDelete = isGf ? latestGfDeck : latestUserDeck;
 
       if (shouldAllowNewReading(deckToDelete) && deckToDelete) {
-        console.log(`🔮 Deleting existing deck before creating new reading: ${deckToDelete.id}`);
+        console.log(
+          `🔮 Deleting existing deck before creating new reading: ${deckToDelete.id}`,
+        );
         const ok = await deleteDeck(deckToDelete.id);
         if (!ok) {
-          console.error('🔮 Failed to delete existing deck; aborting create flow to avoid duplicates');
+          console.error(
+            "🔮 Failed to delete existing deck; aborting create flow to avoid duplicates",
+          );
           setIsActionBusy(false);
           return;
         }
       }
 
-      onNavigate('/tarot-cards-widget');
+      onNavigate("/tarot-cards-widget");
     } catch (e) {
-      console.error('🔮 Failed to start create reading flow:', e);
+      console.error("🔮 Failed to start create reading flow:", e);
       setIsActionBusy(false);
     }
   };
@@ -137,15 +154,15 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
   // Load filtered decks on mount
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadDecks = async () => {
       try {
         setLoadingDecks(true);
         const [userDecks, girlfriendDecks] = await Promise.all([
           getMyDecks(),
-          getGfDecks()
+          getGfDecks(),
         ]);
-        
+
         // Only update state if component is still mounted
         if (isMounted) {
           // Track if we have any decks in database
@@ -155,14 +172,14 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
           // Track latest decks (sorted desc by created_at)
           setLatestUserDeck(userDecks[0] ?? null);
           setLatestGfDeck(girlfriendDecks[0] ?? null);
-          
+
           // Filter only complete readings
           setMyDecks(userDecks.filter(isCompleteReading));
           setGfDecks(girlfriendDecks.filter(isCompleteReading));
         }
       } catch (error) {
         if (isMounted) {
-          console.error('🔮 Error loading tarot decks:', error);
+          console.error("🔮 Error loading tarot decks:", error);
         }
       } finally {
         if (isMounted) {
@@ -170,9 +187,9 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
         }
       }
     };
-    
+
     loadDecks();
-    
+
     // Cleanup function
     return () => {
       isMounted = false;
@@ -181,11 +198,18 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 
   const renderDeckCard = (deck: TarotCardsDeck, isGf: boolean) => {
     // Keep exact spread positions (do NOT filter nulls), so titles align with 1..6
-    const cards = [deck.card1, deck.card2, deck.card3, deck.card4, deck.card5, deck.card6];
+    const cards = [
+      deck.card1,
+      deck.card2,
+      deck.card3,
+      deck.card4,
+      deck.card5,
+      deck.card6,
+    ];
     const displayInfo = formatDeckForDisplay(deck);
 
     return (
-      <Card 
+      <Card
         key={deck.id}
         className="w-full animate-in fade-in duration-500"
         style={{ borderColor: themeColor }}
@@ -194,23 +218,27 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
           <div
             className={`flex ${
               isMobile
-                ? 'flex-col items-center text-center gap-2'
-                : 'flex-row items-center justify-between'
+                ? "flex-col items-center text-center gap-2"
+                : "flex-row items-center justify-between"
             }`}
           >
-            <CardTitle 
+            <CardTitle
               className={`flex items-center gap-2 ${
-                isMobile ? 'text-sm justify-center w-full' : 'text-lg'
+                isMobile ? "text-sm justify-center w-full" : "text-lg"
               }`}
               style={{ color: themeColor }}
             >
-              {isGf ? <Heart size={isMobile ? 16 : 20} /> : <User size={isMobile ? 16 : 20} />}
+              {isGf ? (
+                <Heart size={isMobile ? 16 : 20} />
+              ) : (
+                <User size={isMobile ? 16 : 20} />
+              )}
               {isGf ? `${gfName}'s Reading` : `${bfName}'s Reading`}
             </CardTitle>
 
             <div
               className={`flex items-center gap-2 ${
-                isMobile ? 'justify-center w-full' : 'justify-end'
+                isMobile ? "justify-center w-full" : "justify-end"
               }`}
             >
               <Badge variant="secondary" className="text-xs">
@@ -225,7 +253,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           {/* Cards Row */}
           <div
@@ -236,12 +264,14 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
             }
           >
             {cards.map((card, index) => {
-              const cardName = card?.name ? String(card.name) : '';
+              const cardName = card?.name ? String(card.name) : "";
               const imagePath = cardName
                 ? TAROT_IMAGE_BY_CARD_NAME[normalizeCardName(cardName)]
                 : undefined;
 
-              const imageSrc = imagePath ? getImagePath(imagePath) : '/assets/images/tarotCard.png';
+              const imageSrc = imagePath
+                ? getImagePath(imagePath)
+                : "/assets/images/tarotCard.png";
 
               return (
                 <button
@@ -257,24 +287,30 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                     });
                   }}
                   className={`border rounded-lg p-3 bg-gray-50 text-left transition-colors ${
-                    isMobile ? 'w-full' : 'flex-none'
+                    isMobile ? "w-full" : "flex-none"
                   } ${
                     card
-                      ? 'cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
-                      : 'cursor-default opacity-60'
+                      ? "cursor-pointer hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      : "cursor-default opacity-60"
                   }`}
                   style={{
-                    width: isMobile ? '100%' : '240px',
+                    width: isMobile ? "100%" : "240px",
                     borderColor: `${themeColor}40`,
                   }}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-semibold text-sm" style={{ color: themeColor }}>
+                      <h4
+                        className="font-semibold text-sm"
+                        style={{ color: themeColor }}
+                      >
                         {CARD_TITLES[index]}
                       </h4>
-                      <Badge variant="outline" className="text-xs whitespace-nowrap">
-                        {cardName || 'Unknown'}
+                      <Badge
+                        variant="outline"
+                        className="text-xs whitespace-nowrap"
+                      >
+                        {cardName || "Unknown"}
                       </Badge>
                     </div>
 
@@ -283,24 +319,24 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                         src={imageSrc}
                         alt={cardName || `Card ${index + 1}`}
                         className="w-full object-cover"
-                        style={{ height: isMobile ? '300px' : '400px' }}
+                        style={{ height: isMobile ? "300px" : "400px" }}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = '/assets/images/tarotCard.png';
+                          target.src = "/assets/images/tarotCard.png";
                         }}
                       />
                     </div>
 
                     <div className="text-xs text-gray-600 line-clamp-3">
-                      {card ? (getCardDescription(card) || 'No description available') : 'No card selected'}
+                      {card
+                        ? getCardDescription(card) || "No description available"
+                        : "No card selected"}
                     </div>
                   </div>
                 </button>
               );
             })}
           </div>
-
-      
         </CardContent>
       </Card>
     );
@@ -308,31 +344,41 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
 
   const renderEmptySection = (isGf: boolean) => {
     const hasAnyDecksInDB = isGf ? hasGfDecksInDB : hasUserDecksInDB;
-    const emptyMessage = hasAnyDecksInDB 
+    const emptyMessage = hasAnyDecksInDB
       ? `${isGf ? gfName : bfName} has readings, but none are complete yet`
       : `No ${isGf ? `${gfName}'s` : `${bfName}'s`} readings found`;
-    
+
     return (
       <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-        <div 
+        <div
           className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
           style={{ backgroundColor: `${themeColor}10` }}
         >
-          {isGf ? <Heart size={32} style={{ color: themeColor }} /> : <User size={32} style={{ color: themeColor }} />}
+          {isGf ? (
+            <Heart size={32} style={{ color: themeColor }} />
+          ) : (
+            <User size={32} style={{ color: themeColor }} />
+          )}
         </div>
-        
-        <p className={`text-gray-500 mb-2 ${isMobile ? 'text-sm' : 'text-base'}`}>
+
+        <p
+          className={`text-gray-500 mb-2 ${isMobile ? "text-sm" : "text-base"}`}
+        >
           {emptyMessage}
         </p>
-        
+
         {!hasAnyDecksInDB && (
-          <p className={`text-gray-400 mb-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-            🔮 Loaded 0 {isGf ? 'girlfriend' : 'user'} decks from database
+          <p
+            className={`text-gray-400 mb-4 ${isMobile ? "text-xs" : "text-sm"}`}
+          >
+            🔮 Loaded 0 {isGf ? "girlfriend" : "user"} decks from database
           </p>
         )}
-        
+
         <Button
-          onClick={() => (isGf ? void handleCreateReading(true) : setBfPasswordOpen(true))}
+          onClick={() =>
+            isGf ? void handleCreateReading(true) : setBfPasswordOpen(true)
+          }
           variant="outline"
           size="sm"
           style={{ borderColor: themeColor, color: themeColor }}
@@ -359,7 +405,7 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
     return (
       <div className="text-center py-12">
         <div className="text-red-500 mb-4">Error loading tarot readings</div>
-        <Button 
+        <Button
           onClick={() => window.location.reload()}
           variant="outline"
           style={{ borderColor: themeColor, color: themeColor }}
@@ -416,9 +462,9 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                 : "flex flex-col"
             }
           >
-            <h2 
+            <h2
               className={`font-bold flex items-center gap-2 ${
-                isMobile ? 'text-lg' : 'text-xl'
+                isMobile ? "text-lg" : "text-xl"
               }`}
               style={{ color: themeColor }}
             >
@@ -459,16 +505,18 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
             </Button>
           ) : null}
         </div>
-        
+
         {myDecks.length > 0 ? (
-          <div className={`grid gap-6 ${
-            isMobile
-              ? 'grid-cols-1'
-              : myDecks.length > 1
-                ? 'grid-cols-1 lg:grid-cols-2'
-                : 'grid-cols-1'
-          }`}>
-            {myDecks.map(deck => renderDeckCard(deck, false))}
+          <div
+            className={`grid gap-6 ${
+              isMobile
+                ? "grid-cols-1"
+                : myDecks.length > 1
+                  ? "grid-cols-1 lg:grid-cols-2"
+                  : "grid-cols-1"
+            }`}
+          >
+            {myDecks.map((deck) => renderDeckCard(deck, false))}
           </div>
         ) : (
           renderEmptySection(false)
@@ -491,9 +539,9 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
                 : "flex flex-col"
             }
           >
-            <h2 
+            <h2
               className={`font-bold flex items-center gap-2 ${
-                isMobile ? 'text-lg' : 'text-xl'
+                isMobile ? "text-lg" : "text-xl"
               }`}
               style={{ color: themeColor }}
             >
@@ -534,16 +582,18 @@ export const TarotCardsResults: React.FC<TarotCardsResultsProps> = ({
             </Button>
           ) : null}
         </div>
-        
+
         {gfDecks.length > 0 ? (
-          <div className={`grid gap-6 ${
-            isMobile
-              ? 'grid-cols-1'
-              : gfDecks.length > 1
-                ? 'grid-cols-1 lg:grid-cols-2'
-                : 'grid-cols-1'
-          }`}>
-            {gfDecks.map(deck => renderDeckCard(deck, true))}
+          <div
+            className={`grid gap-6 ${
+              isMobile
+                ? "grid-cols-1"
+                : gfDecks.length > 1
+                  ? "grid-cols-1 lg:grid-cols-2"
+                  : "grid-cols-1"
+            }`}
+          >
+            {gfDecks.map((deck) => renderDeckCard(deck, true))}
           </div>
         ) : (
           renderEmptySection(true)
