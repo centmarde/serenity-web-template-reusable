@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Camera, Music, Gift, Mail, Target, Zap } from "lucide-react";
 import {
@@ -18,7 +15,10 @@ import {
 } from "../../utils/helpers";
 import NoticeDialog from "./dialogs/NoticeDialog";
 import CelebrationDialog from "./dialogs/CelebrationDialog";
-import { useCurrentDialog, useDialogActions } from '../../composables/dialogControll';
+import {
+  useCurrentDialog,
+  useDialogActions,
+} from "../../composables/dialogControll";
 import CounterDialog from "./dialogs/CounterDialog";
 import OpsDialog from "./dialogs/OpsDialog";
 import ChatBot from "./components/ChatBot";
@@ -52,12 +52,22 @@ interface FeatureCardProps {
   onClick: () => void;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useImagePreview, themeColor, badge, onClick }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({
+  title,
+  icon,
+  imageSrc,
+  useImagePreview,
+  themeColor,
+  badge,
+  onClick,
+}) => {
   const isActive = isFeatureActive(title);
-  const cardStyles = isActive ? createActiveCardStyles(themeColor) : createInactiveCardStyles(themeColor);
+  const cardStyles = isActive
+    ? createActiveCardStyles(themeColor)
+    : createInactiveCardStyles(themeColor);
   const buttonBgColor = isActive ? `${themeColor}10` : `${cardStyles.color}10`;
   const [imageError, setImageError] = useState(false);
-  
+
   return (
     <Card
       className="group hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-lg"
@@ -79,7 +89,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useIma
       <CardContent className="p-4 text-center flex flex-col items-center justify-center h-full min-h-[160px]">
         {/* Wide, short pink background with large overlapping image */}
         <div className="relative mb-3 flex-1 flex items-center justify-center">
-          <div 
+          <div
             className="rounded-lg"
             style={{
               backgroundColor: buttonBgColor,
@@ -97,22 +107,21 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useIma
                 style={{
                   width: "120px",
                   height: "120px",
-                  filter: isActive ? 'none' : 'grayscale(30%) opacity(80%)'
+                  filter: isActive ? "none" : "grayscale(30%) opacity(80%)",
                 }}
               />
             ) : (
-              <div className="flex items-center justify-center" style={{ width: "120px", height: "120px" }}>
+              <div
+                className="flex items-center justify-center"
+                style={{ width: "120px", height: "120px" }}
+              >
                 {icon}
               </div>
             )}
           </div>
-          {badge && (
-            <div className="absolute -top-2 -right-2">
-              {badge}
-            </div>
-          )}
+          {badge && <div className="absolute -top-2 -right-2">{badge}</div>}
         </div>
-        
+
         {/* Minimal text below */}
         <div className="mt-auto">
           <h3
@@ -125,9 +134,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, icon, imageSrc, useIma
             {title}
           </h3>
           {!isActive && (
-            <p 
+            <p
               className="text-xs mt-1 opacity-60"
-              style={{ 
+              style={{
                 color: themeColor,
                 fontSize: "clamp(0.625rem, 1.5vw, 0.7rem)",
               }}
@@ -154,14 +163,18 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     loadSettings,
   } = useSettingsStore();
 
-  const { initializeTheme, getCurrentThemeColor, getSafeThemeColor, waitForInitialization } =
-    useThemeStore();
+  const {
+    initializeTheme,
+    getCurrentThemeColor,
+    getSafeThemeColor,
+    waitForInitialization,
+  } = useThemeStore();
 
   const [data, setData] = useState<ComponentData | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showCounterDialog, setShowCounterDialog] = useState(false);
-  
+
   // Dialog controller
   const currentDialog = useCurrentDialog();
   const { closeCurrentDialog } = useDialogActions();
@@ -182,7 +195,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         const coupleOfficialDate = getCoupleOfficialDate();
         const relationshipStats =
           calculateRelationshipStats(coupleOfficialDate);
-        const anniversaryCountdown = 
+        const anniversaryCountdown =
           calculateAnniversaryCountdown(coupleOfficialDate);
 
         const loadedData: ComponentData = {
@@ -240,8 +253,6 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     getRandomTrait,
   ]);
 
-
-
   const handleNoticeDialogClose = (open: boolean) => {
     if (!open) {
       // Use dialog controller to properly close and show next dialog
@@ -258,17 +269,17 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
   const handleFeatureClick = (featureName: string) => {
     if (featureName === "Love Letters" && onNavigate) {
-      onNavigate('/love-letters');
+      onNavigate("/love-letters");
     } else if (featureName === "Made for You" && onNavigate) {
-      onNavigate('/girlfriend/madeforyou');
+      onNavigate("/girlfriend/madeforyou");
     } else if (featureName === "Our Music Playlist" && onNavigate) {
-      onNavigate('/music');
+      onNavigate("/music");
     } else if (featureName === "Our Memories" && onNavigate) {
-      onNavigate('/memories');
+      onNavigate("/memories");
     } else if (featureName === "Evil Thoughts" && onNavigate) {
-      onNavigate('/evil-thoughts');
+      onNavigate("/evil-thoughts");
     } else if (featureName === "Tarot Cards" && onNavigate) {
-      onNavigate('/tarot-cards');
+      onNavigate("/tarot-cards");
     } else {
       setSelectedFeature(featureName);
       setShowOpsDialog(true);
@@ -278,7 +289,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   if (isLoading || !data) {
     const safeThemeColor = getSafeThemeColor();
     return (
-      <div 
+      <div
         className="min-h-screen flex items-center justify-center"
         style={{
           background: `linear-gradient(135deg, ${safeThemeColor}20, ${safeThemeColor}40, #ffffff)`,
@@ -301,7 +312,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
     >
       {/* Memory Glass Background Overlay */}
       <MemoryGlassOverlay />
-      
+
       {/* Main Container - Fluid */}
       <div className="w-full container mx-auto space-y-8 px-4 relative z-10">
         {/* Greeting Section */}
@@ -340,13 +351,14 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           <p
             className="text-lg font-medium text-gray-800"
             style={{
-              fontSize: "clamp(1rem, 3vw, 1.25rem)",
+              fontSize: "clamp(2rem, 3vw, 1.25rem)",
               color: "#333333",
+              fontFamily: "Dancing Script, cursive",
             }}
           >
-            Welcome to your personal love space, {data.gfName} 💕
+            " we'll figure it out together is a love language. "
           </p>
-          
+
           {/* Guidance Subtitle */}
           <p
             className="text-base text-gray-600 mt-4"
@@ -360,7 +372,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
 
           {/* Relationship Stats */}
           <div className="mt-6">
-            <div 
+            <div
               className="inline-block px-6 py-3 rounded-full cursor-pointer hover:scale-105 transition-all duration-300"
               style={{
                 backgroundColor: `white`,
@@ -368,19 +380,18 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
               }}
               onClick={() => setShowCounterDialog(true)}
             >
-              <p 
+              <p
                 className="text-lg font-semibold"
                 style={{
                   color: data.themeColor,
                   fontSize: "clamp(0.875rem, 2.5vw, 1.125rem)",
                 }}
               >
-                {data.anniversaryCountdown.isToday 
-                  ? `🎉 Happy ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} Anniversary!` 
-                  : `💕 ${data.anniversaryCountdown.daysUntilAnniversary} days until our ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} anniversary`
-                }
+                {data.anniversaryCountdown.isToday
+                  ? `🎉 Happy ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} Anniversary!`
+                  : `💕 ${data.anniversaryCountdown.daysUntilAnniversary} days until our ${data.anniversaryCountdown.nextAnniversaryNumber}${data.anniversaryCountdown.ordinalSuffix} anniversary`}
               </p>
-              <p 
+              <p
                 className="text-xs text-gray-500 mt-1"
                 style={{
                   fontSize: "clamp(0.65rem, 1.8vw, 0.75rem)",
@@ -398,53 +409,107 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
             title="Love Letters"
             imageSrc="/assets/images/LoveLetters.png"
             useImagePreview={data.useImagePreview}
-            icon={<Mail size={32} color={isFeatureActive("Love Letters") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Mail
+                size={32}
+                color={
+                  isFeatureActive("Love Letters")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Love Letters")}
           />
-          
+
           <FeatureCard
             title="Our Memories"
             imageSrc="/assets/images/OurMemories.png"
             useImagePreview={data.useImagePreview}
-            icon={<Camera size={32} color={isFeatureActive("Our Memories") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Camera
+                size={32}
+                color={
+                  isFeatureActive("Our Memories")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Memories")}
           />
-          
+
           <FeatureCard
             title="Our Music Playlist"
             imageSrc="/assets/images/OurPlaylist.png"
             useImagePreview={data.useImagePreview}
-            icon={<Music size={32} color={isFeatureActive("Our Music Playlist") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Music
+                size={32}
+                color={
+                  isFeatureActive("Our Music Playlist")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Our Music Playlist")}
           />
-          
+
           <FeatureCard
             title="Made for You"
             imageSrc="/assets/images/MadeForYou.png"
             useImagePreview={data.useImagePreview}
-            icon={<Gift size={32} color={isFeatureActive("Made for You") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Gift
+                size={32}
+                color={
+                  isFeatureActive("Made for You")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Made for You")}
           />
-          
+
           <FeatureCard
             title="Evil Thoughts"
             imageSrc="/assets/images/EvilThoughts.png"
             useImagePreview={data.useImagePreview}
-            icon={<Zap size={32} color={isFeatureActive("Evil Thoughts") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Zap
+                size={32}
+                color={
+                  isFeatureActive("Evil Thoughts")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             badge={<EvilThoughtsBadge />}
             onClick={() => handleFeatureClick("Evil Thoughts")}
           />
-          
+
           <FeatureCard
             title="Tarot Cards"
             imageSrc="/assets/images/tarotCard.png"
             useImagePreview={data.useImagePreview}
-            icon={<Target size={32} color={isFeatureActive("Tarot Cards") ? data.themeColor : createInactiveCardStyles(data.themeColor).color} />}
+            icon={
+              <Target
+                size={32}
+                color={
+                  isFeatureActive("Tarot Cards")
+                    ? data.themeColor
+                    : createInactiveCardStyles(data.themeColor).color
+                }
+              />
+            }
             themeColor={data.themeColor}
             onClick={() => handleFeatureClick("Tarot Cards")}
           />
@@ -468,42 +533,39 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           />
         </Button>
       </div>
-      
+
       {/* Notice Dialog - Controlled by dialog controller */}
-      {currentDialog === 'notice' && (
-        <NoticeDialog 
-          open={true} 
-          onOpenChange={handleNoticeDialogClose} 
+      {currentDialog === "notice" && (
+        <NoticeDialog
+          open={true}
+          onOpenChange={handleNoticeDialogClose}
           onNavigate={onNavigate}
         />
       )}
-      
+
       {/* Celebration Dialog - Controlled by dialog controller */}
-      {currentDialog === 'celebration' && (
-        <CelebrationDialog 
-          open={true} 
-          onOpenChange={handleCelebrationDialogClose} 
+      {currentDialog === "celebration" && (
+        <CelebrationDialog
+          open={true}
+          onOpenChange={handleCelebrationDialogClose}
         />
       )}
-      
+
       {/* Counter Dialog */}
-      <CounterDialog 
-        open={showCounterDialog} 
-        onOpenChange={setShowCounterDialog} 
+      <CounterDialog
+        open={showCounterDialog}
+        onOpenChange={setShowCounterDialog}
       />
-      
+
       {/* Ops Dialog */}
-      <OpsDialog 
-        open={showOpsDialog} 
-        onOpenChange={setShowOpsDialog} 
+      <OpsDialog
+        open={showOpsDialog}
+        onOpenChange={setShowOpsDialog}
         featureName={selectedFeature}
       />
-      
+
       {/* Chat Bot */}
-      <ChatBot 
-        isOpen={showChatBot} 
-        onClose={() => setShowChatBot(false)} 
-      />
+      <ChatBot isOpen={showChatBot} onClose={() => setShowChatBot(false)} />
     </div>
   );
 };
