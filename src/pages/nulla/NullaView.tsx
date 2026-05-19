@@ -120,14 +120,14 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
       }}
     >
       <Card
-        className="w-full max-w-5xl"
+        className="w-full max-w-6xl"
         style={{
           border: `2px solid ${data.themeColor}40`,
           borderRadius: "20px",
           backgroundColor: "white",
         }}
       >
-        <CardContent className="p-6 text-center space-y-4">
+        <CardContent className=" text-center space-y-4">
           <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
             <div className="space-y-4">
               <NullaWidget
