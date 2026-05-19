@@ -129,14 +129,14 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
       >
         <CardContent className=" text-center space-y-4">
           <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-            <div className="space-y-4">
+            <div className="order-2 space-y-4 lg:order-1">
               <NullaWidget
                 themeColor={data.themeColor}
                 overrideModeKey={replyModeKey}
               />
               <NullaItems themeColor={data.themeColor} />
             </div>
-            <div>
+            <div className="order-1 lg:order-2">
               <NullaChatBox
                 themeColor={data.themeColor}
                 onReplyModeChange={handleReplyModeChange}

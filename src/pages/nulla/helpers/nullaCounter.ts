@@ -8,7 +8,9 @@ export const toDateSafe = (value: string | null | undefined) => {
 
 export const formatDate = (value: string | null | undefined) => {
   const parsed = toDateSafe(value);
-  return parsed ? parsed.toLocaleString() : "Not yet";
+  return parsed
+    ? parsed.toLocaleString("en-PH", { timeZone: "Asia/Manila" })
+    : "Not yet";
 };
 
 export const formatDuration = (ms: number) => {
@@ -30,13 +32,13 @@ export const getHungryStatus = (
   if (!latestNulla) return "Unknown";
   const lastEaten = toDateSafe(latestNulla.last_eaten);
   if (!lastEaten || !nowMs) return "Unknown";
-  const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const fortyEightHoursMs = 2 * 24 * 60 * 60 * 1000;
   const eatenDurationMs = (latestNulla.eaten_duration ?? 0) * 60 * 60 * 1000;
   const elapsedMs = nowMs - lastEaten.getTime();
-  const hungryAt = lastEaten.getTime() + twoDaysMs + eatenDurationMs;
-  const starvingAt = lastEaten.getTime() + threeDaysMs + eatenDurationMs;
-  if (elapsedMs >= threeDaysMs + eatenDurationMs || nowMs >= starvingAt) {
+  const hungryAt = lastEaten.getTime() + oneDayMs + eatenDurationMs;
+  const starvingAt = lastEaten.getTime() + fortyEightHoursMs + eatenDurationMs;
+  if (elapsedMs >= fortyEightHoursMs + eatenDurationMs || nowMs >= starvingAt) {
     return "Starving";
   }
   const remaining = hungryAt - nowMs;
@@ -50,12 +52,12 @@ export const getStressStatus = (
   if (!latestNulla) return "Unknown";
   const lastPlaying = toDateSafe(latestNulla.last_playing);
   if (!lastPlaying || !nowMs) return "Unknown";
-  const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const fortyEightHoursMs = 2 * 24 * 60 * 60 * 1000;
   const playingDurationMs =
     (latestNulla.playing_duration ?? 0) * 60 * 60 * 1000;
-  const stressAt = lastPlaying.getTime() + twoDaysMs + playingDurationMs;
-  const sickAt = lastPlaying.getTime() + threeDaysMs + playingDurationMs;
+  const stressAt = lastPlaying.getTime() + oneDayMs + playingDurationMs;
+  const sickAt = lastPlaying.getTime() + fortyEightHoursMs + playingDurationMs;
   if (nowMs >= sickAt) return "Sick";
   const remaining = stressAt - nowMs;
   return remaining <= 0 ? "Stressed" : `In ${formatDuration(remaining)}`;

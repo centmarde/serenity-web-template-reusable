@@ -43,7 +43,7 @@ const NullaItems: React.FC<NullaItemsProps> = ({ themeColor }) => {
           type="button"
           onClick={() => setIsFoodOpen(true)}
           disabled={!latestNulla}
-          className="rounded-full p-2 transition-transform hover:scale-105 disabled:opacity-60"
+          className="flex flex-col items-center gap-1 rounded-full p-2 transition-transform hover:scale-105 disabled:opacity-60"
           aria-label="Feed Nulla"
           title="Feed"
         >
@@ -52,12 +52,13 @@ const NullaItems: React.FC<NullaItemsProps> = ({ themeColor }) => {
             alt="Feed"
             className="h-12 w-12"
           />
+          <span className="text-xs font-medium text-gray-700">Feed</span>
         </button>
         <button
           type="button"
           onClick={() => setIsToysOpen(true)}
           disabled={!latestNulla}
-          className="rounded-full p-2 transition-transform hover:scale-105 disabled:opacity-60"
+          className="flex flex-col items-center gap-1 rounded-full p-2 transition-transform hover:scale-105 disabled:opacity-60"
           aria-label="Play with Nulla"
           title="Play"
         >
@@ -66,6 +67,7 @@ const NullaItems: React.FC<NullaItemsProps> = ({ themeColor }) => {
             alt="Play"
             className="h-12 w-12"
           />
+          <span className="text-xs font-medium text-gray-700">Send Toys</span>
         </button>
       </div>
       <NullaFoodDialog open={isFoodOpen} onOpenChange={setIsFoodOpen} />

@@ -11,6 +11,7 @@ import type { UpdateNullaFoodsInput } from "../../../stores/nullaFoodsData";
 import { useNullasStore } from "../../../stores/nullasData";
 import { getNextMode } from "../helpers/nullaCounter";
 import NullaConfirmationDialog from "./NullaConfirmationDialog";
+import RewardTipsWidget from "../components/RewardTipsWidget";
 
 interface NullaFoodDialogProps {
   open: boolean;
@@ -22,55 +23,62 @@ const NullaFoodDialog: React.FC<NullaFoodDialogProps> = ({
   onOpenChange,
 }) => {
   const fetchFoods = useNullaFoodsStore((state) => state.fetchFoods);
-  const latestFoods = useNullaFoodsStore((state) => state.foods[0] ?? null);
-  const getLatestFoods = useNullaFoodsStore((state) => state.getLatestFoods);
+  const foodsData = useNullaFoodsStore((state) => state.foods);
   const updateFoods = useNullaFoodsStore((state) => state.updateFoods);
   const fetchNullas = useNullasStore((state) => state.fetchNullas);
   const updateNulla = useNullasStore((state) => state.updateNulla);
   const latestNulla = useNullasStore((state) => state.nullas[0] ?? null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedFoodId, setSelectedFoodId] = useState<number | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const foods = useMemo(
-    () => [
-      {
-        key: "donuts",
+  const foods = useMemo(() => {
+    const catalog = {
+      donuts: {
         label: "Donut",
         image: "/assets/nulla/foods/donut.png",
-        count: latestFoods?.donuts ?? 0,
         duration: 10,
       },
-      {
-        key: "mousse",
+      mousse: {
         label: "Mousse",
         image: "/assets/nulla/foods/mousse.png",
-        count: latestFoods?.mousse ?? 0,
         duration: 4,
       },
-      {
-        key: "icecream",
+      icecream: {
         label: "Ice Cream",
         image: "/assets/nulla/foods/icecream.png",
-        count: latestFoods?.icecream ?? 0,
         duration: 8,
       },
-      {
-        key: "cupcake",
+      cupcake: {
         label: "Cupcake",
         image: "/assets/nulla/foods/cupcake.png",
-        count: latestFoods?.cupcake ?? 0,
         duration: 5,
       },
-    ],
-    [latestFoods],
-  );
+    };
 
-  const selectedFood = foods.find((food) => food.key === selectedKey) ?? null;
+    return foodsData.map((food) => {
+      const normalizedName = (food.name || "")
+        .toLowerCase()
+        .replace(/\s+/g, "");
+      const meta = catalog[normalizedName as keyof typeof catalog];
 
-  const handlePickFood = (key: string, count: number) => {
-    if (count <= 0) return;
-    setSelectedKey(key);
+      return {
+        id: food.id,
+        key: normalizedName || "unknown",
+        label: meta?.label ?? food.name ?? "Food",
+        image: meta?.image ?? "/assets/nulla/foods/donut.png",
+        count: food.count ?? 0,
+        duration: meta?.duration ?? 6,
+        isUnlocked: food.is_unlock !== false,
+      };
+    });
+  }, [foodsData]);
+
+  const selectedFood = foods.find((food) => food.id === selectedFoodId) ?? null;
+
+  const handlePickFood = (id: number, count: number, isUnlocked: boolean) => {
+    if (!isUnlocked || count <= 0) return;
+    setSelectedFoodId(id);
     setIsConfirmOpen(true);
   };
 
@@ -95,33 +103,14 @@ const NullaFoodDialog: React.FC<NullaFoodDialogProps> = ({
       });
 
       // decrement food inventory safely
-      const latestFoodsRecord = getLatestFoods();
-      if (latestFoodsRecord && latestFoodsRecord.id) {
-        const updated: UpdateNullaFoodsInput = {};
-        switch (selectedFood.key) {
-          case "donuts":
-            updated.donuts = Math.max(0, (latestFoodsRecord.donuts || 0) - 1);
-            break;
-          case "mousse":
-            updated.mousse = Math.max(0, (latestFoodsRecord.mousse || 0) - 1);
-            break;
-          case "icecream":
-            updated.icecream = Math.max(
-              0,
-              (latestFoodsRecord.icecream || 0) - 1,
-            );
-            break;
-          case "cupcake":
-            updated.cupcake = Math.max(0, (latestFoodsRecord.cupcake || 0) - 1);
-            break;
-        }
-        // call updateFoods to persist the new counts
-        await updateFoods(latestFoodsRecord.id, updated);
-      }
+      const updated: UpdateNullaFoodsInput = {
+        count: Math.max(0, (selectedFood.count ?? 0) - 1),
+      };
+      await updateFoods(selectedFood.id, updated);
     } finally {
       setIsUpdating(false);
       setIsConfirmOpen(false);
-      setSelectedKey(null);
+      setSelectedFoodId(null);
       onOpenChange(false);
     }
   };
@@ -142,10 +131,12 @@ const NullaFoodDialog: React.FC<NullaFoodDialogProps> = ({
         <div className="grid grid-cols-2 gap-4">
           {foods.map((food) => (
             <button
-              key={food.key}
+              key={food.id}
               type="button"
-              onClick={() => handlePickFood(food.key, food.count)}
-              disabled={food.count <= 0}
+              onClick={() =>
+                handlePickFood(food.id, food.count, food.isUnlocked)
+              }
+              disabled={food.count <= 0 || !food.isUnlocked}
               className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <img
@@ -160,6 +151,7 @@ const NullaFoodDialog: React.FC<NullaFoodDialogProps> = ({
             </button>
           ))}
         </div>
+        <RewardTipsWidget />
       </DialogContent>
       <NullaConfirmationDialog
         open={isConfirmOpen}
