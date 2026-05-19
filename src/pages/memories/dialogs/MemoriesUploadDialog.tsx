@@ -7,6 +7,7 @@ import {
   Image as ImageIcon,
   FileText,
   Loader2,
+  User,
 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,7 @@ import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
+import { Switch } from "../../../components/ui/switch";
 import { useThemeStore } from "../../../stores/theme";
 import { useMemoriesStore } from "../../../stores/memoriesData";
 import { useMemoryMilestonesStore } from "../../../stores/memoriesMilestoneData";
@@ -66,6 +68,7 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
+  const [isBoyfriend, setIsBoyfriend] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get theme color with fallback
@@ -222,7 +225,10 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
       onClose();
       onSuccess?.();
 
-      setIsRewardsOpen(true);
+      // Only show rewards dialog if not boyfriend mode
+      if (!isBoyfriend) {
+        setIsRewardsOpen(true);
+      }
     } catch (err) {
       // Dismiss loading toast and show error
       toast.dismiss(loadingToastId);
@@ -539,6 +545,26 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
                 onChange={handleImagesSelect}
                 className="hidden"
               />
+            </div>
+
+            {/* Boyfriend Mode Toggle */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="is-boyfriend" className="text-sm font-medium flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Boyfriend Mode
+                </Label>
+                <Switch
+                  id="is-boyfriend"
+                  checked={isBoyfriend}
+                  onCheckedChange={setIsBoyfriend}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                {isBoyfriend
+                  ? "Reward dialog will be skipped for this memory."
+                  : "You'll receive a bundle reward after creating this memory."}
+              </p>
             </div>
 
             {/* Error Message */}
