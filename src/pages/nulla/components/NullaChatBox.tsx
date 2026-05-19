@@ -2,15 +2,28 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Minus, Send } from "lucide-react";
 import { nullaChatService } from "../helpers/nullaChat";
 import { useNullasStore } from "../../../stores/nullasData";
 import { useSettingsStore } from "../../../stores/settings";
 import { getHungryStatus, getStressStatus } from "../helpers/nullaCounter";
 import { useNullaChatStore } from "../../../stores/nullaChatData";
+import { useMemoryMeshStore } from "../../../stores/memoryMeshData";
 
 interface ChatMessage {
-  id: number;
+  id: string;
   text: string;
   isUser: boolean;
 }
@@ -24,10 +37,11 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({
   themeColor,
   onReplyModeChange,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isClearingMemory, setIsClearingMemory] = useState(false);
+  const [callsign, setCallsign] = useState("darling");
   const [gfName, setGfName] = useState("darling");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fetchNullas = useNullasStore((state) => state.fetchNullas);
@@ -35,8 +49,41 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({
   const latestMode = latestNulla?.mode ?? null;
   const loadSettings = useSettingsStore((state) => state.loadSettings);
   const getGfName = useSettingsStore((state) => state.getGfName);
-  const lastAiMessage = useNullaChatStore((state) => state.lastAiMessage);
-  const setLastAiMessage = useNullaChatStore((state) => state.setLastAiMessage);
+  const getCallsign = useSettingsStore((state) => state.getCallsign);
+  const conversation = useNullaChatStore((state) => state.conversation);
+  const addUserMessage = useNullaChatStore((state) => state.addUserMessage);
+  const addAiMessage = useNullaChatStore((state) => state.addAiMessage);
+  const storeLongTermMemory = useNullaChatStore(
+    (state) => state.storeLongTermMemory,
+  );
+  const clearConversation = useNullaChatStore(
+    (state) => state.clearConversation,
+  );
+  const clearLastAiMessage = useNullaChatStore(
+    (state) => state.clearLastAiMessage,
+  );
+  const getConversationContext = useNullaChatStore(
+    (state) => state.getConversationContext,
+  );
+  const fetchMemoryMesh = useMemoryMeshStore((state) => state.fetchEntries);
+  const memoryMeshEntries = useMemoryMeshStore((state) => state.entries);
+  const deleteAllMemoryMesh = useMemoryMeshStore(
+    (state) => state.deleteAllEntries,
+  );
+
+  const buildMemoryMeshContext = (): string => {
+    if (memoryMeshEntries.length === 0) return "";
+    return memoryMeshEntries
+      .slice(0, 5)
+      .map((entry) => {
+        const parts: string[] = [];
+        if (entry.user_chat) parts.push(`User: ${entry.user_chat}`);
+        if (entry.ai_chat) parts.push(`Nulla: ${entry.ai_chat}`);
+        return parts.join(" | ");
+      })
+      .filter(Boolean)
+      .join("\n");
+  };
 
   const getReplyMode = (reply: string): string => {
     const text = reply.toLowerCase();
@@ -87,78 +134,84 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({
     const trimmed = draft.trim();
     if (!trimmed) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), text: trimmed, isUser: true },
-    ]);
+    addUserMessage(trimmed);
     setDraft("");
 
     setIsTyping(true);
+    try {
+      await fetchMemoryMesh();
+    } catch (error) {
+      console.error("Failed to load memory mesh for chat:", error);
+    }
+    const conversationContext = getConversationContext();
+    const memoryContext = buildMemoryMeshContext();
     const response = await nullaChatService.generateReply({
       message: trimmed,
       mode: latestMode,
       gfName,
+      callsign,
       hungryStatus: getHungryStatus(latestNulla, Date.now()),
       stressStatus: getStressStatus(latestNulla, Date.now()),
       lastEaten: latestNulla?.last_eaten ?? null,
       lastPlaying: latestNulla?.last_playing ?? null,
+      conversationContext,
+      memoryContext,
     });
     if (response.success) {
       const replyText = response.reply ?? "Nulla is quiet right now.";
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), text: replyText, isUser: false },
-      ]);
-      setLastAiMessage(replyText);
+      addAiMessage(replyText);
+      storeLongTermMemory(trimmed, replyText);
       const replyMode = getReplyMode(replyText);
       onReplyModeChange?.(replyMode, 5000);
     } else if (response.error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          text: "Nulla is quiet right now. Try again in a moment.",
-          isUser: false,
-        },
-      ]);
-      setLastAiMessage("Nulla is quiet right now. Try again in a moment.");
+      const fallbackReply = "Nulla is quiet right now. Try again in a moment.";
+      addAiMessage(fallbackReply);
+      storeLongTermMemory(trimmed, fallbackReply);
       onReplyModeChange?.("sad", 5000);
     }
     setIsTyping(false);
+  };
+
+  const handleClearMemory = async () => {
+    setIsClearingMemory(true);
+    try {
+      await deleteAllMemoryMesh();
+      clearConversation();
+      clearLastAiMessage();
+      setDraft("");
+      setIsTyping(false);
+    } catch (error) {
+      console.error("Failed to clear memory mesh:", error);
+    } finally {
+      setIsClearingMemory(false);
+    }
   };
 
   useEffect(() => {
     void fetchNullas();
   }, [fetchNullas]);
 
-  useEffect(() => {
-    if (!lastAiMessage || messages.length > 0) return;
-    const timer = window.setTimeout(() => {
-      setMessages([
-        {
-          id: Date.now(),
-          text: lastAiMessage,
-          isUser: false,
-        },
-      ]);
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [lastAiMessage, messages.length]);
+  const messages: ChatMessage[] = conversation.map((message) => ({
+    id: message.id,
+    text: message.text,
+    isUser: message.role === "user",
+  }));
 
   useEffect(() => {
-    const loadGfName = async () => {
+    const loadCallsign = async () => {
       try {
         await loadSettings();
+        setCallsign(getCallsign());
         setGfName(getGfName());
       } catch (error) {
-        console.error("Failed to load gf_name for chat:", error);
+        console.error("Failed to load callsign for chat:", error);
+        setCallsign("darling");
         setGfName("darling");
       }
     };
 
-    void loadGfName();
-  }, [loadSettings, getGfName]);
+    void loadCallsign();
+  }, [loadSettings, getCallsign, getGfName]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -199,18 +252,65 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({
               </div>
             </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsMinimized((prev) => !prev);
-            }}
-            className="p-1 h-7 w-7 text-white hover:bg-white hover:bg-opacity-20 rounded-full"
-          >
-            <Minus size={14} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(event) => event.stopPropagation()}
+                  className="h-7 px-2 text-xs text-white hover:bg-white hover:bg-opacity-20"
+                >
+                  Clear memory
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogMedia>
+                    <img
+                      src="/assets/nulla/nulla.png"
+                      alt="Nulla"
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Clear Nulla memory?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will delete all long-term memory entries stored for
+                    Nulla. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    onClick={(event) => event.stopPropagation()}
+                    disabled={isClearingMemory}
+                  >
+                    Keep memory
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleClearMemory();
+                    }}
+                    className="bg-red-600 text-white hover:bg-red-700"
+                    disabled={isClearingMemory}
+                  >
+                    {isClearingMemory ? "Clearing..." : "Clear memory"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsMinimized((prev) => !prev);
+              }}
+              className="p-1 h-7 w-7 text-white hover:bg-white hover:bg-opacity-20 rounded-full"
+            >
+              <Minus size={14} />
+            </Button>
+          </div>
         </div>
 
         {!isMinimized && (

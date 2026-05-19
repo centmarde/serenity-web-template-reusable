@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNullasStore } from "../../../stores/nullasData";
-import { formatDateTime } from "../../../lib/helpers";
+import { formatDate } from "../../../lib/helpers";
 import NullaFoodDialog from "../dialogs/NullaFoodDialog";
 import NullaToysDialog from "../dialogs/NullaToysDialog";
 
@@ -13,6 +13,9 @@ const NullaItems: React.FC<NullaItemsProps> = ({ themeColor }) => {
   const latestNulla = useNullasStore((state) => state.nullas[0] ?? null);
   const [isFoodOpen, setIsFoodOpen] = useState(false);
   const [isToysOpen, setIsToysOpen] = useState(false);
+
+  const formatDateOnly = (value?: string | null): string =>
+    value ? formatDate(value) : "Not yet";
 
   useEffect(() => {
     void fetchNullas();
@@ -29,11 +32,11 @@ const NullaItems: React.FC<NullaItemsProps> = ({ themeColor }) => {
       }}
     >
       <div className="text-center text-sm text-gray-700">
-        <strong>Last eaten:</strong> {formatDateTime(latestNulla?.last_eaten)}
+        <strong>Last eaten:</strong> {formatDateOnly(latestNulla?.last_eaten)}
       </div>
       <div className="text-center text-sm text-gray-700">
         <strong>Last playing:</strong>{" "}
-        {formatDateTime(latestNulla?.last_playing)}
+        {formatDateOnly(latestNulla?.last_playing)}
       </div>
       <div className="flex items-center justify-center gap-6">
         <button
