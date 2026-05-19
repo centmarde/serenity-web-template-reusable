@@ -4,24 +4,24 @@ import { supabase } from "../lib/supabase";
 export interface NullaFoodsRecord {
   id: number;
   created_at: string;
-  donuts: number | null;
-  mousse: number | null;
-  icecream: number | null;
-  cupcake: number | null;
+  count: number | null;
+  is_unlock: boolean | null;
+  price: number | null;
+  name: string | null;
 }
 
 export interface CreateNullaFoodsInput {
-  donuts?: number | null;
-  mousse?: number | null;
-  icecream?: number | null;
-  cupcake?: number | null;
+  count?: number | null;
+  is_unlock?: boolean | null;
+  price?: number | null;
+  name?: string | null;
 }
 
 export interface UpdateNullaFoodsInput {
-  donuts?: number | null;
-  mousse?: number | null;
-  icecream?: number | null;
-  cupcake?: number | null;
+  count?: number | null;
+  is_unlock?: boolean | null;
+  price?: number | null;
+  name?: string | null;
 }
 
 interface NullaFoodsStore {
@@ -89,10 +89,10 @@ export const useNullaFoodsStore = create<NullaFoodsStore>((set, get) => ({
         .from("nulla_foods")
         .insert([
           {
-            donuts: input.donuts ?? null,
-            mousse: input.mousse ?? null,
-            icecream: input.icecream ?? null,
-            cupcake: input.cupcake ?? null,
+            count: input.count ?? null,
+            is_unlock: input.is_unlock ?? null,
+            price: input.price ?? null,
+            name: input.name ?? null,
           },
         ])
         .select()
@@ -129,10 +129,10 @@ export const useNullaFoodsStore = create<NullaFoodsStore>((set, get) => ({
     try {
       const updateData: UpdateNullaFoodsInput = {};
 
-      if (input.donuts !== undefined) updateData.donuts = input.donuts;
-      if (input.mousse !== undefined) updateData.mousse = input.mousse;
-      if (input.icecream !== undefined) updateData.icecream = input.icecream;
-      if (input.cupcake !== undefined) updateData.cupcake = input.cupcake;
+      if (input.count !== undefined) updateData.count = input.count;
+      if (input.is_unlock !== undefined) updateData.is_unlock = input.is_unlock;
+      if (input.price !== undefined) updateData.price = input.price;
+      if (input.name !== undefined) updateData.name = input.name;
 
       const { data, error } = await supabase
         .from("nulla_foods")

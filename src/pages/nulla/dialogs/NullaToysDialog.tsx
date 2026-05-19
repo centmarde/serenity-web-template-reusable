@@ -12,6 +12,7 @@ import type { UpdateNullaToysInput } from "../../../stores/nullaToysData";
 import { useNullasStore } from "../../../stores/nullasData";
 import { getNextMode } from "../helpers/nullaCounter";
 import NullaConfirmationDialog from "./NullaConfirmationDialog";
+import RewardTipsWidget from "../components/RewardTipsWidget";
 
 interface NullaToysDialogProps {
   open: boolean;
@@ -23,55 +24,60 @@ const NullaToysDialog: React.FC<NullaToysDialogProps> = ({
   onOpenChange,
 }) => {
   const fetchToys = useNullaToysStore((state) => state.fetchToys);
-  const latestToys = useNullaToysStore((state) => state.toys[0] ?? null);
-  const getLatestToys = useNullaToysStore((state) => state.getLatestToys);
+  const toysData = useNullaToysStore((state) => state.toys);
   const updateToys = useNullaToysStore((state) => state.updateToys);
   const fetchNullas = useNullasStore((state) => state.fetchNullas);
   const updateNulla = useNullasStore((state) => state.updateNulla);
   const latestNulla = useNullasStore((state) => state.nullas[0] ?? null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedToyId, setSelectedToyId] = useState<number | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const toys = useMemo(
-    () => [
-      {
-        key: "mouse",
+  const toys = useMemo(() => {
+    const catalog = {
+      mouse: {
         label: "Mouse",
         image: "/assets/nulla/toys/mouse.png",
-        count: latestToys?.mouse ?? 0,
         duration: 8,
       },
-      {
-        key: "softblocks",
+      softblocks: {
         label: "Soft Blocks",
         image: "/assets/nulla/toys/softblocks.png",
-        count: latestToys?.softblocks ?? 0,
         duration: 12,
       },
-      {
-        key: "plushdino",
+      plushdino: {
         label: "Plush Dino",
         image: "/assets/nulla/toys/plushdino.png",
-        count: latestToys?.plushdino ?? 0,
         duration: 10,
       },
-      {
-        key: "crystalball",
+      crystalball: {
         label: "Crystal Ball",
         image: "/assets/nulla/toys/crystalball.png",
-        count: latestToys?.crystalball ?? 0,
         duration: 3,
       },
-    ],
-    [latestToys],
-  );
+    };
 
-  const selectedToy = toys.find((toy) => toy.key === selectedKey) ?? null;
+    return toysData.map((toy) => {
+      const normalizedName = (toy.name || "").toLowerCase().replace(/\s+/g, "");
+      const meta = catalog[normalizedName as keyof typeof catalog];
 
-  const handlePickToy = (key: string, count: number) => {
-    if (count <= 0) return;
-    setSelectedKey(key);
+      return {
+        id: toy.id,
+        key: normalizedName || "unknown",
+        label: meta?.label ?? toy.name ?? "Toy",
+        image: meta?.image ?? "/assets/nulla/toys/mouse.png",
+        count: toy.count ?? 0,
+        duration: meta?.duration ?? 6,
+        isUnlocked: toy.is_unlock !== false,
+      };
+    });
+  }, [toysData]);
+
+  const selectedToy = toys.find((toy) => toy.id === selectedToyId) ?? null;
+
+  const handlePickToy = (id: number, count: number, isUnlocked: boolean) => {
+    if (!isUnlocked || count <= 0) return;
+    setSelectedToyId(id);
     setIsConfirmOpen(true);
   };
 
@@ -96,38 +102,14 @@ const NullaToysDialog: React.FC<NullaToysDialogProps> = ({
       });
 
       // decrement toy inventory safely
-      const latestToysRecord = getLatestToys();
-      if (latestToysRecord && latestToysRecord.id) {
-        const updated: UpdateNullaToysInput = {};
-        switch (selectedToy.key) {
-          case "mouse":
-            updated.mouse = Math.max(0, (latestToysRecord.mouse || 0) - 1);
-            break;
-          case "softblocks":
-            updated.softblocks = Math.max(
-              0,
-              (latestToysRecord.softblocks || 0) - 1,
-            );
-            break;
-          case "plushdino":
-            updated.plushdino = Math.max(
-              0,
-              (latestToysRecord.plushdino || 0) - 1,
-            );
-            break;
-          case "crystalball":
-            updated.crystalball = Math.max(
-              0,
-              (latestToysRecord.crystalball || 0) - 1,
-            );
-            break;
-        }
-        await updateToys(latestToysRecord.id, updated);
-      }
+      const updated: UpdateNullaToysInput = {
+        count: Math.max(0, (selectedToy.count ?? 0) - 1),
+      };
+      await updateToys(selectedToy.id, updated);
     } finally {
       setIsUpdating(false);
       setIsConfirmOpen(false);
-      setSelectedKey(null);
+      setSelectedToyId(null);
       onOpenChange(false);
     }
   };
@@ -148,10 +130,10 @@ const NullaToysDialog: React.FC<NullaToysDialogProps> = ({
         <div className="grid grid-cols-2 gap-4">
           {toys.map((toy) => (
             <button
-              key={toy.key}
+              key={toy.id}
               type="button"
-              onClick={() => handlePickToy(toy.key, toy.count)}
-              disabled={toy.count <= 0}
+              onClick={() => handlePickToy(toy.id, toy.count, toy.isUnlocked)}
+              disabled={toy.count <= 0 || !toy.isUnlocked}
               className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <img
@@ -166,6 +148,7 @@ const NullaToysDialog: React.FC<NullaToysDialogProps> = ({
             </button>
           ))}
         </div>
+        <RewardTipsWidget />
       </DialogContent>
       <NullaConfirmationDialog
         open={isConfirmOpen}

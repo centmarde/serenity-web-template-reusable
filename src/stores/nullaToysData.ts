@@ -4,24 +4,24 @@ import { supabase } from "../lib/supabase";
 export interface NullaToysRecord {
   id: number;
   created_at: string;
-  mouse: number | null;
-  softblocks: number | null;
-  plushdino: number | null;
-  crystalball: number | null;
+  count: number | null;
+  is_unlock: boolean | null;
+  price: number | null;
+  name: string | null;
 }
 
 export interface CreateNullaToysInput {
-  mouse?: number | null;
-  softblocks?: number | null;
-  plushdino?: number | null;
-  crystalball?: number | null;
+  count?: number | null;
+  is_unlock?: boolean | null;
+  price?: number | null;
+  name?: string | null;
 }
 
 export interface UpdateNullaToysInput {
-  mouse?: number | null;
-  softblocks?: number | null;
-  plushdino?: number | null;
-  crystalball?: number | null;
+  count?: number | null;
+  is_unlock?: boolean | null;
+  price?: number | null;
+  name?: string | null;
 }
 
 interface NullaToysStore {
@@ -89,10 +89,10 @@ export const useNullaToysStore = create<NullaToysStore>((set, get) => ({
         .from("nulla_toys")
         .insert([
           {
-            mouse: input.mouse ?? null,
-            softblocks: input.softblocks ?? null,
-            plushdino: input.plushdino ?? null,
-            crystalball: input.crystalball ?? null,
+            count: input.count ?? null,
+            is_unlock: input.is_unlock ?? null,
+            price: input.price ?? null,
+            name: input.name ?? null,
           },
         ])
         .select()
@@ -127,12 +127,10 @@ export const useNullaToysStore = create<NullaToysStore>((set, get) => ({
     try {
       const updateData: UpdateNullaToysInput = {};
 
-      if (input.mouse !== undefined) updateData.mouse = input.mouse;
-      if (input.softblocks !== undefined)
-        updateData.softblocks = input.softblocks;
-      if (input.plushdino !== undefined) updateData.plushdino = input.plushdino;
-      if (input.crystalball !== undefined)
-        updateData.crystalball = input.crystalball;
+      if (input.count !== undefined) updateData.count = input.count;
+      if (input.is_unlock !== undefined) updateData.is_unlock = input.is_unlock;
+      if (input.price !== undefined) updateData.price = input.price;
+      if (input.name !== undefined) updateData.name = input.name;
 
       const { data, error } = await supabase
         .from("nulla_toys")
