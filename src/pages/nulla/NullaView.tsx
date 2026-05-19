@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import NullaWidget from "./components/NullaWidget";
 import NullaChatBox from "./components/NullaChatBox";
+import NullaItems from "./components/NullaItems";
 
 interface ComponentData {
   themeColor: string;
@@ -135,6 +136,7 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
             themeColor={data.themeColor}
             overrideModeKey={replyModeKey}
           />
+          <NullaItems themeColor={data.themeColor} />
 
           <div className="pt-2">
             <Button

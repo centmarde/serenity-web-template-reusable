@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { nullaModesImages } from "../helpers/nullaModesImages";
 import { useNullasStore } from "../../../stores/nullasData";
-import { toDateSafe } from "../helpers/nullaCounter";
+import { getNextMode } from "../helpers/nullaCounter";
 
 interface NullaWidgetProps {
   themeColor: string;
@@ -38,57 +38,27 @@ const NullaWidget: React.FC<NullaWidgetProps> = ({
     return nextMode ?? nullaModesImages[0];
   }, [latestNulla, modeMap, overrideModeKey]);
 
+  const isBrowserReload = () => {
+    const entries = performance.getEntriesByType("navigation");
+    if (entries.length > 0) {
+      return (entries[0] as PerformanceNavigationTiming).type === "reload";
+    }
+
+    return performance.navigation?.type === 1;
+  };
+
   useEffect(() => {
     const loadLatest = async () => {
+      if (!isBrowserReload()) return;
+
       await fetchNullas();
       const latest = getLatestNulla();
 
       if (!latest) return;
-
       const now = Date.now();
-      const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-      const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-      const eatenDurationMs = (latest.eaten_duration ?? 0) * 60 * 60 * 1000;
-      const playingDurationMs = (latest.playing_duration ?? 0) * 60 * 60 * 1000;
-
-      const lastEaten = toDateSafe(latest.last_eaten);
-      const lastPlaying = toDateSafe(latest.last_playing);
-
-      const hungryAt = lastEaten
-        ? lastEaten.getTime() + twoDaysMs + eatenDurationMs
-        : null;
-      const stressAt = lastPlaying
-        ? lastPlaying.getTime() + twoDaysMs + playingDurationMs
-        : null;
-      const starvingAt = lastEaten
-        ? lastEaten.getTime() + threeDaysMs + eatenDurationMs
-        : null;
-      const sickAt = lastPlaying
-        ? lastPlaying.getTime() + threeDaysMs + playingDurationMs
-        : null;
-
-      const isStarving = starvingAt ? now >= starvingAt : false;
-      const isSick = sickAt ? now >= sickAt : false;
-
-      if (isStarving && isSick && latest.mode !== "dying") {
-        await updateNulla(latest.id, { mode: "dying" });
-        return;
-      }
-
-      if (isStarving && latest.mode !== "starving") {
-        await updateNulla(latest.id, { mode: "starving" });
-        return;
-      }
-
-      if (isSick && latest.mode !== "sick") {
-        await updateNulla(latest.id, { mode: "sick" });
-        return;
-      }
-
-      if (hungryAt && now >= hungryAt && latest.mode !== "hungry") {
-        await updateNulla(latest.id, { mode: "hungry" });
-      } else if (stressAt && now >= stressAt && latest.mode !== "stress") {
-        await updateNulla(latest.id, { mode: "stress" });
+      const nextMode = getNextMode(latest, now);
+      if (nextMode && nextMode !== latest.mode) {
+        await updateNulla(latest.id, { mode: nextMode });
       }
     };
 

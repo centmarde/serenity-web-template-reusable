@@ -33,9 +33,12 @@ export const getHungryStatus = (
   const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
   const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
   const eatenDurationMs = (latestNulla.eaten_duration ?? 0) * 60 * 60 * 1000;
+  const elapsedMs = nowMs - lastEaten.getTime();
   const hungryAt = lastEaten.getTime() + twoDaysMs + eatenDurationMs;
   const starvingAt = lastEaten.getTime() + threeDaysMs + eatenDurationMs;
-  if (nowMs >= starvingAt) return "Starving";
+  if (elapsedMs >= threeDaysMs + eatenDurationMs || nowMs >= starvingAt) {
+    return "Starving";
+  }
   const remaining = hungryAt - nowMs;
   return remaining <= 0 ? "Hungry" : `In ${formatDuration(remaining)}`;
 };
@@ -56,6 +59,29 @@ export const getStressStatus = (
   if (nowMs >= sickAt) return "Sick";
   const remaining = stressAt - nowMs;
   return remaining <= 0 ? "Stressed" : `In ${formatDuration(remaining)}`;
+};
+
+export const getNextMode = (latestNulla: NullaRecord | null, nowMs: number) => {
+  if (!latestNulla) return null;
+  const hungryStatus = getHungryStatus(latestNulla, nowMs);
+  const stressStatus = getStressStatus(latestNulla, nowMs);
+
+  if (hungryStatus === "Unknown" || stressStatus === "Unknown") return null;
+
+  if (hungryStatus === "Starving" && stressStatus === "Sick") {
+    return "dying";
+  }
+
+  if (hungryStatus === "Starving") return "starving";
+  if (stressStatus === "Sick") return "sick";
+  if (stressStatus === "Stressed") return "stress";
+  if (hungryStatus === "Hungry") return "hungry";
+
+  if (hungryStatus.startsWith("In ") && stressStatus.startsWith("In ")) {
+    return "happy";
+  }
+
+  return null;
 };
 
 export const getSinceLastEaten = (
