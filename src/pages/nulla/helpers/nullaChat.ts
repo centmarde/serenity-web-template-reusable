@@ -9,10 +9,13 @@ export interface NullaChatRequest {
   message: string;
   mode?: string | null;
   gfName?: string | null;
+  callsign?: string | null;
   hungryStatus?: string | null;
   stressStatus?: string | null;
   lastEaten?: string | null;
   lastPlaying?: string | null;
+  conversationContext?: string;
+  memoryContext?: string;
 }
 
 export interface NullaChatResponse {
@@ -82,7 +85,7 @@ class NullaChatService {
   private buildSystemPrompt(request: NullaChatRequest): string {
     const label = this.formatModeLabel(request.mode);
     const personality = this.getModePersonality(request.mode);
-    const addressee = this.formatAddressee(request.gfName);
+    const addressee = this.formatAddressee(request.callsign, request.gfName);
     const hunger = this.formatStatus("Hunger", request.hungryStatus);
     const stress = this.formatStatus("Stress", request.stressStatus);
     const lastEaten = this.formatLastEvent("last eaten", request.lastEaten);
@@ -90,14 +93,34 @@ class NullaChatService {
       "last played",
       request.lastPlaying,
     );
+    const recentConversation = this.formatContextBlock(
+      "Recent conversation",
+      request.conversationContext,
+    );
+    const longTermMemory = this.formatContextBlock(
+      "Long-term memory",
+      request.memoryContext,
+    );
+    const contextBlocks = [recentConversation, longTermMemory]
+      .filter(Boolean)
+      .join("\n");
 
-    return `You are Nulla, a sweet, playful companion. Lore: Your name is Nulla. You are an alien from outer space with digital powers. Authorities found you on Earth. You can hide inside any website and chose this low-key one to stay. Current mood: ${label}. ${personality} Always address the user as "${addressee}". Status: ${hunger} ${stress} ${lastEaten} ${lastPlaying} Keep replies concise, warm, and supportive (1-2 sentences).`;
+    return `You are Nulla, a sweet, playful companion. Lore: Your name is Nulla. You are an alien from outer space with digital powers. Authorities found you on Earth. You can hide inside any website and chose this low-key one to stay. Current mood: ${label}. ${personality} Always address the user as "${addressee}". Status: ${hunger} ${stress} ${lastEaten} ${lastPlaying} ${contextBlocks ? `\n${contextBlocks}\n` : ""}Keep a neutral but cute tone; never be needy, clingy, guilt-tripping, or overly dependent. Use memory only when relevant and do not invent details. Keep replies concise, warm, and supportive (1-2 sentences).`;
   }
 
-  private formatAddressee(gfName?: string | null): string {
-    const safeName = (gfName ?? "").trim();
-    if (!safeName) return "master darling";
-    return `master ${safeName}`;
+  private formatAddressee(
+    callsign?: string | null,
+    gfName?: string | null,
+  ): string {
+    const safeCallsign = (callsign ?? "").trim();
+    const safeGfName = (gfName ?? "").trim();
+
+    if (safeCallsign && safeGfName) {
+      return `${safeCallsign} ${safeGfName}`.trim();
+    }
+    if (safeCallsign) return safeCallsign;
+    if (safeGfName) return safeGfName;
+    return "darling";
   }
 
   private formatStatus(label: string, value?: string | null): string {
@@ -149,6 +172,12 @@ class NullaChatService {
 
   private buildUserPrompt(message: string): string {
     return `User says: "${message}"\nReply as Nulla.`;
+  }
+
+  private formatContextBlock(label: string, value?: string | null): string {
+    const safeValue = (value ?? "").trim();
+    if (!safeValue) return "";
+    return `${label}:\n${safeValue}`;
   }
 }
 

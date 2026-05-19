@@ -114,29 +114,35 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-6"
+      className="min-h-screen flex items-center justify-center px-4 py-6 lg:px-10"
       style={{
         background: `linear-gradient(135deg, ${data.themeColor}20, ${data.themeColor}40, #ffffff)`,
       }}
     >
       <Card
-        className="w-full max-w-xl"
+        className="w-full max-w-6xl"
         style={{
           border: `2px solid ${data.themeColor}40`,
           borderRadius: "20px",
           backgroundColor: "white",
         }}
       >
-        <CardContent className="p-6 text-center space-y-4">
-          <NullaChatBox
-            themeColor={data.themeColor}
-            onReplyModeChange={handleReplyModeChange}
-          />
-          <NullaWidget
-            themeColor={data.themeColor}
-            overrideModeKey={replyModeKey}
-          />
-          <NullaItems themeColor={data.themeColor} />
+        <CardContent className=" text-center space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+            <div className="space-y-4">
+              <NullaWidget
+                themeColor={data.themeColor}
+                overrideModeKey={replyModeKey}
+              />
+              <NullaItems themeColor={data.themeColor} />
+            </div>
+            <div>
+              <NullaChatBox
+                themeColor={data.themeColor}
+                onReplyModeChange={handleReplyModeChange}
+              />
+            </div>
+          </div>
 
           <div className="pt-2">
             <Button
