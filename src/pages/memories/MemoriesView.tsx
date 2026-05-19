@@ -1,17 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Heart } from 'lucide-react';
 import MemoriesWidget from './components/MemoriesWidget';
 import { MemoriesUploadDialog } from './dialogs/MemoriesUploadDialog';
 import { Button } from '../../components/ui/button';
 import { useThemeStore } from '../../stores/theme';
 import { useSettingsStore } from '../../stores/settings';
+import { useMemoriesStore } from '../../stores/memoriesData';
 
 export const MemoriesView: React.FC = () => {
   const { getCurrentThemeColor, waitForInitialization } = useThemeStore();
   const { loadSettings } = useSettingsStore();
+  const { checkCanAddMemory, canAddMemory } = useMemoriesStore();
   const [themeColor, setThemeColor] = useState<string>('#F2A6A6');
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0); // Key to trigger widget reload
+
+  // Refresh data after successful memory creation
+  const handleMemorySuccess = useCallback(async () => {
+    // Force refresh the permission check since a new memory was just created
+    await checkCanAddMemory(true);
+    // Trigger widget reload by incrementing key
+    setReloadKey(prev => prev + 1);
+    // Close the dialog
+    setIsUploadDialogOpen(false);
+  }, [checkCanAddMemory]);
 
   useEffect(() => {
     const initializeTheme = async () => {
@@ -20,6 +33,10 @@ export const MemoriesView: React.FC = () => {
         await loadSettings();
         const color = getCurrentThemeColor();
         setThemeColor(color);
+        
+        // Check if user can add a new memory
+        await checkCanAddMemory();
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to load theme:', error);
@@ -29,7 +46,7 @@ export const MemoriesView: React.FC = () => {
       }
     };
     initializeTheme();
-  }, [getCurrentThemeColor, waitForInitialization, loadSettings]);
+  }, [getCurrentThemeColor, waitForInitialization, loadSettings, checkCanAddMemory]);
 
   if (isLoading) {
     return (
@@ -77,7 +94,8 @@ export const MemoriesView: React.FC = () => {
           {/* Add Memory Button */}
           <Button
             onClick={() => setIsUploadDialogOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            disabled={canAddMemory === false}
+            className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             style={{
               backgroundColor: themeColor,
               borderColor: themeColor,
@@ -91,7 +109,7 @@ export const MemoriesView: React.FC = () => {
 
       {/* Timeline Section */}
       <div className="relative">
-        <MemoriesWidget />
+        <MemoriesWidget key={reloadKey} />
       </div>
 
       {/* Footer Section */}
@@ -116,7 +134,8 @@ export const MemoriesView: React.FC = () => {
       {/* Floating Action Button - Alternative placement */}
       <Button
         onClick={() => setIsUploadDialogOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110 z-50"
+        disabled={canAddMemory === false}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110 z-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         style={{
           backgroundColor: themeColor,
           borderColor: themeColor,
@@ -129,10 +148,7 @@ export const MemoriesView: React.FC = () => {
       <MemoriesUploadDialog
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
-        onSuccess={() => {
-          // Optionally refresh the memories widget or show success message
-          setIsUploadDialogOpen(false);
-        }}
+        onSuccess={handleMemorySuccess}
       />
     </div>
   );

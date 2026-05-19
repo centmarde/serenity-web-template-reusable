@@ -1,48 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Timeline } from '@/components/ui/timeline';
-import { Heart, Edit3, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
+import React, { useState, useEffect } from "react";
+import { Timeline } from "@/components/ui/timeline";
+import { Heart, Edit3, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { DeleteMemoriesDialog } from '../dialogs/DeleteMemoriesDialog';
-import { EditMemoriesDialog } from '../dialogs/EditMemoriesDialog';
-import { useThemeStore } from '../../../stores/theme';
-import { useMemoriesStore, type Memory } from '../../../stores/memoriesData';
-import { useMemoryMilestonesStore } from '../../../stores/memoriesMilestoneData';
-import { useMemoryImagesStore } from '../../../stores/memoriesImagesData';
-
+} from "@/components/ui/dialog";
+import { DeleteMemoriesDialog } from "../dialogs/DeleteMemoriesDialog";
+import { EditMemoriesDialog } from "../dialogs/EditMemoriesDialog";
+import { useThemeStore } from "../../../stores/theme";
+import { useMemoriesStore, type Memory } from "../../../stores/memoriesData";
+import { useMemoryMilestonesStore } from "../../../stores/memoriesMilestoneData";
+import { useMemoryImagesStore } from "../../../stores/memoriesImagesData";
 
 export const MemoriesWidget: React.FC = () => {
   const { getCurrentThemeColor } = useThemeStore();
   const memoriesStore = useMemoriesStore();
   const milestonesStore = useMemoryMilestonesStore();
   const imagesStore = useMemoryImagesStore();
-  
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  
+
   // Get theme color with fallback
   let themeColor: string;
   try {
     themeColor = getCurrentThemeColor();
   } catch {
-    themeColor = '#F2A6A6'; // Fallback color
+    themeColor = "#F2A6A6"; // Fallback color
   }
 
   // Initialize data from Supabase
@@ -52,16 +50,18 @@ export const MemoriesWidget: React.FC = () => {
         setIsLoading(true);
         setError(null);
 
-        // Load all data from stores
+        // Load all data from stores and check permissions
         await Promise.all([
           memoriesStore.fetchMemories(),
           milestonesStore.fetchMilestones(),
-          imagesStore.fetchImages()
+          imagesStore.fetchImages(),
+          memoriesStore.checkCanAddMemory(),
         ]);
 
         setIsLoading(false);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load memories';
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load memories";
         setError(errorMessage);
         setIsLoading(false);
       }
@@ -72,14 +72,14 @@ export const MemoriesWidget: React.FC = () => {
 
   // Format date for display
   const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'No date';
-    
+    if (!dateString) return "No date";
+
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch {
       return dateString;
@@ -124,7 +124,9 @@ export const MemoriesWidget: React.FC = () => {
     return (
       <div className="w-full flex items-center justify-center py-20">
         <div className="text-center space-y-4">
-          <p className="text-red-500 text-base sm:text-lg">Failed to load memories</p>
+          <p className="text-red-500 text-base sm:text-lg">
+            Failed to load memories
+          </p>
           <p className="text-neutral-600 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -157,13 +159,13 @@ export const MemoriesWidget: React.FC = () => {
   // Convert Supabase data to timeline format
   const timelineData = memoriesStore.memories.map((memory) => {
     // Find related milestones using the new schema
-    const milestones = milestonesStore.milestones.filter(m => 
-      m.memories_id === memory.id
+    const milestones = milestonesStore.milestones.filter(
+      (m) => m.memories_id === memory.id,
     );
 
     // Find related images using the new schema
-    const images = imagesStore.images.filter(img => 
-      img.memories_id === memory.id
+    const images = imagesStore.images.filter(
+      (img) => img.memories_id === memory.id,
     );
 
     return {
@@ -174,18 +176,18 @@ export const MemoriesWidget: React.FC = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex-1 min-w-0">
-                  <h3 
+                  <h3
                     className="text-base sm:text-xl font-semibold text-neutral-800 dark:text-neutral-200 leading-tight"
                     style={{
-                      wordBreak: 'break-word',
-                      display: '-webkit-box',
+                      wordBreak: "break-word",
+                      display: "-webkit-box",
                       WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      lineHeight: '1.3'
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      lineHeight: "1.3",
                     }}
                   >
-                    {memory.title || 'Untitled Memory'}
+                    {memory.title || "Untitled Memory"}
                   </h3>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -202,7 +204,8 @@ export const MemoriesWidget: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteMemory(memory)}
-                    className="h-8 w-8 p-0 hover:bg-red-50 text-red-600 hover:text-red-700"
+                    disabled={memoriesStore.latestMemoryId === memory.id}
+                    className="h-8 w-8 p-0 hover:bg-red-50 text-red-600 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -213,21 +216,21 @@ export const MemoriesWidget: React.FC = () => {
                   {memory.description}
                 </p>
               )}
-              
+
               {/* Display multiple milestones/details with bullets */}
               {milestones.length > 0 && (
                 <div className="mb-4">
                   <ul className="space-y-1">
                     {milestones.map((milestone, index) => (
-                      <li 
+                      <li
                         key={index}
                         className="flex items-center gap-2 text-xs sm:text-sm"
                       >
-                        <div 
+                        <div
                           className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: themeColor }}
                         />
-                        <span 
+                        <span
                           className="font-medium"
                           style={{ color: themeColor }}
                         >
@@ -238,7 +241,7 @@ export const MemoriesWidget: React.FC = () => {
                   </ul>
                 </div>
               )}
-              
+
               {/* Display images with carousel and clickable full view */}
               {images.length > 0 && (
                 <div className="mt-4 w-full">
@@ -247,25 +250,27 @@ export const MemoriesWidget: React.FC = () => {
                     <Dialog>
                       <DialogTrigger asChild>
                         <img
-                          src={images[0].image_src || ''}
-                          alt={memory.title || 'Memory'}
+                          src={images[0].image_src || ""}
+                          alt={memory.title || "Memory"}
                           className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.style.display = "none";
                           }}
                         />
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh]">
                         <DialogHeader>
-                          <DialogTitle className="text-base sm:text-lg">{memory.title || 'Memory Image'}</DialogTitle>
+                          <DialogTitle className="text-base sm:text-lg">
+                            {memory.title || "Memory Image"}
+                          </DialogTitle>
                         </DialogHeader>
                         <div className="flex justify-center">
                           <img
-                            src={images[0].image_src || ''}
-                            alt={memory.title || 'Memory'}
+                            src={images[0].image_src || ""}
+                            alt={memory.title || "Memory"}
                             className="max-w-full max-h-[70vh] object-contain rounded-lg"
                             onError={(e) => {
-                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.style.display = "none";
                             }}
                           />
                         </div>
@@ -280,25 +285,28 @@ export const MemoriesWidget: React.FC = () => {
                             <Dialog>
                               <DialogTrigger asChild>
                                 <img
-                                  src={img.image_src || ''}
-                                  alt={`${memory.title || 'Memory'} ${index + 1}`}
+                                  src={img.image_src || ""}
+                                  alt={`${memory.title || "Memory"} ${index + 1}`}
                                   className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                   onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.style.display = "none";
                                   }}
                                 />
                               </DialogTrigger>
                               <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh]">
                                 <DialogHeader>
-                                  <DialogTitle className="text-base sm:text-lg">{memory.title || 'Memory Image'} ({index + 1} of {images.length})</DialogTitle>
+                                  <DialogTitle className="text-base sm:text-lg">
+                                    {memory.title || "Memory Image"} (
+                                    {index + 1} of {images.length})
+                                  </DialogTitle>
                                 </DialogHeader>
                                 <div className="flex justify-center">
                                   <img
-                                    src={img.image_src || ''}
-                                    alt={`${memory.title || 'Memory'} ${index + 1}`}
+                                    src={img.image_src || ""}
+                                    alt={`${memory.title || "Memory"} ${index + 1}`}
                                     className="max-w-full max-h-[70vh] object-contain rounded-lg"
                                     onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
+                                      e.currentTarget.style.display = "none";
                                     }}
                                   />
                                 </div>
@@ -307,19 +315,25 @@ export const MemoriesWidget: React.FC = () => {
                           </CarouselItem>
                         ))}
                       </CarouselContent>
-                      <CarouselPrevious 
-                        className="left-2" 
-                        style={{ backgroundColor: `${themeColor}90`, borderColor: themeColor }}
+                      <CarouselPrevious
+                        className="left-2"
+                        style={{
+                          backgroundColor: `${themeColor}90`,
+                          borderColor: themeColor,
+                        }}
                       />
-                      <CarouselNext 
-                        className="right-2" 
-                        style={{ backgroundColor: `${themeColor}90`, borderColor: themeColor }}
+                      <CarouselNext
+                        className="right-2"
+                        style={{
+                          backgroundColor: `${themeColor}90`,
+                          borderColor: themeColor,
+                        }}
                       />
                     </Carousel>
                   )}
                 </div>
               )}
-              
+
               {/* No fallback needed since we get all images from the same source */}
             </div>
           </div>
@@ -331,14 +345,14 @@ export const MemoriesWidget: React.FC = () => {
   return (
     <>
       <Timeline data={timelineData} />
-      
+
       {/* Edit Memory Dialog */}
       <EditMemoriesDialog
         isOpen={showEditDialog}
         onClose={handleCloseEditDialog}
         memory={selectedMemory}
       />
-      
+
       {/* Delete Memory Dialog */}
       <DeleteMemoriesDialog
         isOpen={showDeleteDialog}

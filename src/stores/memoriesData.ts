@@ -36,9 +36,13 @@ interface MemoriesStore {
   loading: boolean;
   error: string | null;
   isInitialized: boolean;
+  canAddMemory: boolean | null; // null = checking, false = disabled, true = enabled
+  latestMemoryId: number | null; // ID of the latest memory if it's less than 1 day old
+  permissionsChecked: boolean; // tracks if permissions have been checked
 
   // Actions
   fetchMemories: () => Promise<void>;
+  checkCanAddMemory: (forceRefresh?: boolean) => Promise<void>;
   createMemory: (input: CreateMemoryInput) => Promise<Memory>;
   updateMemory: (input: UpdateMemoryInput) => Promise<Memory>;
   deleteMemory: (id: number) => Promise<void>;
@@ -55,6 +59,9 @@ export const useMemoriesStore = create<MemoriesStore>((set, get) => ({
   loading: false,
   error: null,
   isInitialized: false,
+  canAddMemory: null,
+  latestMemoryId: null,
+  permissionsChecked: false,
 
   fetchMemories: async () => {
     const { isInitialized, loading } = get();
@@ -261,6 +268,52 @@ export const useMemoriesStore = create<MemoriesStore>((set, get) => ({
       const memoryDate = new Date(m.date);
       return memoryDate >= start && memoryDate <= end;
     });
+  },
+
+  checkCanAddMemory: async (forceRefresh: boolean = false) => {
+    const { permissionsChecked } = get();
+    
+    // Skip if already checked and not forcing refresh
+    if (permissionsChecked && !forceRefresh) {
+      return;
+    }
+
+    try {
+      // Fetch the latest memory ordered by created_at descending, limit 1
+      const { data, error } = await supabase
+        .from('memories')
+        .select('id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        // No memories exist, allow adding
+        set({ canAddMemory: true, latestMemoryId: null, permissionsChecked: true });
+        return;
+      }
+
+      const latestMemory = data[0];
+      const latestDate = new Date(latestMemory.created_at);
+      const now = new Date();
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      const timeDiff = now.getTime() - latestDate.getTime();
+
+      if (timeDiff > oneDayInMs) {
+        // More than 1 day has passed, enable add button and allow delete
+        set({ canAddMemory: true, latestMemoryId: null, permissionsChecked: true });
+      } else {
+        // Less than 1 day, disable add button and protect latest memory from delete
+        set({ canAddMemory: false, latestMemoryId: latestMemory.id, permissionsChecked: true });
+      }
+    } catch (error) {
+      console.error('Failed to check can add memory:', error);
+      // On error, allow adding to not block the user
+      set({ canAddMemory: true, latestMemoryId: null, permissionsChecked: true });
+    }
   },
 
   clearError: () => {

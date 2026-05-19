@@ -16,18 +16,23 @@ import type { UpdateNullaToysInput } from "../../../stores/nullaToysData";
 interface NullaRewardsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  rewardMode?: "random" | "bundle";
 }
 
 type FoodKey = "donuts" | "mousse" | "icecream" | "cupcake";
 type ToyKey = "mouse" | "softblocks" | "plushdino" | "crystalball";
-type Reward =
+type RewardItem =
   | { type: "food"; key: FoodKey; label: string; image: string }
-  | { type: "toy"; key: ToyKey; label: string; image: string }
+  | { type: "toy"; key: ToyKey; label: string; image: string };
+type Reward =
+  | RewardItem
+  | { type: "bundle"; items: RewardItem[] }
   | { type: "none" };
 
 const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
   open,
   onOpenChange,
+  rewardMode = "random",
 }) => {
   const fetchFoods = useNullaFoodsStore((state) => state.fetchFoods);
   const foods = useNullaFoodsStore((state) => state.foods);
@@ -96,26 +101,48 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
     [],
   );
 
+  const getRandomInt = (min: number, max: number) => {
+    const low = Math.ceil(min);
+    const high = Math.floor(max);
+    return Math.floor(Math.random() * (high - low + 1)) + low;
+  };
+
+  const pickRandomFood = (): RewardItem => {
+    const pick = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+    return {
+      type: "food",
+      key: pick.key,
+      label: pick.label,
+      image: pick.image,
+    };
+  };
+
+  const pickRandomToy = (): RewardItem => {
+    const pick = toyOptions[Math.floor(Math.random() * toyOptions.length)];
+    return {
+      type: "toy",
+      key: pick.key,
+      label: pick.label,
+      image: pick.image,
+    };
+  };
+
+  const buildBundleReward = (): Reward => {
+    const bundleSize = getRandomInt(3, 6);
+    const items: RewardItem[] = [];
+
+    for (let i = 0; i < bundleSize; i += 1) {
+      items.push(Math.random() < 0.5 ? pickRandomFood() : pickRandomToy());
+    }
+
+    return { type: "bundle", items };
+  };
+
   const rollReward = (): Reward => {
     const roll = Math.random();
-    if (roll < 0.4) {
-      const pick = foodOptions[Math.floor(Math.random() * foodOptions.length)];
-      return {
-        type: "food",
-        key: pick.key,
-        label: pick.label,
-        image: pick.image,
-      };
-    }
-    if (roll < 0.8) {
-      const pick = toyOptions[Math.floor(Math.random() * toyOptions.length)];
-      return {
-        type: "toy",
-        key: pick.key,
-        label: pick.label,
-        image: pick.image,
-      };
-    }
+    if (roll < 0.2) return buildBundleReward();
+    if (roll < 0.6) return pickRandomFood();
+    if (roll < 0.9) return pickRandomToy();
     return { type: "none" };
   };
 
@@ -168,7 +195,8 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
     hasAppliedRef.current = true;
     setHasApplied(true);
     setIsUpdating(true);
-    const chosen = reward ?? rollReward();
+    const chosen =
+      reward ?? (rewardMode === "bundle" ? buildBundleReward() : rollReward());
     setReward(chosen);
 
     try {
@@ -176,6 +204,14 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
         await applyFoodReward(chosen.key);
       } else if (chosen.type === "toy") {
         await applyToyReward(chosen.key);
+      } else if (chosen.type === "bundle") {
+        for (const item of chosen.items) {
+          if (item.type === "food") {
+            await applyFoodReward(item.key);
+          } else {
+            await applyToyReward(item.key);
+          }
+        }
       }
     } finally {
       setIsUpdating(false);
@@ -205,6 +241,9 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
   const rewardMessage = useMemo(() => {
     if (!reward) return "Claim your reward for a chance at food or toys.";
     if (reward.type === "none") return "No reward this time.";
+    if (reward.type === "bundle") {
+      return `Bundle reward: ${reward.items.length} items!`;
+    }
     return `You received +1 ${reward.label}.`;
   }, [reward]);
 
@@ -217,14 +256,32 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
         </DialogHeader>
         {reward && reward.type !== "none" && (
           <div className="flex items-center justify-center">
-            <div className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 px-6 py-4">
-              <img
-                src={reward.image}
-                alt={reward.label}
-                className="h-16 w-16 object-contain"
-              />
-              <div className="text-sm text-gray-700">{reward.label}</div>
-            </div>
+            {reward.type === "bundle" ? (
+              <div className="grid grid-cols-2 gap-3">
+                {reward.items.map((item, index) => (
+                  <div
+                    key={`${item.key}-${index}`}
+                    className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 px-4 py-3"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.label}
+                      className="h-12 w-12 object-contain"
+                    />
+                    <div className="text-xs text-gray-700">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 px-6 py-4">
+                <img
+                  src={reward.image}
+                  alt={reward.label}
+                  className="h-16 w-16 object-contain"
+                />
+                <div className="text-sm text-gray-700">{reward.label}</div>
+              </div>
+            )}
           </div>
         )}
         <DialogFooter>
