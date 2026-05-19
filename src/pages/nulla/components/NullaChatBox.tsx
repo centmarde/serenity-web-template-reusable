@@ -4,6 +4,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Minus, Send } from "lucide-react";
 import { nullaChatService } from "../helpers/nullaChat";
+import { useNullasStore } from "../../../stores/nullasData";
+import { useSettingsStore } from "../../../stores/settings";
+import { getHungryStatus, getStressStatus } from "../helpers/nullaCounter";
+import { useNullaChatStore } from "../../../stores/nullaChatData";
 
 interface ChatMessage {
   id: number;
@@ -13,14 +17,71 @@ interface ChatMessage {
 
 interface NullaChatBoxProps {
   themeColor: string;
+  onReplyModeChange?: (modeKey: string | null, durationMs?: number) => void;
 }
 
-const NullaChatBox: React.FC<NullaChatBoxProps> = ({ themeColor }) => {
+const NullaChatBox: React.FC<NullaChatBoxProps> = ({
+  themeColor,
+  onReplyModeChange,
+}) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [gfName, setGfName] = useState("darling");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fetchNullas = useNullasStore((state) => state.fetchNullas);
+  const latestNulla = useNullasStore((state) => state.nullas[0] ?? null);
+  const latestMode = latestNulla?.mode ?? null;
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
+  const getGfName = useSettingsStore((state) => state.getGfName);
+  const lastAiMessage = useNullaChatStore((state) => state.lastAiMessage);
+  const setLastAiMessage = useNullaChatStore((state) => state.setLastAiMessage);
+
+  const getReplyMode = (reply: string): string => {
+    const text = reply.toLowerCase();
+
+    const rules: Array<{ mode: string; keywords: string[] }> = [
+      { mode: "angry", keywords: ["angry", "mad", "furious", "annoyed"] },
+      { mode: "sad", keywords: ["sad", "sorry", "tears", "lonely", "hurt"] },
+      {
+        mode: "shocked",
+        keywords: ["wow", "whoa", "shocked", "surprised", "gasp"],
+      },
+      {
+        mode: "sleepy",
+        keywords: ["sleep", "sleepy", "tired", "rest", "nap"],
+      },
+      {
+        mode: "thinking",
+        keywords: ["think", "consider", "maybe", "hmm", "wonder"],
+      },
+      {
+        mode: "shy",
+        keywords: ["shy", "blush", "nervous", "bashful"],
+      },
+      {
+        mode: "running",
+        keywords: ["run", "running", "rush", "hurry", "fast"],
+      },
+      {
+        mode: "eating",
+        keywords: ["eat", "eating", "snack", "food", "hungry"],
+      },
+      {
+        mode: "happy-jump",
+        keywords: ["yay", "happy", "excited", "love", "sweet", "great"],
+      },
+    ];
+
+    for (const rule of rules) {
+      if (rule.keywords.some((keyword) => text.includes(keyword))) {
+        return rule.mode;
+      }
+    }
+
+    return "happy-idle";
+  };
 
   const handleSend = async () => {
     const trimmed = draft.trim();
@@ -33,13 +94,24 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({ themeColor }) => {
     setDraft("");
 
     setIsTyping(true);
-    const response = await nullaChatService.generateReply({ message: trimmed });
+    const response = await nullaChatService.generateReply({
+      message: trimmed,
+      mode: latestMode,
+      gfName,
+      hungryStatus: getHungryStatus(latestNulla, Date.now()),
+      stressStatus: getStressStatus(latestNulla, Date.now()),
+      lastEaten: latestNulla?.last_eaten ?? null,
+      lastPlaying: latestNulla?.last_playing ?? null,
+    });
     if (response.success) {
       const replyText = response.reply ?? "Nulla is quiet right now.";
       setMessages((prev) => [
         ...prev,
         { id: Date.now(), text: replyText, isUser: false },
       ]);
+      setLastAiMessage(replyText);
+      const replyMode = getReplyMode(replyText);
+      onReplyModeChange?.(replyMode, 5000);
     } else if (response.error) {
       setMessages((prev) => [
         ...prev,
@@ -49,9 +121,44 @@ const NullaChatBox: React.FC<NullaChatBoxProps> = ({ themeColor }) => {
           isUser: false,
         },
       ]);
+      setLastAiMessage("Nulla is quiet right now. Try again in a moment.");
+      onReplyModeChange?.("sad", 5000);
     }
     setIsTyping(false);
   };
+
+  useEffect(() => {
+    void fetchNullas();
+  }, [fetchNullas]);
+
+  useEffect(() => {
+    if (!lastAiMessage || messages.length > 0) return;
+    const timer = window.setTimeout(() => {
+      setMessages([
+        {
+          id: Date.now(),
+          text: lastAiMessage,
+          isUser: false,
+        },
+      ]);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [lastAiMessage, messages.length]);
+
+  useEffect(() => {
+    const loadGfName = async () => {
+      try {
+        await loadSettings();
+        setGfName(getGfName());
+      } catch (error) {
+        console.error("Failed to load gf_name for chat:", error);
+        setGfName("darling");
+      }
+    };
+
+    void loadGfName();
+  }, [loadSettings, getGfName]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

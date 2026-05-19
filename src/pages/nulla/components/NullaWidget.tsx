@@ -1,24 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { nullaModesImages } from "../helpers/nullaModesImages";
 import { useNullasStore } from "../../../stores/nullasData";
-import {
-  formatDate,
-  getHungryStatus,
-  getSinceLastEaten,
-  getSinceLastPlaying,
-  getStressStatus,
-  toDateSafe,
-} from "../helpers/nullaCounter";
+import { toDateSafe } from "../helpers/nullaCounter";
 
 interface NullaWidgetProps {
   themeColor: string;
+  overrideModeKey?: string | null;
 }
 
-const NullaWidget: React.FC<NullaWidgetProps> = ({ themeColor }) => {
+const NullaWidget: React.FC<NullaWidgetProps> = ({
+  themeColor,
+  overrideModeKey,
+}) => {
   const { fetchNullas, updateNulla } = useNullasStore();
   const getLatestNulla = useNullasStore((state) => state.getLatestNulla);
   const latestNulla = useNullasStore((state) => state.nullas[0] ?? null);
-  const [nowMs, setNowMs] = useState(() => Date.now());
 
   const modeMap = useMemo(() => {
     return new Map(nullaModesImages.map((mode) => [mode.key, mode]));
@@ -31,19 +27,16 @@ const NullaWidget: React.FC<NullaWidgetProps> = ({ themeColor }) => {
       .join(" ");
 
   const activeMode = useMemo(() => {
+    if (overrideModeKey) {
+      const overrideMode = modeMap.get(overrideModeKey);
+      if (overrideMode) return overrideMode;
+    }
+
     const nextMode = latestNulla?.mode
       ? modeMap.get(latestNulla.mode)
       : undefined;
     return nextMode ?? nullaModesImages[0];
-  }, [latestNulla, modeMap]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNowMs(Date.now());
-    }, 60 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [latestNulla, modeMap, overrideModeKey]);
 
   useEffect(() => {
     const loadLatest = async () => {
@@ -102,26 +95,6 @@ const NullaWidget: React.FC<NullaWidgetProps> = ({ themeColor }) => {
     void loadLatest();
   }, [fetchNullas, getLatestNulla, updateNulla]);
 
-  const hungryStatus = useMemo(
-    () => getHungryStatus(latestNulla, nowMs),
-    [latestNulla, nowMs],
-  );
-
-  const stressStatus = useMemo(
-    () => getStressStatus(latestNulla, nowMs),
-    [latestNulla, nowMs],
-  );
-
-  const sinceLastEaten = useMemo(
-    () => getSinceLastEaten(latestNulla, nowMs),
-    [latestNulla, nowMs],
-  );
-
-  const sinceLastPlaying = useMemo(
-    () => getSinceLastPlaying(latestNulla, nowMs),
-    [latestNulla, nowMs],
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex justify-center">
@@ -143,7 +116,7 @@ const NullaWidget: React.FC<NullaWidgetProps> = ({ themeColor }) => {
       </div>
 
       <div
-        className="w-full text-left space-y-2"
+        className="w-full text-left"
         style={{
           border: `1px solid ${themeColor}20`,
           borderRadius: "14px",
@@ -151,26 +124,8 @@ const NullaWidget: React.FC<NullaWidgetProps> = ({ themeColor }) => {
           backgroundColor: `${themeColor}08`,
         }}
       >
-        <div className="text-sm text-gray-700">
+        <div className="text-center text-sm text-gray-700">
           <strong>Mode:</strong> {latestNulla?.mode ?? "Unknown"}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Last eaten:</strong> {formatDate(latestNulla?.last_eaten)}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Since eaten:</strong> {sinceLastEaten}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Hungry status:</strong> {hungryStatus}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Last played:</strong> {formatDate(latestNulla?.last_playing)}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Since played:</strong> {sinceLastPlaying}
-        </div>
-        <div className="text-sm text-gray-700">
-          <strong>Stress status:</strong> {stressStatus}
         </div>
       </div>
     </div>
