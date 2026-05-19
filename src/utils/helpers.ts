@@ -322,6 +322,7 @@ export const createActiveCardStyles = (themeColor: string) => {
  */
 export const isFeatureActive = (featureName: string): boolean => {
   const activeFeatures = [
+    "home",
     "Love Letters",
     "Made for You",
     "Our Music Playlist",

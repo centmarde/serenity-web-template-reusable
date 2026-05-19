@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSettingsStore } from "../../stores/settings";
 import { useThemeStore } from "../../stores/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import NullaWidget from "./components/NullaWidget";
+import NullaChatBox from "./components/NullaChatBox";
 
 interface ComponentData {
   themeColor: string;
@@ -25,6 +27,26 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
 
   const [data, setData] = useState<ComponentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [replyModeKey, setReplyModeKey] = useState<string | null>(null);
+  const replyTimeoutRef = useRef<number | null>(null);
+
+  const handleReplyModeChange = useCallback(
+    (modeKey: string | null, durationMs = 5000) => {
+      if (replyTimeoutRef.current) {
+        window.clearTimeout(replyTimeoutRef.current);
+      }
+
+      setReplyModeKey(modeKey);
+
+      if (modeKey) {
+        replyTimeoutRef.current = window.setTimeout(() => {
+          setReplyModeKey(null);
+          replyTimeoutRef.current = null;
+        }, durationMs);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const initialize = async () => {
@@ -64,6 +86,14 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
     getSafeThemeColor,
   ]);
 
+  useEffect(() => {
+    return () => {
+      if (replyTimeoutRef.current) {
+        window.clearTimeout(replyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (isLoading || !data) {
     const safeThemeColor = getSafeThemeColor();
     return (
@@ -97,35 +127,14 @@ const NullaView: React.FC<NullaViewProps> = ({ onNavigate }) => {
         }}
       >
         <CardContent className="p-6 text-center space-y-4">
-          <div className="flex justify-center">
-            <img
-              src="/assets/nulla/nulla-icon.png"
-              alt="Nulla"
-              style={{
-                width: "min(260px, 70vw)",
-                height: "auto",
-              }}
-            />
-          </div>
-
-          <h1
-            className="font-bold text-gray-800"
-            style={{
-              fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
-            }}
-          >
-            Nulla Prototype
-          </h1>
-
-          <p
-            className="text-gray-600"
-            style={{
-              fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
-            }}
-          >
-            Hi {data.callsign}! This is a starter space for the Nulla feature
-            inside {data.appName}.
-          </p>
+          <NullaChatBox
+            themeColor={data.themeColor}
+            onReplyModeChange={handleReplyModeChange}
+          />
+          <NullaWidget
+            themeColor={data.themeColor}
+            overrideModeKey={replyModeKey}
+          />
 
           <div className="pt-2">
             <Button

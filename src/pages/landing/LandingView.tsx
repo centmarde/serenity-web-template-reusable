@@ -142,17 +142,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           >
             {title}
           </h3>
-          {!isActive && (
-            <p
-              className="text-xs mt-1 opacity-60"
-              style={{
-                color: themeColor,
-                fontSize: "clamp(0.625rem, 1.5vw, 0.7rem)",
-              }}
-            >
-              Coming Soon
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>
@@ -559,7 +548,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           }}
         >
           <img
-            src="/assets/dudu-cute.gif"
+            src="/assets/nulla/nulla-icon.png"
             alt="Chat with love assistant"
             className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform duration-300"
           />
