@@ -169,7 +169,12 @@ const NullaToysDialog: React.FC<NullaToysDialogProps> = ({
       </DialogContent>
       <NullaConfirmationDialog
         open={isConfirmOpen}
-        onOpenChange={setIsConfirmOpen}
+        onOpenChange={(nextOpen) => {
+          setIsConfirmOpen(nextOpen);
+          if (!nextOpen) {
+            onOpenChange(false);
+          }
+        }}
         title="Play With Nulla"
         description={
           selectedToy

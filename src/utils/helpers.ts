@@ -329,7 +329,7 @@ export const isFeatureActive = (featureName: string): boolean => {
     "Our Memories",
     "Evil Thoughts",
     "Tarot Cards",
-    // "Nulla",
+    "Nulla",
   ];
   return activeFeatures.includes(featureName);
 };

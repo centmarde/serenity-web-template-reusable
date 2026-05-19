@@ -163,7 +163,12 @@ const NullaFoodDialog: React.FC<NullaFoodDialogProps> = ({
       </DialogContent>
       <NullaConfirmationDialog
         open={isConfirmOpen}
-        onOpenChange={setIsConfirmOpen}
+        onOpenChange={(nextOpen) => {
+          setIsConfirmOpen(nextOpen);
+          if (!nextOpen) {
+            onOpenChange(false);
+          }
+        }}
         title="Feed Nulla"
         description={
           selectedFood
