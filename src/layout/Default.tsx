@@ -37,7 +37,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
   const handleNavigate = (path: string) => {
     const route = getRouteByPath(path);
 
-    if (route && !isFeatureActive(route.name)) {
+    if (route && route.name !== "Home" && !isFeatureActive(route.name)) {
       setSelectedFeature(route.name);
       setShowOpsDialog(true);
       return;
@@ -47,6 +47,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
       onNavigate(path);
     }
   };
+
+  const isNullaRoute = currentPath === "/nulla";
 
   // Render component based on route
   const renderContent = () => {
@@ -95,7 +97,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
       <main className="w-full">{renderContent()}</main>
 
       {/* ChatBot Toggle Button */}
-      {!showChatBot && (
+      {!showChatBot && !isNullaRoute && (
         <Button
           onClick={() => setShowChatBot(true)}
           className="fixed bottom-6 right-6 w-16 h-16 rounded-full p-0 shadow-2xl hover:scale-110 transition-all duration-300 group z-50"
@@ -105,7 +107,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
           }}
         >
           <img
-            src="/assets/dudu-cute.gif"
+            src="/assets/nulla/nulla-icon.png"
             alt="Chat with love assistant"
             className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform duration-300"
           />
@@ -113,7 +115,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
       )}
 
       {/* ChatBot Component */}
-      <ChatBot isOpen={showChatBot} onClose={() => setShowChatBot(false)} />
+      {!isNullaRoute && (
+        <ChatBot isOpen={showChatBot} onClose={() => setShowChatBot(false)} />
+      )}
 
       {/* Ops Dialog for coming soon features */}
       <OpsDialog

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { nullaModesImages } from "../helpers/nullaModesimages";
+import { nullaModesImages } from "../helpers/nullaModesImages";
 import { useNullasStore } from "../../../stores/nullasData";
 import {
   formatDate,

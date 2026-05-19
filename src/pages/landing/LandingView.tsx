@@ -548,7 +548,7 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
           }}
         >
           <img
-            src="/assets/dudu-cute.gif"
+            src="/assets/nulla/nulla-icon.png"
             alt="Chat with love assistant"
             className="w-12 h-12 rounded-full group-hover:scale-105 transition-transform duration-300"
           />

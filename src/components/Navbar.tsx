@@ -157,7 +157,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             <div className="hidden lg:flex items-center gap-1">
               {navRoutes.map((route) => {
                 const IconComponent = getIconComponent(route.icon || "Heart");
-                const isActive = currentPath === route.path;
+                const isHomeRoute = route.path === "/";
+                const isActive = isHomeRoute
+                  ? currentPath === "/" || currentPath === "/home"
+                  : currentPath === route.path;
                 const isEvilThoughts = route.path === "/evil-thoughts";
 
                 return (
@@ -187,7 +190,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
                       className="text-xs font-medium"
                       style={{ fontSize: "clamp(0.65rem, 1.2vw, 0.75rem)" }}
                     >
-                      {route.path === "/"
+                      {isHomeRoute
                         ? "Home"
                         : route.name.replace("Our ", "").replace("with Me", "")}
                     </span>
@@ -250,11 +253,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPath = "/", onNavigate }) => {
             <div className="px-4 pb-4 flex flex-col gap-2 pt-20">
               {navRoutes.map((route) => {
                 const IconComponent = getIconComponent(route.icon || "Heart");
-                const isActive = currentPath === route.path;
-                const label =
-                  route.path === "/"
-                    ? "Home"
-                    : route.name.replace("Our ", "").replace("with Me", "");
+                const isHomeRoute = route.path === "/";
+                const isActive = isHomeRoute
+                  ? currentPath === "/" || currentPath === "/home"
+                  : currentPath === route.path;
+                const label = isHomeRoute
+                  ? "Home"
+                  : route.name.replace("Our ", "").replace("with Me", "");
                 const isEvilThoughts = route.path === "/evil-thoughts";
 
                 return (

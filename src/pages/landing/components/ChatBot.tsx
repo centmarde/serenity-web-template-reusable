@@ -21,7 +21,7 @@ interface ChatBotProps {
 const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   const { getCallsign, getBfName, getStartingGreetings } = useSettingsStore();
   const { getCurrentThemeColor } = useThemeStore();
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -75,7 +75,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       `I'm like ${bfName}'s digital twin, and just like him, I think you're absolutely amazing! He made sure I'd tell you that every chance I get 💕 What's on your heart?`,
       `${greeting}! ${bfName} downloaded all his love for you into my system, so I'm basically overflowing with appreciation for how wonderful you are! What's new with you? ✨`,
     ];
-    
+
     return responses[Math.floor(Math.random() * responses.length)];
   };
 
@@ -83,7 +83,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
     if (!inputValue.trim()) return;
 
     const userMessageText = inputValue.trim();
-    
+
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -92,22 +92,25 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
     // Simulate bot typing and response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: `bot-${Date.now()}`,
-        text: generateBotResponse(),
-        isUser: false,
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+    setTimeout(
+      () => {
+        const botMessage: Message = {
+          id: `bot-${Date.now()}`,
+          text: generateBotResponse(),
+          isUser: false,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+      },
+      1000 + Math.random() * 2000,
+    ); // Random delay between 1-3 seconds
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -124,45 +127,45 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-80 max-w-[calc(100vw-2rem)]">
+    <div className="fixed bottom-6 right-6 z-[9999] w-80 max-w-[calc(100vw-2rem)]">
       {/* Chat Window */}
-      <div 
+      <div
         className={`bg-white rounded-lg shadow-2xl transition-all duration-300 ease-in-out ${
-          isMinimized ? 'h-14' : 'h-96'
+          isMinimized ? "h-14" : "h-96"
         }`}
         style={{
           border: `2px solid ${themeColor}`,
-          maxHeight: isMinimized ? '56px' : '400px',
+          maxHeight: isMinimized ? "56px" : "400px",
         }}
       >
         {/* Header */}
-        <div 
+        <div
           className="flex items-center justify-between p-3 rounded-t-lg cursor-pointer"
           style={{ backgroundColor: themeColor }}
           onClick={handleToggleMinimize}
         >
           <div className="flex items-center gap-2">
-            <div 
+            <div
               className="w-8 h-8 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden"
-              style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+              style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
             >
               <img
-                src="/assets/dudu-cute.gif"
+                src="/assets/nulla/nulla-icon.png"
                 alt="Mini assistant"
                 className="w-6 h-6 rounded-full object-cover"
               />
             </div>
             <div>
-              <h3 className="text-white font-semibold text-sm">
-                Mini {bfName} 💕
-              </h3>
+              <h3 className="text-white font-semibold text-sm">Nulla</h3>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-white text-xs opacity-90">Trained by {bfName}</span>
+                <span className="text-white text-xs opacity-90">
+                  Trained by {bfName}
+                </span>
               </div>
             </div>
           </div>
-          
+
           <div className="flex gap-1">
             <Button
               variant="ghost"
@@ -202,13 +205,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
                   >
                     <div
                       className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
-                        message.isUser
-                          ? "rounded-br-md"
-                          : "rounded-bl-md"
+                        message.isUser ? "rounded-br-md" : "rounded-bl-md"
                       }`}
                       style={{
-                        backgroundColor: message.isUser 
-                          ? themeColor 
+                        backgroundColor: message.isUser
+                          ? themeColor
                           : "#f0f0f0",
                         color: message.isUser ? "white" : "#333",
                       }}
@@ -217,16 +218,20 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
                     </div>
                   </div>
                 ))}
-                
+
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div
-                      className="px-3 py-2 rounded-2xl rounded-bl-md bg-gray-100"
-                    >
+                    <div className="px-3 py-2 rounded-2xl rounded-bl-md bg-gray-100">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
                       </div>
                     </div>
                   </div>
