@@ -1,36 +1,14 @@
 {
-  "themeColor": "#F2A6A6",
-  "isDarkMode": false,
-  "useImagePreview": true,
-  "callsign": "babi",
-  "gf_name": "Martha",
-  "bf_name": "Marde",
-  "appName": "our love space",
-  "email": "centmarde.campado@gmail.com",
-  "coupleOfficialDate": "2026-02-16",
-  "startingGreetings": "baby girl",
-  "bfThoughtsPassword": "ohahay",
+  "themeColor": "#ffdee9",
+  "callsign": "حبيبة قلبي وعيدي 🌸",
+  "couplename": "أجمل هلو كيتي بالدنيا 🎀",
+  "appName": "رسالة العيد السرية 🐱✨",
+  "coupleOfficialDate": "2026-05-24",
+  "startingGreetings": "يا قطعة سُكّر في حياتي",
   "traits": [
-    "you like pink color and it's so cute on you",
-    "you don't like crowded environment and I find it cute, kaha?",
-    "you have the most beautiful smile that lights up my day",
-    "you're incredibly thoughtful and remember the smallest details",
-    "you have the sweetest way of saying good night",
-    "maayo kaayo ka mo duwa ug COD untana ako sab",
-    "im here for you, through thick and thin",
-    "you have a heart of gold and it's one of the things I love most about you"
-  ],
-  "songTitle": "falling",
-  "songArtist": "iration",
-  "songUrl": "/songs/falling.mp3",
-  "dialogMessages": {
-    "welcomeMessage": "Welcome to your personal love space",
-    "workInProgressNotice": "This system is currently under active development. Some features may be incomplete or subject to change. I appreciate your patience",
-    "featureComingSoon": "This feature is currently being built with love and attention to detail. Thank you for your patience",
-    "counterDialogDescription": "Every moment with you has been a treasure. Here's how long we've been creating beautiful memories together.",
-    "betaBadge": "Beta Version",
-    "madeWithLove": "Made with 💝",
-    "inDevelopment": "In Development",
-    "comingSoon": "Coming Soon 🚀"
-  }
+    "كل عام وأنتِ لروحي حباً، ولأيامى فرحاً، ولقلبي عيداً 🌸",
+    "العيد الحقيقي مش بالملابس ولا بالحلوى، العيد هو إني أصحى وألاقيكِ في حياتي 🥺💖",
+    "شكراً لأنك بتخلي كل شي دايماً أحلى وألطف بوجودكِ وبضحكتكِ الدايمة 🎀",
+    "الله يديمك لي يا توأم روحي ولا يحرمني منكِ أبداً يا رب.. بحبكككك دايماً وأبداً! 😭🍿✨"
+  ]
 }
