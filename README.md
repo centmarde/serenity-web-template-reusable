@@ -16,6 +16,7 @@ A sophisticated, feature-rich web application template designed for couples to c
 ## ✨ Advanced Features
 
 ### 🎭 Core Experience
+
 - **🔧 Fully Configurable**: Everything customizable through a single `settings.json` file
 - **📱 Mobile Responsive**: Optimized for all device sizes with fluid design
 - **💝 Romantic Loading Experience**: Animated loading screen with personalized traits
@@ -24,6 +25,7 @@ A sophisticated, feature-rich web application template designed for couples to c
 - **🚀 Zero Code Changes**: Customize entirely through configuration
 
 ### 🎵 Musical & Creative Features
+
 - **🎼 Lyric Art Poster Generator**: Advanced canvas-based system that transforms song lyrics into ASCII art using image processing
 - **🎵 Advanced Music Player**: Spotify-style player with shuffle functionality using Fisher-Yates algorithm and dynamic theming
 - **🎶 Smart Playlist Management**: Search, pagination (5 songs per page), and intelligent song filtering
@@ -33,18 +35,65 @@ A sophisticated, feature-rich web application template designed for couples to c
 - **🎨 Color Mapping Technology**: Advanced contrast curves and brightness mapping for artistic effects
 
 ### 🔐 Advanced Architecture
+
 - **🔒 Authentication System**: Secure user authentication with Supabase integration
 - **💾 State Management**: Advanced Zustand stores for settings, themes, and user data
 - **🌈 Theme Engine**: Sophisticated theming system with real-time color adaptation
 - **📊 Data Visualization**: Chart components with Recharts integration
 
+---
+
+## 🗄️ Database Schema (Supabase)
+
+The Zustand stores in `src/stores/*` are the single reference for the current database schema. Use the tables below as the baseline when setting up or updating Supabase.
+
+### Core Tables
+
+| Table          | Key Columns                                                                                    | Notes                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `love_letters` | `id`, `created_at`, `title`, `message`, `user_id`, `category`, `is_girlfriend`, `attach_image` | Love letters with optional image attachment. `user_id` may be null (admin insert). |
+| `songs`        | `id`, `created_at`, `title`, `description`, `is_girlfriend`, `audio_src`                       | Playlist entries; `audio_src` is a storage path or full URL.                       |
+| `thoughts`     | `id`, `created_at`, `content`, `is_gf`, `end_date`                                             | Short thoughts with expiration logic.                                              |
+| `logs`         | `id`, `created_at`, `is_sad_letter`, `is_miss_letter`, `device`, `address`                     | User activity logs with device and location metadata.                              |
+
+### Memories Tables
+
+| Table               | Key Columns                                        | Notes                                        |
+| ------------------- | -------------------------------------------------- | -------------------------------------------- |
+| `memories`          | `id`, `created_at`, `date`, `title`, `description` | Core memory records.                         |
+| `memory_images`     | `id`, `created_at`, `image_src`, `memories_id`     | Image references; `memories_id` is optional. |
+| `memory_milestones` | `id`, `created_at`, `milestone`, `memories_id`     | Milestones linked to a memory.               |
+| `memory_mesh`       | `id`, `created_at`, `user_chat`, `ai_chat`         | Long-term AI chat memory store.              |
+
+### Nulla Tables
+
+| Table         | Key Columns                                                                                    | Notes                   |
+| ------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| `nulla`       | `id`, `created_at`, `mode`, `last_eaten`, `eaten_duration`, `last_playing`, `playing_duration` | Tamagotchi-style state. |
+| `nulla_foods` | `id`, `created_at`, `count`, `is_unlock`, `price`, `name`                                      | Food inventory.         |
+| `nulla_toys`  | `id`, `created_at`, `count`, `is_unlock`, `price`, `name`                                      | Toy inventory.          |
+
+### Tarot Tables
+
+| Table               | Key Columns                                              | Notes                                           |
+| ------------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| `tarot_cards_decks` | `id`, `created_at`, `is_gf`, `end_date`, `card1`-`card6` | Cards are stored as JSONB with AI descriptions. |
+
+### Storage Buckets
+
+- `songs`: audio files stored by original filename (`songs` bucket)
+- `memories`: memory images stored at `memory-images/<filename>` (`memories` bucket)
+- `messages`: optional letter images stored under `messages/marde/<filename>`
+
 ### 🎪 Interactive Components
+
 - **💬 Dialog System**: Beautiful animated dialogs with blur effects and responsive design
 - **📱 Mobile-First Navigation**: Advanced responsive navigation with gesture support
 - **🎭 Animated Narrator**: Interactive storytelling with animated GIFs and timed messages
 - **🎨 Dynamic Widgets**: Reusable widget system for different content types
 
 ### 🎵 Advanced Playlist Features
+
 - **🔍 Smart Search**: Real-time song search across titles and descriptions with instant filtering
 - **📄 Intelligent Pagination**: Clean 5-songs-per-page layout with responsive navigation controls
 - **👥 Role-Based Permissions**: Edit/delete access control based on song ownership (girlfriend's songs only)
@@ -92,13 +141,14 @@ The system is built around a **single source of truth** - the `settings.json` fi
 ### 🎯 Advanced Reusability Strategy
 
 #### 1. **Settings-Driven Architecture**
+
 Every aspect of the application reads from `public/settings.json`:
 
 ```json
 {
   "themeColor": "#F2A6A6",
   "callsign": "love",
-  "couplename": "Jane", 
+  "couplename": "Jane",
   "appName": "Love Personal Love Space",
   "coupleOfficialDate": "2025-02-16",
   "startingGreetings": "baby girl",
@@ -111,6 +161,7 @@ Every aspect of the application reads from `public/settings.json`:
 ```
 
 #### 2. **Advanced State Management System**
+
 ```typescript
 // Settings Store - Single source of truth for all components
 interface Settings {
@@ -140,6 +191,7 @@ interface AuthStore {
 ```
 
 #### 3. **Comprehensive Component Architecture**
+
 - **LoadingView**: Displays random traits with animated progress and custom GIFs
 - **LandingView**: Shows personalized dashboard with relationship stats
 - **MadeForYouView**: Interactive gift gallery with artistic features
@@ -155,6 +207,7 @@ interface AuthStore {
 - **Responsive Widget System**: Mobile-first components with adaptive layouts
 
 #### 4. **Advanced Technology Stack**
+
 - **Canvas Processing**: Advanced image-to-ASCII conversion algorithms
 - **Color Theory Engine**: Brightness mapping, contrast curves, and color blending
 - **Animation System**: Framer Motion integration for smooth transitions
@@ -170,6 +223,7 @@ interface AuthStore {
 ## 🚀 Quick Setup for New Users
 
 ### Step 1: Clone & Install
+
 ```bash
 git clone https://github.com/centmarde/serenity-web-template-reusable.git
 cd serenity-web-template-reusable
@@ -177,6 +231,7 @@ npm install
 ```
 
 ### Step 2: Customize Settings
+
 Edit `public/settings.json` with your information:
 
 ```json
@@ -196,9 +251,11 @@ Edit `public/settings.json` with your information:
 ```
 
 ### Step 3: Add Your Loading Animation
+
 Replace `public/assets/loading-gif.gif` with your preferred animation.
 
 ### Step 4: Run
+
 ```bash
 npm run dev
 ```
@@ -220,10 +277,11 @@ npm run dev
 ## 🎨 Customization Examples
 
 ### Theme Colors
+
 ```json
 {
   "themeColor": "#FF6B9D"  // Pink theme
-  "themeColor": "#4ECDC4"  // Teal theme  
+  "themeColor": "#4ECDC4"  // Teal theme
   "themeColor": "#A8E6CF"  // Mint theme
 }
 ```
@@ -231,43 +289,45 @@ npm run dev
 ### Advanced Configuration Options
 
 #### Traits Categories
+
 ```json
 {
   "traits": [
     // Appearance traits
     "you have the most beautiful eyes",
     "your smile lights up the room",
-    
-    // Personality traits  
+
+    // Personality traits
     "you're incredibly thoughtful",
     "you always make me laugh",
-    
+
     // Habit traits
-    "you love cozy movie nights", 
+    "you love cozy movie nights",
     "you get excited about small things"
   ]
 }
 ```
 
 #### Feature Toggles & Customization
+
 ```json
 {
   // Core settings (required)
   "themeColor": "#F2A6A6",
   "callsign": "love",
   "couplename": "Jane",
-  
+
   // Advanced features (optional)
   "enableLyricArt": true,
   "enableAsciiGallery": true,
   "enableMusicPlayer": true,
   "enableAuthSystem": false,
-  
+
   // Creative customization
   "customLoadingGif": "your-custom-loading.gif",
   "favoriteFlowerImages": ["rose.png", "rose1.png"],
   "musicPlaylist": ["falling.mp3"],
-  
+
   // AI Integration (optional)
   "enableAiResponses": true,
   "aiPersonality": "romantic"
@@ -275,6 +335,7 @@ npm run dev
 ```
 
 #### Technical Canvas Settings
+
 ```json
 {
   // Lyric Art Configuration
@@ -285,8 +346,8 @@ npm run dev
     "colorBlendMode": "gradient",
     "backgroundMode": "black"
   },
-  
-  // ASCII Art Settings  
+
+  // ASCII Art Settings
   "asciiArt": {
     "imageProcessing": "brightness-based",
     "characterSet": "extended",
@@ -309,18 +370,21 @@ npm run dev
 ## 🔄 System Reusability Benefits
 
 ### ✅ **For Developers**
+
 - No code changes needed for customization
 - Type-safe configuration system
-- Modular component architecture  
+- Modular component architecture
 - Easy to extend with new features
 
 ### ✅ **For End Users**
+
 - Simple JSON configuration
 - Instant personalization
 - No technical knowledge required
 - Complete ownership of content
 
 ### ✅ **For Deployment**
+
 - Single configuration file to manage
 - Easy backup and restore of settings
 - Version control friendly
@@ -422,6 +486,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎨 Technical Highlights
 
 ### Canvas-Based Art Generation
+
 The template features advanced image processing algorithms:
 
 ```typescript
@@ -429,19 +494,20 @@ The template features advanced image processing algorithms:
 function renderLyricsPoster(canvas, image, lyrics, themeColor) {
   // 1. Image brightness analysis
   const pixels = context.getImageData(0, 0, width, height).data;
-  
+
   // 2. Contrast curve application with S-curve
   const boostedBrightness = contrastCurve(brightness);
-  
+
   // 3. Color mapping from theme to white
   const colorMix = interpolateColor(themeColor, "#FFFFFF", intensity);
-  
+
   // 4. Character mapping from lyrics stream
   const character = lyricsStream[charIndex % lyricsStream.length];
 }
 ```
 
 ### Advanced Responsive Design
+
 ```css
 /* Fluid typography and spacing */
 font-size: clamp(1rem, 4vw, 1.8rem);
@@ -451,6 +517,7 @@ margin-bottom: min(40px, 8vw);
 ```
 
 ### State Management Pattern
+
 ```typescript
 // Type-safe settings access
 const { getThemeColor, getCallsign, waitForThemeColor } = useSettingsStore();
@@ -458,18 +525,19 @@ const themeColor = await waitForThemeColor(); // Async-safe loading
 ```
 
 ### Advanced Playlist Management System
+
 The template features sophisticated playlist management with modular architecture:
 
 ```typescript
 // Smart Song Filtering with Null Handling
 const getBoyfriendSongs = () => {
-  return songs.filter(song => 
-    song.is_girlfriend === false || song.is_girlfriend === null
+  return songs.filter(
+    (song) => song.is_girlfriend === false || song.is_girlfriend === null,
   );
 };
 
 // Fisher-Yates Shuffle Algorithm
-const shuffleArray = <T,>(arr: T[]): T[] => {
+const shuffleArray = <T>(arr: T[]): T[] => {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -482,9 +550,10 @@ const shuffleArray = <T,>(arr: T[]): T[] => {
 const searchedSongs = useMemo(() => {
   const q = searchQuery.trim().toLowerCase();
   if (!q) return allFilteredSongs;
-  return allFilteredSongs.filter(song =>
-    song.title?.toLowerCase().includes(q) ||
-    song.description?.toLowerCase().includes(q)
+  return allFilteredSongs.filter(
+    (song) =>
+      song.title?.toLowerCase().includes(q) ||
+      song.description?.toLowerCase().includes(q),
   );
 }, [allFilteredSongs, searchQuery]);
 
@@ -495,6 +564,7 @@ const canEditSong = (song: Song) => {
 ```
 
 ### Dialog Architecture Pattern
+
 ```typescript
 // Modular Dialog System with Separation of Concerns
 interface EditSongDialogProps {
@@ -522,11 +592,12 @@ const handleSave = async () => {
 ## 🚀 Advanced Deployment Options
 
 ### Environment-Specific Builds
+
 ```bash
 # Development with hot reload
 npm run dev
 
-# Production with optimizations  
+# Production with optimizations
 npm run build
 
 # Preview production build
@@ -534,6 +605,7 @@ npm run preview
 ```
 
 ### Platform Deployment
+
 - **Vercel**: `vercel --prod` (Recommended for React apps)
 - **Netlify**: Drag and drop `dist/` folder with form handling
 - **GitHub Pages**: Push to `gh-pages` branch with Actions
@@ -541,6 +613,7 @@ npm run preview
 - **Docker**: Containerized deployment with nginx
 
 ### Performance Optimizations
+
 - **Code Splitting**: Automatic route-based splitting with Vite
 - **Image Optimization**: WebP format support and lazy loading
 - **Bundle Analysis**: `npm run build --analyzer` to optimize bundle size
@@ -562,7 +635,7 @@ npm run preview
 ## 🔮 Upcoming Features
 
 - **🎬 Video Background Processing**: Convert videos to ASCII animations
-- **🎯 AI-Powered Art Suggestions**: Machine learning for artistic recommendations  
+- **🎯 AI-Powered Art Suggestions**: Machine learning for artistic recommendations
 - **�️ Advanced Audio Controls**: Equalizer, volume normalization, and crossfade effects
 - **📊 Playlist Analytics**: Play count tracking, favorite song statistics, and listening patterns
 - **🔄 Real-time Collaboration**: Live playlist editing with conflict resolution
