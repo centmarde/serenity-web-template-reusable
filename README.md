@@ -85,6 +85,8 @@ The Zustand stores in `src/stores/*` are the single reference for the current da
 - `memories`: memory images stored at `memory-images/<filename>` (`memories` bucket)
 - `messages`: optional letter images stored under `messages/marde/<filename>`
 
+**First-time setup reminder:** Create the `memories`, `songs`, and `messages` storage buckets in Supabase before running the app so uploads work correctly.
+
 ### 🎪 Interactive Components
 
 - **💬 Dialog System**: Beautiful animated dialogs with blur effects and responsive design
