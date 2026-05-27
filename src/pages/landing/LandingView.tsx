@@ -24,6 +24,7 @@ import {
 } from "../../utils/helpers";
 import NoticeDialog from "./dialogs/NoticeDialog";
 import CelebrationDialog from "./dialogs/CelebrationDialog";
+import TarotDialog from "./dialogs/TarotDialog";
 import {
   useCurrentDialog,
   useDialogActions,
@@ -259,6 +260,13 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
   };
 
   const handleCelebrationDialogClose = (open: boolean) => {
+    if (!open) {
+      // Use dialog controller to properly close and show next dialog
+      closeCurrentDialog();
+    }
+  };
+
+  const handleTarotDialogClose = (open: boolean) => {
     if (!open) {
       // Use dialog controller to properly close and show next dialog
       closeCurrentDialog();
@@ -560,6 +568,15 @@ const LandingView: React.FC<LandingViewProps> = ({ onNavigate }) => {
         <NoticeDialog
           open={true}
           onOpenChange={handleNoticeDialogClose}
+          onNavigate={onNavigate}
+        />
+      )}
+
+      {/* Tarot Dialog - Controlled by dialog controller */}
+      {currentDialog === "tarot" && (
+        <TarotDialog
+          open={true}
+          onOpenChange={handleTarotDialogClose}
           onNavigate={onNavigate}
         />
       )}
