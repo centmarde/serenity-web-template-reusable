@@ -1,12 +1,13 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-export type DialogType = 'auth' | 'notice' | 'celebration' | 'none';
+export type DialogType = "auth" | "notice" | "tarot" | "celebration" | "none";
 
 interface DialogState {
   currentDialog: DialogType;
   dialogQueue: DialogType[];
   isAuthenticated: boolean;
   hasSeenNotice: boolean;
+  hasSeenTarot: boolean;
   hasSeenCelebration: boolean;
 }
 
@@ -16,15 +17,16 @@ interface DialogActions {
   closeCurrentDialog: () => void;
   skipToDialog: (dialog: DialogType) => void;
   resetDialogFlow: () => void;
-  
+
   // Authentication flow
   setAuthenticated: (isAuth: boolean) => void;
   handleAuthSuccess: () => void;
-  
+
   // Dialog completion tracking
   markNoticeAsSeen: () => void;
+  markTarotAsSeen: () => void;
   markCelebrationAsSeen: () => void;
-  
+
   // Utility functions
   isDialogOpen: (dialog: DialogType) => boolean;
   getCurrentDialog: () => DialogType;
@@ -35,10 +37,11 @@ interface DialogStore extends DialogState, DialogActions {}
 
 // Initial state
 const initialState: DialogState = {
-  currentDialog: 'none',
+  currentDialog: "none",
   dialogQueue: [],
   isAuthenticated: false,
   hasSeenNotice: false,
+  hasSeenTarot: false,
   hasSeenCelebration: false,
 };
 
@@ -56,20 +59,22 @@ export const useDialogController = create<DialogStore>((set, get) => ({
         dialogQueue: remainingQueue,
       });
     } else {
-      set({ currentDialog: 'none' });
+      set({ currentDialog: "none" });
     }
   },
 
   closeCurrentDialog: () => {
     const { currentDialog } = get();
-    
+
     // Mark dialogs as seen when closed
-    if (currentDialog === 'notice') {
+    if (currentDialog === "notice") {
       get().markNoticeAsSeen();
-    } else if (currentDialog === 'celebration') {
+    } else if (currentDialog === "tarot") {
+      get().markTarotAsSeen();
+    } else if (currentDialog === "celebration") {
       get().markCelebrationAsSeen();
     }
-    
+
     // Show next dialog in queue
     get().showNextDialog();
   },
@@ -83,25 +88,28 @@ export const useDialogController = create<DialogStore>((set, get) => ({
 
   resetDialogFlow: () => {
     // Reset to initial state and determine which dialogs should be shown
-    const isGirlfriendAuth = localStorage.getItem('girlfriend-authenticated') === 'true';
-    
+    const isGirlfriendAuth =
+      localStorage.getItem("girlfriend-authenticated") === "true";
+
     const queue: DialogType[] = [];
-    
+
     // Build the dialog queue based on current state - STRICT SEQUENCE
     if (!isGirlfriendAuth) {
       // If not authenticated, ONLY show auth dialog
-      queue.push('auth');
+      queue.push("auth");
     } else {
-      // Always show notice and celebration dialogs on page reload for authenticated users
-      queue.push('notice');
-      queue.push('celebration');
+      // Always show notice, tarot, and celebration dialogs on page reload for authenticated users
+      queue.push("notice");
+      queue.push("tarot");
+      queue.push("celebration");
     }
-    
+
     set({
-      currentDialog: queue.length > 0 ? queue[0] : 'none',
+      currentDialog: queue.length > 0 ? queue[0] : "none",
       dialogQueue: queue.slice(1),
       isAuthenticated: isGirlfriendAuth,
       hasSeenNotice: false, // Always reset to false - no session management
+      hasSeenTarot: false, // Always reset to false - no session management
       hasSeenCelebration: false, // Always reset to false - no session management
     });
   },
@@ -110,22 +118,23 @@ export const useDialogController = create<DialogStore>((set, get) => ({
   setAuthenticated: (isAuth: boolean) => {
     set({ isAuthenticated: isAuth });
     if (isAuth) {
-      localStorage.setItem('girlfriend-authenticated', 'true');
+      localStorage.setItem("girlfriend-authenticated", "true");
     } else {
-      localStorage.removeItem('girlfriend-authenticated');
+      localStorage.removeItem("girlfriend-authenticated");
     }
   },
 
   handleAuthSuccess: () => {
     get().setAuthenticated(true);
-    
-    // After successful authentication, automatically queue the notice and celebration dialogs
-    const queue: DialogType[] = ['notice', 'celebration'];
-    
+
+    // After successful authentication, automatically queue the notice, tarot, and celebration dialogs
+    const queue: DialogType[] = ["notice", "tarot", "celebration"];
+
     set({
       currentDialog: queue[0], // Start with notice dialog
       dialogQueue: queue.slice(1), // Queue celebration dialog next
       hasSeenNotice: false, // Reset to ensure they show
+      hasSeenTarot: false, // Reset to ensure they show
       hasSeenCelebration: false, // Reset to ensure they show
     });
   },
@@ -133,6 +142,11 @@ export const useDialogController = create<DialogStore>((set, get) => ({
   // Dialog completion tracking
   markNoticeAsSeen: () => {
     set({ hasSeenNotice: true });
+    // No sessionStorage - dialogs will show again on page reload
+  },
+
+  markTarotAsSeen: () => {
+    set({ hasSeenTarot: true });
     // No sessionStorage - dialogs will show again on page reload
   },
 
@@ -153,14 +167,23 @@ export const useDialogController = create<DialogStore>((set, get) => ({
 
   shouldShowDialog: (dialog: DialogType) => {
     const state = get();
-    
+
     switch (dialog) {
-      case 'auth':
+      case "auth":
         return !state.isAuthenticated;
-      case 'notice':
+      case "notice":
         return state.isAuthenticated && !state.hasSeenNotice;
-      case 'celebration':
-        return state.isAuthenticated && state.hasSeenNotice && !state.hasSeenCelebration;
+      case "tarot":
+        return (
+          state.isAuthenticated && state.hasSeenNotice && !state.hasSeenTarot
+        );
+      case "celebration":
+        return (
+          state.isAuthenticated &&
+          state.hasSeenNotice &&
+          state.hasSeenTarot &&
+          !state.hasSeenCelebration
+        );
       default:
         return false;
     }
@@ -168,9 +191,12 @@ export const useDialogController = create<DialogStore>((set, get) => ({
 }));
 
 // Selector hooks for better performance
-export const useCurrentDialog = () => useDialogController((state) => state.currentDialog);
-export const useIsDialogOpen = (dialog: DialogType) => useDialogController((state) => state.isDialogOpen(dialog));
-export const useAuthenticationStatus = () => useDialogController((state) => state.isAuthenticated);
+export const useCurrentDialog = () =>
+  useDialogController((state) => state.currentDialog);
+export const useIsDialogOpen = (dialog: DialogType) =>
+  useDialogController((state) => state.isDialogOpen(dialog));
+export const useAuthenticationStatus = () =>
+  useDialogController((state) => state.isAuthenticated);
 
 // Action hooks
 export const useDialogActions = () => {
@@ -183,6 +209,7 @@ export const useDialogActions = () => {
     setAuthenticated: store.setAuthenticated,
     handleAuthSuccess: store.handleAuthSuccess,
     markNoticeAsSeen: store.markNoticeAsSeen,
+    markTarotAsSeen: store.markTarotAsSeen,
     markCelebrationAsSeen: store.markCelebrationAsSeen,
   };
 };
