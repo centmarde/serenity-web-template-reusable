@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button';
 import { useThemeStore } from '../../stores/theme';
 import { useSettingsStore } from '../../stores/settings';
 import { useMemoriesStore } from '../../stores/memoriesData';
+import { buildBundleReward } from '../../lib/nullaRewards';
 
 export const MemoriesView: React.FC = () => {
   const { getCurrentThemeColor, waitForInitialization } = useThemeStore();
@@ -149,6 +150,7 @@ export const MemoriesView: React.FC = () => {
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}
         onSuccess={handleMemorySuccess}
+  bundleRewardGenerator={buildBundleReward}
       />
     </div>
   );
