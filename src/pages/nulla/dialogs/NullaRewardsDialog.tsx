@@ -12,6 +12,12 @@ import { useNullaFoodsStore } from "../../../stores/nullaFoodsData";
 import type { UpdateNullaFoodsInput } from "../../../stores/nullaFoodsData";
 import { useNullaToysStore } from "../../../stores/nullaToysData";
 import type { UpdateNullaToysInput } from "../../../stores/nullaToysData";
+import {
+  buildBundleReward,
+  type FoodKey,
+  type ToyKey,
+  type RewardItem,
+} from "../../../lib/nullaRewards";
 
 interface NullaRewardsDialogProps {
   open: boolean;
@@ -19,15 +25,11 @@ interface NullaRewardsDialogProps {
   rewardMode?: "random" | "bundle";
 }
 
-type FoodKey = "donuts" | "mousse" | "icecream" | "cupcake";
-type ToyKey = "mouse" | "softblocks" | "plushdino" | "crystalball";
-type RewardItem =
-  | { type: "food"; key: FoodKey; label: string; image: string }
-  | { type: "toy"; key: ToyKey; label: string; image: string };
 type Reward =
   | RewardItem
   | { type: "bundle"; items: RewardItem[] }
   | { type: "none" };
+
 
 const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
   open,
@@ -101,12 +103,6 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
     [],
   );
 
-  const getRandomInt = (min: number, max: number) => {
-    const low = Math.ceil(min);
-    const high = Math.floor(max);
-    return Math.floor(Math.random() * (high - low + 1)) + low;
-  };
-
   const pickRandomFood = (): RewardItem => {
     const pick = foodOptions[Math.floor(Math.random() * foodOptions.length)];
     return {
@@ -127,22 +123,14 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
     };
   };
 
-  const buildBundleReward = (): Reward => {
-    const bundleSize = getRandomInt(3, 6);
-    const items: RewardItem[] = [];
-
-    for (let i = 0; i < bundleSize; i += 1) {
-      items.push(Math.random() < 0.5 ? pickRandomFood() : pickRandomToy());
-    }
-
-    return { type: "bundle", items };
-  };
+  const buildBundle = (): Reward => buildBundleReward();
 
   const rollReward = (): Reward => {
+    // IMPORTANT: bundle rewards are only allowed when `rewardMode === "bundle"`.
+    // Random/individual rewards should never roll the bundle path.
     const roll = Math.random();
-    if (roll < 0.2) return buildBundleReward();
-    if (roll < 0.6) return pickRandomFood();
-    if (roll < 0.9) return pickRandomToy();
+    if (roll < 0.5) return pickRandomFood();
+    if (roll < 0.85) return pickRandomToy();
     return { type: "none" };
   };
 
@@ -196,7 +184,7 @@ const NullaRewardsDialog: React.FC<NullaRewardsDialogProps> = ({
     setHasApplied(true);
     setIsUpdating(true);
     const chosen =
-      reward ?? (rewardMode === "bundle" ? buildBundleReward() : rollReward());
+  reward ?? (rewardMode === "bundle" ? buildBundle() : rollReward());
     setReward(chosen);
 
     try {

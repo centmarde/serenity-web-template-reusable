@@ -30,11 +30,13 @@ import { useMemoryImagesStore } from "../../../stores/memoriesImagesData";
 import { toast } from "sonner";
 import { AiSuggestion } from "../components/AiSuggestion";
 import NullaRewardsDialog from "../../nulla/dialogs/NullaRewardsDialog";
+import type { BundleReward } from "../../../lib/nullaRewards";
 
 interface MemoriesUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  bundleRewardGenerator?: () => BundleReward;
 }
 
 interface FormData {
@@ -49,6 +51,7 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  bundleRewardGenerator,
 }) => {
   const { getCurrentThemeColor } = useThemeStore();
   const memoriesStore = useMemoriesStore();
@@ -227,6 +230,10 @@ export const MemoriesUploadDialog: React.FC<MemoriesUploadDialogProps> = ({
 
       // Only show rewards dialog if not boyfriend mode
       if (!isBoyfriend) {
+  // Generate the bundle once up-front for any side effects/analytics hooks and
+  // to ensure Memories always uses the dedicated bundle generator.
+  // The actual inventory updates are still applied by NullaRewardsDialog.
+  bundleRewardGenerator?.();
         setIsRewardsOpen(true);
       }
     } catch (err) {

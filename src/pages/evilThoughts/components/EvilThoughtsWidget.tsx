@@ -669,6 +669,7 @@ const EvilThoughtsWidget: React.FC<EvilThoughtsWidgetProps> = ({
       <NullaRewardsDialog
         open={showRewardsDialog}
         onOpenChange={setShowRewardsDialog}
+  rewardMode="random"
       />
     </Card>
   );
