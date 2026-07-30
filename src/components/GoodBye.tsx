@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function GoodBye() {
   const [displayedText, setDisplayedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isMobile = useIsMobile();
 
   const farewellMessage = `Thank you for these five months. They may have been short, but they gave me memories I'll carry for a lifetime. I'll always cherish every moment we spent together—the genuine laughter, the late conversations, the quiet moments, and every second that made me believe we had something real.
 
@@ -56,15 +58,15 @@ Take care of yourself. Goodbye.`;
         color: "#e8d5b7",
         fontFamily: "'Georgia', 'Times New Roman', serif",
         zIndex: 99999,
-        padding: "2rem",
+        padding: isMobile ? "1rem" : "2rem",
         textAlign: "center",
       }}
     >
       {/* Decorative heart */}
       <div
         style={{
-          fontSize: "3rem",
-          marginBottom: "2rem",
+          fontSize: isMobile ? "2rem" : "3rem",
+          marginBottom: isMobile ? "1.5rem" : "2rem",
           opacity: 0.8,
           animation: "goodbye-heart-pulse 1.5s ease-in-out infinite",
         }}
@@ -75,8 +77,8 @@ Take care of yourself. Goodbye.`;
       {/* Farewell message with typewriter effect */}
       <div
         style={{
-          fontSize: "1.2rem",
-          lineHeight: 1.8,
+          fontSize: isMobile ? "0.88rem" : "1.2rem",
+          lineHeight: isMobile ? 1.7 : 1.8,
           maxWidth: "650px",
           whiteSpace: "pre-wrap",
           fontStyle: "italic",
@@ -97,8 +99,8 @@ Take care of yourself. Goodbye.`;
       <div
         style={{
           position: "absolute",
-          bottom: "3rem",
-          fontSize: "0.9rem",
+          bottom: isMobile ? "1.5rem" : "3rem",
+          fontSize: isMobile ? "0.7rem" : "0.9rem",
           opacity: 0.4,
           letterSpacing: "2px",
           textTransform: "uppercase",
