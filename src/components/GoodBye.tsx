@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function GoodBye() {
+export default function GoodBye({ onProceed }: { onProceed: () => void }) {
   const [displayedText, setDisplayedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
+  const [isTypingFinished, setIsTypingFinished] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMobile = useIsMobile();
 
@@ -16,13 +17,15 @@ Take care of yourself. Goodbye.`;
   useEffect(() => {
     // Type out the farewell message character by character
     let charIndex = 0;
-    const typingSpeed = 30; // ms per character
+    const typingSpeed = 15; // ms per character (2x faster)
 
     intervalRef.current = setInterval(() => {
       if (charIndex < farewellMessage.length) {
         setDisplayedText(farewellMessage.slice(0, charIndex + 1));
         charIndex++;
       } else {
+        // Typing complete - trigger the proceed button to show
+        setIsTypingFinished(true);
         if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }, typingSpeed);
@@ -62,27 +65,70 @@ Take care of yourself. Goodbye.`;
         textAlign: "center",
       }}
     >
-      {/* Decorative heart */}
+      {/* Decorative heart + proceed button */}
       <div
         style={{
-          fontSize: isMobile ? "2rem" : "3rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: isMobile ? "1rem" : "1.5rem",
           marginBottom: isMobile ? "1.5rem" : "2rem",
-          opacity: 0.8,
-          animation: "goodbye-heart-pulse 1.5s ease-in-out infinite",
         }}
       >
-        💔
+        <div
+          style={{
+            fontSize: isMobile ? "2rem" : "3rem",
+            opacity: 0.8,
+            animation: "goodbye-heart-pulse 1.5s ease-in-out infinite",
+          }}
+        >
+          💔
+        </div>
+
+        {/* Proceed button - appears only after typing is done */}
+        {isTypingFinished && (
+          <button
+            onClick={onProceed}
+            style={{
+              position: "relative",
+              padding: isMobile ? "0.5rem 1.2rem" : "0.6rem 1.6rem",
+              fontSize: isMobile ? "0.8rem" : "0.95rem",
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              color: "#1a1a2e",
+              background: "#e8d5b7",
+              border: "none",
+              borderRadius: "999px",
+              cursor: "pointer",
+              letterSpacing: "1px",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.35)",
+              transition: "background 0.2s ease",
+              pointerEvents: "auto",
+              zIndex: 2147483647,
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "#f4e6c9";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = "#e8d5b7";
+            }}
+          >
+            Proceed to the App
+          </button>
+        )}
       </div>
 
-      {/* Farewell message with typewriter effect */}
+      {/* Farewell message with typewriter effect - scrollable so the header (heart + button) always stays on screen */}
       <div
         style={{
           fontSize: isMobile ? "0.88rem" : "1.2rem",
           lineHeight: isMobile ? 1.7 : 1.8,
           maxWidth: "650px",
+          maxHeight: isMobile ? "42vh" : "55vh",
+          overflowY: "auto",
           whiteSpace: "pre-wrap",
           fontStyle: "italic",
           textAlign: "left",
+          padding: "0 0.5rem",
         }}
       >
         {displayLines.map((line, index) => (
